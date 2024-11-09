@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -20,3 +14,359 @@ datasource db {
   provider = "sqlite"
   url      = "file:dev.db"
 }
+
+// specify the schema of your database tables
+model Student {
+  stdId     String      @id @default(uuid())
+  fName     String
+  lName     String
+  email     String?     @unique
+  tel       String?     @unique
+  cityzenId String?     @unique
+  parent    StudentParent[]
+  attendance Attendance[]
+  editAttendance EditAttendance[]
+  leaveRequest LeaveRequest[]
+  activity  ActivityParticipate[]
+  editActivity EditActivityParticipate[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Leader {
+  ldrId     String      @id @default(uuid())
+  fName     String
+  lName     String
+  email     String?     @unique
+  tel       String?     @unique
+  password  String
+  classroom Classrooms[]
+  attendance Attendance[]
+  editAttendance EditAttendance[]
+  activity  ActivityParticipate[]
+  editActivity EditActivityParticipate[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Teacher {
+  tchId     String      @id @default(uuid())
+  tchCode   String      @unique
+  fName     String
+  lName     String
+  email     String?     @unique
+  tel       String?     @unique
+  password  String
+  deptId    String
+  department Department @relation(fields: [deptId], references: [deptId])
+  subject   Subject[]
+  classId   String
+  classroom Classrooms @relation(fields: [classId], references: [classId])
+  attendance Attendance[]
+  editAttendance EditAttendance[]
+  leaveRequest LeaveRequest[]
+  activity  ActivityTeacher[]
+  actParticipate ActivityParticipate[]
+  editActParticipate EditActivityParticipate[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Department {
+  deptId    String      @id @default(uuid())
+  deptCode  String      @unique
+  deptName  String
+  teacher   Teacher[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Parent {
+  prntId    String      @id @default(uuid())
+  name      String
+  email     String?     @unique
+  tel       String?     @unique
+  student   StudentParent[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StudentParent {
+  id        String      @id @default(uuid())
+  stdId     String
+  prntId    String
+  student   Student @relation(fields: [stdId], references: [stdId])
+  parent    Parent  @relation(fields: [prntId], references: [prntId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Subject {
+  subId     String      @id @default(uuid())
+  subCode   String      @unique
+  subNameThai   String
+  subNameEng    String?
+  subCredit      Int
+  tchId      String
+  teacher    Teacher @relation(fields: [tchId], references: [tchId])
+  subTypeId  String
+  subjectType SubjectType @relation(fields: [subTypeId], references: [subTypeId])
+  timetable  Timetable[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SubjectType {
+  subTypeId String      @id @default(uuid())
+  subTypeCode String      @unique
+  subTypeNameThai String
+  subTypeNameEng String?
+  subject    Subject[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Classrooms {
+  classId     String      @id @default(uuid())
+  classLevel  Int
+  classRoom  Int
+  academicYear Int
+  semester    Int
+  classTypeId String
+  classroomType ClassroomType @relation(fields: [classTypeId], references: [classTypeId])
+  timetable   Timetable?
+  teacher     Teacher[]
+  leaderId    String
+  leader      Leader @relation(fields: [leaderId], references: [ldrId])
+  activity    ClassroomCanjoinActivity[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ClassroomType {
+  classTypeId String      @id @default(uuid())
+  classTypeNameThai String
+  classTypeNameEng String?
+  classroom    Classrooms[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Timetable {
+  timetableId     String      @id @default(uuid())
+  subId      String
+  classId    String   @unique
+  tchId      String
+  timeStart  DateTime
+  timeEnd    DateTime
+  dayOfWeek  Int    // 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday, 7 = Sunday
+  subject    Subject @relation(fields: [subId], references: [subId])
+  classroom  Classrooms @relation(fields: [classId], references: [classId])
+  studyTime  StudingTime[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StudingTime {
+  studyTimeId String      @id @default(uuid())
+  timetableId String
+  timetable   Timetable @relation(fields: [timetableId], references: [timetableId])
+  attendance  Attendance[]
+  editAttendance EditAttendance[]
+  leaveRequest LeaveRequestStudingTime[]
+  studingTimeDate DateTime
+}
+
+model Attendance {
+  attId     String      @id @default(uuid())
+  stdId     String
+  studingTimeId String
+  attTimestamp DateTime
+  // attStatus EnumAttendanceStatus
+  attStatus String
+  student   Student @relation(fields: [stdId], references: [stdId])
+  studingTime StudingTime @relation(fields: [studingTimeId], references: [studyTimeId])
+  attMethodId String
+  attMethod AttendanceMethod @relation(fields: [attMethodId], references: [attMethodId])
+  latitute  Float?
+  longitute Float?
+  note      String?
+  operatedBy String
+  tchId     String?
+  teacher   Teacher? @relation(fields: [tchId], references: [tchId])
+  leaderId  String?
+  leader    Leader? @relation(fields: [leaderId], references: [ldrId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AttendanceMethod {
+  attMethodId String      @id @default(uuid())
+  attMethodName String
+  attendance Attendance[]
+  editAttendance EditAttendance[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EditAttendance {
+  attId     String      @id @default(uuid())
+  stdId     String
+  studingTimeId String
+  attTimestamp DateTime
+  attStatus String
+  student   Student @relation(fields: [stdId], references: [stdId])
+  studingTime StudingTime @relation(fields: [studingTimeId], references: [studyTimeId])
+  attMethodId String
+  attMethod AttendanceMethod @relation(fields: [attMethodId], references: [attMethodId])
+  latitute  Float?
+  longitute Float?
+  note      String?
+  operatedBy String
+  tchId     String?
+  teacher   Teacher? @relation(fields: [tchId], references: [tchId])
+  leaderId  String?
+  leader    Leader? @relation(fields: [leaderId], references: [ldrId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LeaveRequest {
+  leaveId   String      @id @default(uuid())
+  stdId     String
+  leaveDate DateTime
+  leaveTypeId String
+  leaveReason String
+  leaveStatus String
+  LeaveFile String?
+  student   Student @relation(fields: [stdId], references: [stdId])
+  leaveRequestType LeaveRequestType @relation(fields: [leaveTypeId], references: [leaveTypeId])
+  tacherApproveId String?
+  teacherApprove Teacher? @relation(fields: [tacherApproveId], references: [tchId])
+  approverTimestamp DateTime?
+  studingTime LeaveRequestStudingTime[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LeaveRequestType {
+  leaveTypeId String      @id @default(uuid())
+  leaveTypeName String
+  leaveRequest LeaveRequest[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LeaveRequestStudingTime {
+  leaveId   String   @unique
+  studyTimeId String  @unique
+  leaveRequest LeaveRequest @relation(fields: [leaveId], references: [leaveId])
+  studingTime StudingTime @relation(fields: [studyTimeId], references: [studyTimeId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Activity {
+  actId     String      @id @default(uuid())
+  actName   String
+  actDate   DateTime
+  actTypeId String
+  activityType ActivityType @relation(fields: [actTypeId], references: [actTypeId])
+  actStatus String
+  actDesc   String?
+  actLocation String?
+  actStartTime DateTime?
+  actEndTime DateTime?
+  joinLimit Boolean
+  teacher   ActivityTeacher[]
+  classroom ClassroomCanjoinActivity[]
+  actParticipate ActivityParticipate[]
+  editActParticipate EditActivityParticipate[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ActivityType {
+  actTypeId String      @id @default(uuid())
+  actTypeName String
+  activity Activity[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ActivityTeacher {
+  actId     String  @unique
+  tchId     String  @unique
+  teacher   Teacher @relation(fields: [tchId], references: [tchId])
+  activity  Activity @relation(fields: [actId], references: [actId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ClassroomCanjoinActivity {
+  classId   String  @unique
+  actId     String  @unique
+  classroom Classrooms @relation(fields: [classId], references: [classId])
+  activity  Activity @relation(fields: [actId], references: [actId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ActivityParticipate {
+  actParticipateId String @id @default(uuid())
+  actId     String
+  stdId     String
+  student   Student @relation(fields: [stdId], references: [stdId])
+  activity  Activity @relation(fields: [actId], references: [actId])
+  note      String?
+  joinTimestamp  DateTime
+  operateBy String
+  teacherId String?
+  teacher   Teacher? @relation(fields: [teacherId], references: [tchId])
+  leaderId  String?
+  leader    Leader? @relation(fields: [leaderId], references: [ldrId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EditActivityParticipate {
+  actParticipateId String @id @default(uuid())
+  actId     String
+  stdId     String
+  student   Student @relation(fields: [stdId], references: [stdId])
+  activity  Activity @relation(fields: [actId], references: [actId])
+  note      String?
+  joinTimestamp  DateTime
+  operateBy String
+  teacherId String?
+  teacher   Teacher? @relation(fields: [teacherId], references: [tchId])
+  leaderId  String?
+  leader    Leader? @relation(fields: [leaderId], references: [ldrId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Admin {
+  adminId   String      @id @default(uuid())
+  username  String      @unique
+  name      String
+  email     String?     @unique
+  tel       String?     @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// enum EnumAttendanceStatus {
+//   PRESENT
+//   ABSENT
+//   LATE
+//   ACTIVITY
+//   LEAVE
+// }
+
+// enum EnumLeaveStatus {
+//   WAITING
+//   APPROVED
+//   REJECTED
+// }
