@@ -1,0 +1,33 @@
+{
+  "name": "student_attendance_api",
+  "version": "1.0.0",
+  "description": "final project",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/artijo/student_attendance_api.git"
+  },
+  "keywords": [
+    "attendance",
+    "student"
+  ],
+  "author": "artijo, ohm",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/artijo/student_attendance_api/issues"
+  },
+  "homepage": "https://github.com/artijo/student_attendance_api#readme",
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0"
+  }
+}
