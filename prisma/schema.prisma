@@ -5,15 +5,15 @@ generator client {
 // if the DATABASE_URL env var is set, we connect to the production database
 // otherwise, we connect to a local SQLite database
 
-// datasource db {
-//   provider = "mysql"
-//   url      = env("DATABASE_URL")
-// }
-
 datasource db {
-  provider = "sqlite"
-  url      = "file:dev.db"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
+
+// datasource db {
+//   provider = "sqlite"
+//   url      = "file:dev.db"
+// }
 
 // specify the schema of your database tables
 model Student {
