@@ -1,0 +1,10 @@
+[
+    {
+        "deptCode" : "sc",
+        "deptName" : "science"
+    },
+    {
+        "deptCode": "ma",
+        "deptName": "math"
+    }
+]

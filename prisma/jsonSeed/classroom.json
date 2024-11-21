@@ -1,0 +1,16 @@
+[
+    {
+        "classLevel" : 6,
+        "classRoom" : 1,
+        "adcmicYear" : 2566,
+        "semester" : 1,
+        "cType" : "sci-math"
+    },
+    {
+        "classLevel" : 6,
+        "classRoom" : 2,
+        "adcmicYear" : 2566,
+        "semester" : 2,
+        "cType" : "Art"
+    }
+]
