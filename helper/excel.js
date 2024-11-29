@@ -1,4 +1,5 @@
 // เรียกใช้ Module
+
 import reader from 'xlsx';
 
 
@@ -24,24 +25,25 @@ function readExcel(fileName){
 }
 
 function insertExcel(fileName, obejectInfo){ //ObejectInfo คือ ข้อมูลที่ user insert เพื่อเพิ่มลงไฟล์ excel ไฟล์เดิม 
-    const data = readExcel(fileName)
-    if(Object.keys(obejectInfo[0]).length != Object.keys(obejectInfo[0]).length){
-        return 0;
-    }
+    
+    // const data = readExcel(fileName)
+    // if(Object.keys(obejectInfo[0]).length != Object.keys(obejectInfo[0]).length){
+    //     return 0;
+    // }
 
-    const dataKeys = Object.keys(data[0])
-    const objectInfoDataKeys = Object.keys(obejectInfo[0])
+    // const dataKeys = Object.keys(data[0])
+    // const objectInfoDataKeys = Object.keys(obejectInfo[0])
 
-    let i = 0; // loop count for indexFor Array
-    dataKeys.forEach((keys) => {
-        if(keys != objectInfoDataKeys[i]){ // ถ้าเกิด coloum ไม่ตรงให้ หยุดการทำงาน
-            return 0; 
-        }
-        // }else{
-        //     console.log(`${keys} ตรง`)
-        // }
-        i++
-    })
+    // let i = 0; // loop count for indexFor Array
+    // dataKeys.forEach((keys) => {
+    //     if(keys != objectInfoDataKeys[i]){ // ถ้าเกิด coloum ไม่ตรงให้ หยุดการทำงาน
+    //         return 0; 
+    //     }
+    //     // }else{
+    //     //     console.log(`${keys} ตรง`)
+    //     // }
+    //     i++
+    // })
 
     const file = reader.readFile(`./helper/${fileName}`); // อ่านไฟล์ excel
     const workSheet = file.Sheets[file.SheetNames[0]] // file.Sheets['ชีต1'] การเข้าถึง ชีตไฟล์โดยใช้ชื่อ
@@ -54,11 +56,25 @@ function insertExcel(fileName, obejectInfo){ //ObejectInfo คือ ข้อ�
     
     file.Sheets[file.SheetNames[0]] = updatedSheet
 
-    reader.writeFile(file,`./helper/${fileName}` );
+    reader.writeFile(file,`./helper/${fileName}` , {compression:true});
 
 
     // console.log(Object.keys(data[0])) // get key object เอาไว้เช็ค ex. [ 'fName', 'lName', 'email', 'tel', 'cityzenId' ]
 }
+
+
+function createExcel(objectInfo) {
+    const worksheet = reader.utils.json_to_sheet(objectInfo);
+    const workbook = reader.utils.book_new();
+    reader.utils.book_append_sheet(workbook, worksheet, 'Sheet 1')
+    reader.writeFile(workbook, `./helper/test.xlsx`, {compression:true});
+}
+
+
+
+
+// createExcel();
+
 
 // ex. data set
 let student_data = [
@@ -78,7 +94,7 @@ let student_data = [
     }
 ]
 
-
-insertExcel("studentTestWrite.xlsx",student_data)
+createExcel(student_data)
+// insertExcel("studentTestWrite.xlsx",student_data)
 // readExcel("student_list(test).xlsx")
 
