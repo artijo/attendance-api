@@ -1,13 +1,14 @@
 import db from '../prisma/client.js';
 
+
 export const test = async (req,res) =>{
     try{
         const data = await db.student.findMany({});
         res.json(data);
     }catch(err){
-        console.log({"error":err})
-    }
-}
+        console.log({"error":err});
+    };
+};
 
 export const createStudent = async (req, res) => { // สร้างรายชื่อนักเรียนรายบุคคล
     const body = req.body;
@@ -21,22 +22,22 @@ export const createStudent = async (req, res) => { // สร้างราย�
                     tel:body.tel,
                     cityzenId:body.cityzenId,
                 }
-            })
-            res.json({message: `สร้าง ${student.fName} ${student.lName} แล้ว`})
+            });
+            res.json({message: `สร้าง ${student.fName} ${student.lName} แล้ว`});
         }catch(err){
-            console.error(err)
+            console.error(err);
         }
-    }
-}
+    };
+};
 
 export const getAllStudent = async (req, res) => { // ดึงรายชื่อนักเรียนทั้งหมด
     try{
         const student = await db.student.findMany({});
         res.json(student)
     }catch(error){
-        console.error(error)
-    }
-}
+        console.error(error);
+    };
+};
 
 export const updateStudent = async(req, res) => {
     const body = req.body;
@@ -53,12 +54,14 @@ export const updateStudent = async(req, res) => {
                     tel:body.tel,
                     cityzenId:body.cityzenId,
                 }
-            })
-            res.json(student)
+            });
+            res.json(student);
         }catch(error){
-            console.error(error)
-        }
-    }
-}
+            console.error(error);
+        };
+    };
+};
+
+
 
 

@@ -6,6 +6,7 @@ import cors from 'cors';
 // import routes
 import testRouter from './routers/test.js';
 import studentRouter from './routers/studentRoute.js';
+import teacherRouter from './routers/teacherRoute.js';
 
 const PORT = process.env.PORT || 3000;
 
@@ -24,6 +25,7 @@ dotenv.config();
 // use routes
 app.use('/test', testRouter);
 app.use('/s',studentRouter); //studentRoute s= student
+app.use('/t', teacherRouter); // teacherRoute t= teacher
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
