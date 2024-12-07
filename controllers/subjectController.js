@@ -21,12 +21,12 @@ export const createSubjectType = async (req, res) => {
 };
 
 export const selectSubjectType = async (req, res) => {
-    const uuid = req.params.UUID;
-    if(uuid){
+    const subjectType = req.params.UUID;
+    if(subjectType){
         try{
             const subjectId = db.subjectType.findFirstOrThrow({
                 where:{
-                    subTypeId:uuid
+                    subTypeId:subjectType
                 }
             });
             res.json(subjectId);
@@ -108,6 +108,47 @@ export const createSubject = async (req, res) => {
         }catch(err){
             console.error(err);
             res.json(err)
+        };
+    };
+};
+
+export const editSubject = async (req, res) => {
+    const body = req.body;
+    if(body) {
+        try{
+            const subject = await db.subject.update({
+                where:{
+                    subId: body.UUID
+                },
+                data:{
+                    subCode:body.subCode,
+                    subNameEng:body.subNameEng,
+                    subNameThai:body.subNameThai,
+                    subCredit:body.subCredit,
+                    tchId:body.tchId,
+                    subTypeId:body.subTypeId
+                }
+            });
+            res.json(subject);
+        }catch(err){
+            console.error(err);
+            res.json(err);
+        };
+    };
+};
+
+export const deleteSubject = async (req, res) => {
+    const subjectId = req.params.UUID;
+    if(subjectType){
+        try{
+            await db.subject.delete({
+                where:{
+                    subId: subjectId
+                }
+            });
+            res.json(subjectId);
+        }catch(err){
+            console.error(err);
         };
     };
 };
