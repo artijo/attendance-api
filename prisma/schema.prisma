@@ -28,6 +28,7 @@ model Student {
   editAttendance EditAttendance[]
   leaveRequest   LeaveRequest[]
   activity       ActivityParticipate[]
+  classroomMembers ClassroomMember[]
   editActivity   EditActivityParticipate[]
   createdAt      DateTime                  @default(now())
   updatedAt      DateTime                  @updatedAt
@@ -41,6 +42,7 @@ model Leader {
   tel            String?                   @unique
   password       String
   classroom      Classrooms[]
+  
   attendance     Attendance[]
   editAttendance EditAttendance[]
   activity       ActivityParticipate[]
@@ -134,7 +136,9 @@ model Classrooms {
   semester      Int
   classTypeId   String
   classroomType ClassroomType              @relation(fields: [classTypeId], references: [classTypeId])
-  timetable     Timetable?
+  classroomMembers ClassroomMember[]
+  // timetable     Timetable?
+  timetable     Timetable[]
   teacher       Teacher[]
   leaderId      String
   leader        Leader                     @relation(fields: [leaderId], references: [ldrId])
@@ -142,6 +146,19 @@ model Classrooms {
   createdAt     DateTime                   @default(now())
   updatedAt     DateTime                   @updatedAt
 }
+
+model ClassroomMember {
+  classRoomMemeberId        String      @id @default(uuid())
+  classId   String
+  stdId     String
+  classroom Classrooms  @relation(fields: [classId], references: [classId])
+  student   Student     @relation(fields: [stdId], references: [stdId])
+  stdNo     String      
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+
 
 model ClassroomType {
   classTypeId       String       @id @default(uuid())
@@ -155,10 +172,11 @@ model ClassroomType {
 model Timetable {
   timetableId String        @id @default(uuid())
   subId       String
-  classId     String        @unique
-  tchId       String
+  classId     String        
+  // tchId       String
   timeStart   DateTime
   timeEnd     DateTime
+  timeLate    DateTime
   dayOfWeek   Int // 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday, 7 = Sunday
   subject     Subject       @relation(fields: [subId], references: [subId])
   classroom   Classrooms    @relation(fields: [classId], references: [classId])

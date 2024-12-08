@@ -133,6 +133,18 @@ CREATE TABLE `Classrooms` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `ClassroomMember` (
+    `classRoomMemeberId` VARCHAR(191) NOT NULL,
+    `classId` VARCHAR(191) NOT NULL,
+    `stdId` VARCHAR(191) NOT NULL,
+    `stdNo` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`classRoomMemeberId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `ClassroomType` (
     `classTypeId` VARCHAR(191) NOT NULL,
     `classTypeNameThai` VARCHAR(191) NOT NULL,
@@ -148,14 +160,13 @@ CREATE TABLE `Timetable` (
     `timetableId` VARCHAR(191) NOT NULL,
     `subId` VARCHAR(191) NOT NULL,
     `classId` VARCHAR(191) NOT NULL,
-    `tchId` VARCHAR(191) NOT NULL,
     `timeStart` DATETIME(3) NOT NULL,
     `timeEnd` DATETIME(3) NOT NULL,
+    `timeLate` DATETIME(3) NOT NULL,
     `dayOfWeek` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `Timetable_classId_key`(`classId`),
     PRIMARY KEY (`timetableId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -378,6 +389,12 @@ ALTER TABLE `Classrooms` ADD CONSTRAINT `Classrooms_classTypeId_fkey` FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE `Classrooms` ADD CONSTRAINT `Classrooms_leaderId_fkey` FOREIGN KEY (`leaderId`) REFERENCES `Leader`(`ldrId`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ClassroomMember` ADD CONSTRAINT `ClassroomMember_classId_fkey` FOREIGN KEY (`classId`) REFERENCES `Classrooms`(`classId`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ClassroomMember` ADD CONSTRAINT `ClassroomMember_stdId_fkey` FOREIGN KEY (`stdId`) REFERENCES `Student`(`stdId`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Timetable` ADD CONSTRAINT `Timetable_subId_fkey` FOREIGN KEY (`subId`) REFERENCES `Subject`(`subId`) ON DELETE RESTRICT ON UPDATE CASCADE;

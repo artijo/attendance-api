@@ -11,8 +11,9 @@ const prisma = new PrismaClient();
 async function main() {
     try {
         // Create students
+        let studentArray = [];
         for (const student of students) {
-            await db.student.create({
+            const studentCreate = await db.student.create({
                 data: {
                     fName: student.fName,
                     lName: student.lName,
@@ -21,6 +22,7 @@ async function main() {
                     cityzenId: student.cityzenId,
                 },
             });
+            studentArray.push(studentCreate.stdId);
             console.log(`Student created: ${student.fName} ${student.lName}`);
         }
 
@@ -108,6 +110,13 @@ async function main() {
             // console.log(`classroom id array ${classroomIdArray}`)
             console.log(`Classroom created: Level ${classroom.classLevel}, Room ${classroom.classRoom}`);
         }
+        
+        await db.classroomMember.createMany({
+            data:[
+                {stdId:studentArray[0], classId:classroomIdArray[0], stdNo:"01"},
+                {stdId:studentArray[1], classId:classroomIdArray[0], stdNo:"02"}
+            ]
+        })
 
         // Create departments
         for (const department of departments) {
@@ -169,17 +178,75 @@ async function main() {
             subjectTypeIds.push(subjectTypeId.subTypeId);
           };
         
-          // Add Subjects
-          const subjects = [
-            { subCode: "GEN101", subNameThai: "พื้นฐานทั่วไป", subNameEng: "General Basics", subCredit: 3, tchId: teacherIdArray[0], subTypeId: subjectTypeIds[0] },
-            { subCode: "MATH101", subNameThai: "คณิตศาสตร์พื้นฐาน", subNameEng: "Basic Mathematics", subCredit: 3, tchId:  teacherIdArray[0], subTypeId: subjectTypeIds[1] },
-            { subCode: "SCI101", subNameThai: "วิทยาศาสตร์ทั่วไป", subNameEng: "General Science", subCredit: 3, tchId:  teacherIdArray[1], subTypeId: subjectTypeIds[2] },
-            { subCode: "ENG101", subNameThai: "ภาษาอังกฤษขั้นพื้นฐาน", subNameEng: "Basic English", subCredit: 3, tchId:  teacherIdArray[1], subTypeId: subjectTypeIds[3] },
-          ];
         
-          for (const subject of subjects) {
-            await prisma.subject.create({ data: subject });
-          }
+            const subjectArrayId = [];
+            // Add Subjects
+            const subjects = [
+                { subCode: "GEN101", subNameThai: "พื้นฐานทั่วไป", subNameEng: "General Basics", subCredit: 3, tchId: teacherIdArray[0], subTypeId: subjectTypeIds[0] },
+                { subCode: "MATH101", subNameThai: "คณิตศาสตร์พื้นฐาน", subNameEng: "Basic Mathematics", subCredit: 3, tchId:  teacherIdArray[0], subTypeId: subjectTypeIds[1] },
+                { subCode: "SCI101", subNameThai: "วิทยาศาสตร์ทั่วไป", subNameEng: "General Science", subCredit: 3, tchId:  teacherIdArray[1], subTypeId: subjectTypeIds[2] },
+                { subCode: "ENG101", subNameThai: "ภาษาอังกฤษขั้นพื้นฐาน", subNameEng: "Basic English", subCredit: 3, tchId:  teacherIdArray[1], subTypeId: subjectTypeIds[3] },
+            ];
+            
+            for (const subject of subjects) {
+                const subjectCreate = await prisma.subject.create({ data: subject });
+                subjectArrayId.push(subjectCreate.subId);
+            };
+
+            const timetables = [
+                {
+                  subId: subjectArrayId[0], // วิชา: GEN101
+                  classId: classroomIdArray[0], // ห้อง: Class 101
+                  timeStart: new Date("2024-12-11T08:00:00"),
+                  timeEnd: new Date("2024-12-11T09:30:00"),
+                  timeLate: new Date("2024-12-11T08:15:00"),
+                  dayOfWeek: 1, // Monday
+                },
+                {
+                  subId: subjectArrayId[1], // วิชา: MATH101
+                  classId: classroomIdArray[0],
+                  timeStart: new Date("2024-12-11T09:45:00"),
+                  timeEnd: new Date("2024-12-11T11:15:00"),
+                  timeLate: new Date("2024-12-11T10:00:00"),
+                  dayOfWeek: 2, // Tuesday
+                },
+                {
+                  subId: subjectArrayId[2], // วิชา: SCI101
+                  classId: classroomIdArray[0],
+                  timeStart: new Date("2024-12-11T11:30:00"),
+                  timeEnd: new Date("2024-12-11T13:00:00"),
+                  timeLate: new Date("2024-12-11T11:45:00"),
+                  dayOfWeek: 3, // Wednesday
+                },
+                {
+                  subId: subjectArrayId[3], // วิชา: ENG101
+                  classId: classroomIdArray[0],
+                  timeStart: new Date("2024-12-11T13:15:00"),
+                  timeEnd: new Date("2024-12-11T14:45:00"),
+                  timeLate: new Date("2024-12-11T13:30:00"),
+                  dayOfWeek: 4, // Thursday
+                },
+              ];
+              
+              for (const timetable of timetables) {
+                await prisma.timetable.create({
+                  data: timetable,
+                });
+                console.log(`Timetable created for Subject ${timetable.subId} on Day ${timetable.dayOfWeek}`);
+              }
+            
+
+        //   const timetables = await db.timetable.createMany({
+        //     data:[
+        //         {
+        //             subId:ds,
+        //             classId:db,
+        //             timeStart:1,
+        //             timeEnd:2,
+        //             dayOfWeek:1,
+        //         }
+        //     ]
+        //   });
         
     } catch (err) {
         console.error("Error during seeding process:", err);
