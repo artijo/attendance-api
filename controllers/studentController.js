@@ -39,6 +39,38 @@ export const getAllStudent = async (req, res) => { // ดึงรายชื�
     };
 };
 
+export const getStudent = async (req, res) => {
+    const uuid = req.params.uuid;
+    if(uuid){
+        try{
+            const student = await db.student.findFirstOrThrow({
+                where:{
+                    stdId:uuid
+                }
+            });
+            res.json(student);
+        }
+        catch(err){
+            console.error(err);
+        };
+    };
+};
+
+export const deleteStudent = async (req, res) => {
+    const uuid = req.params.uuid;
+    if(uuid){
+        try{
+            await db.student.delete({
+                where:{
+                    stdId:uuid
+                }
+            });
+        }catch(err){
+            console.error(err)
+        };
+    };
+};
+
 export const updateStudent = async(req, res) => {
     const body = req.body;
     if(body);{
@@ -61,6 +93,8 @@ export const updateStudent = async(req, res) => {
         };
     };
 };
+
+ 
 
 
 

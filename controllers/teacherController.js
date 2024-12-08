@@ -70,3 +70,35 @@ export const updateTeacher = async (req, res) => {
         }
     };
 }
+
+export const getTeacher = async (req, res) => {
+    const uuid = req.params.uuid;
+    if(uuid){
+        try{
+            const teacher = await db.student.findFirstOrThrow({
+                where:{
+                    stdId:uuid
+                }
+            });
+            res.json(teacher);
+        }
+        catch(err){
+            console.error(err);
+        };
+    };
+};
+
+export const deleteTeacher = async (req, res) => {
+    const uuid = req.params.uuid;
+    if(uuid){
+        try{
+            await db.student.delete({
+                where:{
+                    stdId:uuid
+                }
+            })
+        }catch(err){
+            console.error(err)
+        };
+    };
+};
