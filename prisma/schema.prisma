@@ -174,9 +174,9 @@ model Timetable {
   subId       String
   classId     String        
   // tchId       String
-  timeStart   DateTime
-  timeEnd     DateTime
-  timeLate    DateTime
+  timeStart   String
+  timeEnd     String
+  timeLate    String
   dayOfWeek   Int // 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday, 7 = Sunday
   subject     Subject       @relation(fields: [subId], references: [subId])
   classroom   Classrooms    @relation(fields: [classId], references: [classId])

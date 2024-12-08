@@ -197,44 +197,111 @@ async function main() {
                 {
                   subId: subjectArrayId[0], // วิชา: GEN101
                   classId: classroomIdArray[0], // ห้อง: Class 101
-                  timeStart: new Date("2024-12-11T08:00:00"),
-                  timeEnd: new Date("2024-12-11T09:30:00"),
-                  timeLate: new Date("2024-12-11T08:15:00"),
+                  timeStart: "08:00:00",
+                  timeEnd: "09:30:00",
+                  timeLate: "08:15:00",
                   dayOfWeek: 1, // Monday
                 },
                 {
                   subId: subjectArrayId[1], // วิชา: MATH101
                   classId: classroomIdArray[0],
-                  timeStart: new Date("2024-12-11T09:45:00"),
-                  timeEnd: new Date("2024-12-11T11:15:00"),
-                  timeLate: new Date("2024-12-11T10:00:00"),
+                  timeStart: "09:45:00",
+                  timeEnd: "11:15:00",
+                  timeLate: "10:00:00",
                   dayOfWeek: 2, // Tuesday
                 },
                 {
                   subId: subjectArrayId[2], // วิชา: SCI101
                   classId: classroomIdArray[0],
-                  timeStart: new Date("2024-12-11T11:30:00"),
-                  timeEnd: new Date("2024-12-11T13:00:00"),
-                  timeLate: new Date("2024-12-11T11:45:00"),
+                  timeStart:"11:30:00",
+                  timeEnd:"13:00:00",
+                  timeLate: "11:45:00",
                   dayOfWeek: 3, // Wednesday
                 },
                 {
                   subId: subjectArrayId[3], // วิชา: ENG101
                   classId: classroomIdArray[0],
-                  timeStart: new Date("2024-12-11T13:15:00"),
-                  timeEnd: new Date("2024-12-11T14:45:00"),
-                  timeLate: new Date("2024-12-11T13:30:00"),
+                  timeStart: "13:15:00",
+                  timeEnd: "14:45:00",
+                  timeLate: "13:30:00",
                   dayOfWeek: 4, // Thursday
                 },
               ];
               
+              const timeTableIdArray = [];
               for (const timetable of timetables) {
-                await prisma.timetable.create({
+                const timetableCreate = await prisma.timetable.create({
                   data: timetable,
                 });
+                timeTableIdArray.push(timetableCreate.timetableId);
                 console.log(`Timetable created for Subject ${timetable.subId} on Day ${timetable.dayOfWeek}`);
               }
             
+              // สร้างปฏิทินการเรียน (StudingTime) และการเข้าร่วมเรียน (Attendance)
+              const attendanceMethods = [
+                {
+                    attMethodName:"ยังไม่ลงชื่อ",
+                },
+                {
+                    attMethodName:"เช็คชื่อด้วยระบบ Gps"
+                },
+                {
+                    attMethodName:"เช็คชื่อด้วยคุณครู"
+                }
+              ];
+              const attendanceMethodIdArray = [];
+              for(const attendanceMethod of attendanceMethods){
+                const attendanceMethodCreate = await db.attendanceMethod.create({data:attendanceMethod});
+                attendanceMethodIdArray.push(attendanceMethodCreate.attMethodId);
+              };
+    
+
+        const studingTimeArray = [];
+        for (const timetableId of timeTableIdArray) {
+        // ตัวอย่าง: สร้าง StudingTime สำหรับ 7 วันนับจากวันที่เริ่มต้น
+        for (let i = 0; i < 7; i++) {
+            // สร้างวันที่เริ่มต้น
+            const today = new Date();
+            today.setDate(today.getDate() + i);
+
+            // กำหนดเวลาเป็น 00:00:00
+            const studyDate = new Date(today.setHours(0, 0, 0, 0));
+
+            // สร้าง StudingTime
+            const studingTime = await prisma.studingTime.create({
+            data: {
+                timetableId: timetableId,
+                studingTimeDate: studyDate,
+            },
+            });
+
+            studingTimeArray.push(studingTime.studyTimeId);
+            console.log(`StudingTime created for timetable ${timetableId} on ${studyDate.toISOString().split("T")[0]}`);
+
+            
+
+            // สร้าง Attendance สำหรับนักเรียนทุกคน
+            for (const studentId of studentArray) {
+            const attendance = await prisma.attendance.create({
+                data: {
+                stdId: studentId,
+                studingTimeId: studingTime.studyTimeId,
+                attTimestamp: new Date(), // สมมติให้การเข้าเรียนเกิดขึ้นตอนนี้
+                attStatus: "null", // ค่าเริ่มต้น: PRESENT (หรือใช้ ENUM ถ้ามี)
+                attMethodId: attendanceMethodIdArray[0], // สมมติว่าเป็นการบันทึกแบบ manual
+                latitute: null, // กำหนดค่าเป็น null หรือเพิ่ม logic ถ้าต้องการ
+                longitute: null,
+                note: null,
+                operatedBy: "Admin", // สมมติว่า Admin เป็นผู้บันทึก
+                },
+            });
+
+            console.log(`Attendance created for student ${studentId} in StudingTime ${studingTime.studyTimeId}`);
+            }
+        }
+        }
+
+              
 
         //   const timetables = await db.timetable.createMany({
         //     data:[
