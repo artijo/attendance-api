@@ -287,7 +287,7 @@ async function main() {
                 stdId: studentId,
                 studingTimeId: studingTime.studyTimeId,
                 attTimestamp: new Date(), // สมมติให้การเข้าเรียนเกิดขึ้นตอนนี้
-                attStatus: "null", // ค่าเริ่มต้น: PRESENT (หรือใช้ ENUM ถ้ามี)
+                attStatus: "PRESENT", // ค่าเริ่มต้น: PRESENT (หรือใช้ ENUM ถ้ามี)
                 attMethodId: attendanceMethodIdArray[0], // สมมติว่าเป็นการบันทึกแบบ manual
                 latitute: null, // กำหนดค่าเป็น null หรือเพิ่ม logic ถ้าต้องการ
                 longitute: null,
