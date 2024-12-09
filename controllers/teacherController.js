@@ -162,6 +162,9 @@ export const getStudentAllAttendenceExcelOneSubject = async (req, res) => { // e
                         student:true
                     },
                 }
+            },
+            orderBy:{
+                studingTimeDate:'asc'
             }
         });
         res.json(studingTime);  
