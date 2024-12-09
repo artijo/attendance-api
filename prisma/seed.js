@@ -6,10 +6,31 @@ import departments from './jsonSeed/department.json' assert { type: 'json' };
 import classroomType from './jsonSeed/classroomType.json' assert { type: 'json' };
 import classrooms from './jsonSeed/classroom.json' assert { type: 'json' };
 
+
+import {
+    hashPassword,
+} from '../helper/bcrypt.js';
+
 const prisma = new PrismaClient();
 
 async function main() {
     try {
+
+        //Create admin 
+
+        const adminCreate = await db.admin.createMany({
+            data:[
+                {
+                    name:'admin test',
+                    password: await hashPassword('//..,,6565'),
+                    username: 'admin01pp',
+                    email: 'admin',
+                    tel: '0651088956',
+                }
+            ]
+        })
+
+
         // Create students
         let studentArray = [];
         for (const student of students) {
@@ -56,7 +77,7 @@ async function main() {
             data: {
                 fName: 'Peerapon',
                 lName: 'Loasu-angkoon',
-                password: 'ome31231',
+                password:  await hashPassword('ome31231za'),
                 email: 'peerapon@gmail.com',
                 tel: '0651088956',
             },
@@ -138,7 +159,7 @@ async function main() {
             lName: "Doe",
             email: "john.doe@example.com",
             tel: "1234567890",
-            password: "securepassword123",
+            password:  await hashPassword("securepassword123"),
             deptId: departmentIdArray[0],
             classId: classroomIdArray[0],
             },
@@ -148,7 +169,7 @@ async function main() {
             lName: "Smith",
             email: "jane.smith@example.com",
             tel: "0987654321",
-            password: "securepassword456",
+            password:await  hashPassword("securepassword456"),
             deptId: departmentIdArray[1],
             classId: classroomIdArray[1],
             },
@@ -201,6 +222,14 @@ async function main() {
                   timeEnd: "09:30:00",
                   timeLate: "08:15:00",
                   dayOfWeek: 1, // Monday
+                },
+                {
+                    subId: subjectArrayId[0], // วิชา: GEN101
+                    classId: classroomIdArray[0], // ห้อง: Class 101
+                    timeStart: "13:00:00",
+                    timeEnd: "14:00:00",
+                    timeLate: "13:15:00",
+                    dayOfWeek: 2, // Monday
                 },
                 {
                   subId: subjectArrayId[1], // วิชา: MATH101

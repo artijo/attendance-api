@@ -102,3 +102,74 @@ export const deleteTeacher = async (req, res) => {
         };
     };
 };
+
+
+export const getStudentAllAttendenceExcelOneSubject = async (req, res) => { // export สรุปการเข้าเรียนของนักเรียนทุกคนแต่วิชาเดียว
+    const subjectId = req.body.subjectId; // uuid วิชา
+    const classroomId = req.body.classId; // uuid ห้องเรียน
+
+    // uuid ของ 
+    try{
+        const studentInThisClassRoom = await db.classroomMember.findMany({
+            where:{
+                classId:classroomId
+            },
+            select:{
+                stdId:true,
+                stdNo:true,
+                student:{
+                    select:{
+                        fName:true,
+                        lName:true
+                    }
+                }
+            }
+        });
+        // res.json(studentInThisClassRoom); 
+
+
+        const timetable = await db.timetable.findMany({
+            where:{
+                AND:{
+                    subId:subjectId,
+                    classId:classroomId
+                }
+            },
+            select:{
+                timetableId:true
+            }
+        })
+        
+       // สร้าง array ของ timetableId
+        const timetableIds = timetable.map(item => item.timetableId);
+
+        // สร้าง JSON object สำหรับ Prisma query โดยใช้ `in` สำหรับหลายค่า
+        const objectTimetableForSearch = {
+            timetableId: {
+                in: timetableIds
+            }
+        };
+
+        // ตรวจสอบ query ที่จะใช้
+        // console.log(objectTimetableForSearch);
+
+        // ใช้ใน Prisma query
+        const studingTime = await db.studingTime.findMany({
+            where: objectTimetableForSearch,
+            select:{
+                attendance:{
+                    include:{
+                        student:true
+                    },
+                }
+            }
+        });
+        res.json(studingTime);  
+        // ส่งผลลัพธ์
+        // res.json(studingTime);
+        
+    }catch(err){
+        console.error(err)
+    };
+
+}
