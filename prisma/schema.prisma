@@ -200,8 +200,8 @@ model Attendance {
   stdId         String
   studingTimeId String
   attTimestamp  DateTime
-  // attStatus EnumAttendanceStatus
-  attStatus     String
+  attStatus EnumAttendanceStatus
+  // attStatus     String
   student       Student          @relation(fields: [stdId], references: [stdId])
   studingTime   StudingTime      @relation(fields: [studingTimeId], references: [studyTimeId])
   attMethodId   String
@@ -232,7 +232,7 @@ model EditAttendance {
   stdId         String
   studingTimeId String
   attTimestamp  DateTime
-  attStatus     String
+  attStatus     EnumAttendanceStatus
   student       Student          @relation(fields: [stdId], references: [stdId])
   studingTime   StudingTime      @relation(fields: [studingTimeId], references: [studyTimeId])
   attMethodId   String
@@ -255,7 +255,7 @@ model LeaveRequest {
   leaveDate         DateTime
   leaveTypeId       String
   leaveReason       String
-  leaveStatus       String
+  leaveStatus       EnumLeaveStatus
   LeaveFile         String?
   student           Student                   @relation(fields: [stdId], references: [stdId])
   leaveRequestType  LeaveRequestType          @relation(fields: [leaveTypeId], references: [leaveTypeId])
@@ -375,16 +375,16 @@ model Admin {
   updatedAt DateTime @updatedAt
 }
 
-// enum EnumAttendanceStatus {
-//   PRESENT
-//   ABSENT
-//   LATE
-//   ACTIVITY
-//   LEAVE
-// }
+enum EnumAttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  ACTIVITY
+  LEAVE
+}
 
-// enum EnumLeaveStatus {
-//   WAITING
-//   APPROVED
-//   REJECTED
-// }
+enum EnumLeaveStatus {
+  WAITING
+  APPROVED
+  REJECTED
+}
