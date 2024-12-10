@@ -1,5 +1,5 @@
 import { comparePassword } from "../helper/bcrypt.js";
-import { generateToken } from "../helper/jwt.js";
+import { generateToken, verifyToken } from "../helper/jwt.js";
 import db from '../prisma/client.js';
 
 export async function login(req, res) {
@@ -28,7 +28,8 @@ export async function login(req, res) {
 }
 
 export async function getTokenformRefreshToken(req, res) {
-    const refreshToken  = req.headers['Authorization'].split(' ')[1];
+    let refreshToken  = req.headers['authorization'].split(' ')[1];
+
     try{
         const decoded = verifyToken(refreshToken);
         if (!decoded) {
@@ -36,7 +37,7 @@ export async function getTokenformRefreshToken(req, res) {
         }
         const user = await db.admin.findUnique({
             where: {
-                id: decoded.id
+                username: decoded.username
             }
         });
         if (!user) {
@@ -45,6 +46,31 @@ export async function getTokenformRefreshToken(req, res) {
         const token = generateToken({ id: user.id, username: user.username }, '1h');
         res.cookie('token', token, { httpOnly: true });
         return res.json({ token });
+    }catch(err){
+        console.error(err);
+    }
+}
+
+export async function checkAuth(req, res) {
+    const token = req.cookies.token;
+    if (!token) {
+        return res.status(401).json({ message: 'Token not found' });
+    }
+    try{
+        const decoded = verifyToken(token);
+        if (!decoded) {
+            return res.status(401).json({ message: 'Invalid token' });
+        }
+        console.log(decoded);
+        const user = await db.admin.findUnique({
+            where: {
+                username: decoded.username
+            }
+        });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        return res.json({status: 'logged in'});
     }catch(err){
         console.error(err);
     }
