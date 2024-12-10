@@ -22,7 +22,7 @@ export const comparePassword =  async (inputPassword, hashPasswordFromDatabase) 
         }
         // const hash = await hashPasswordFromDatabase
         // console.log(hash)
-        const compareResult = bcrypt.compare(inputPassword,hashPasswordFromDatabase);
+        const compareResult = await bcrypt.compare(inputPassword,hashPasswordFromDatabase);
         if (compareResult == true) {
             return true;
         } else {
