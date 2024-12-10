@@ -1,17 +1,17 @@
 [
     {
+        "stdId": "60070001",
         "fName": "Peerapon",
         "lName": "Loasuangkoon",
         "email": "peeraphol.l@kkumail.com",
-        "tel": "0100000000",
-        "cityzenId": "0000000000000"
+        "tel": "0100000000"
     },
     {
+        "stdId": "60070002",
         "fName": "Johnny",
         "lName": "Silverhand",
         "email": "cyberpunk2077@kkumail.com",
-        "tel": "080000000",
-        "cityzenId": "1111111111111"
+        "tel": "080000000"
     }
 ]
 

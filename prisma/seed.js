@@ -36,6 +36,7 @@ async function main() {
         for (const student of students) {
             const studentCreate = await db.student.create({
                 data: {
+                    stdId: student.stdId,
                     fName: student.fName,
                     lName: student.lName,
                     email: student.email,

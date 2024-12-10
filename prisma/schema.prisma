@@ -17,7 +17,7 @@ datasource db {
 
 // specify the schema of your database tables
 model Student {
-  stdId          String                    @id @default(uuid())
+  stdId          String                    @id
   fName          String
   lName          String
   email          String?                   @unique
