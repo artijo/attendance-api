@@ -4,6 +4,10 @@ import {
     comparePassword
 } from '../helper/bcrypt.js';
 
+import {
+    createExcel
+} from '../helper/excel.js'
+
 export const createTeacher = async (req, res) => {
     const body = req.body;
     const password = await hashPassword(body.password) ;// รหัสผ่่านที่ผ่านการเข้ารหัสแล้วเรียบร้อยแล้ว
@@ -110,24 +114,6 @@ export const getStudentAllAttendenceExcelOneSubject = async (req, res) => { // e
 
     // uuid ของ 
     try{
-        const studentInThisClassRoom = await db.classroomMember.findMany({
-            where:{
-                classId:classroomId
-            },
-            select:{
-                stdId:true,
-                stdNo:true,
-                student:{
-                    select:{
-                        fName:true,
-                        lName:true
-                    }
-                }
-            }
-        });
-        // res.json(studentInThisClassRoom); 
-
-
         const timetable = await db.timetable.findMany({
             where:{
                 AND:{
@@ -139,38 +125,66 @@ export const getStudentAllAttendenceExcelOneSubject = async (req, res) => { // e
                 timetableId:true
             }
         })
-        
-       // สร้าง array ของ timetableId
+
         const timetableIds = timetable.map(item => item.timetableId);
 
-        // สร้าง JSON object สำหรับ Prisma query โดยใช้ `in` สำหรับหลายค่า
         const objectTimetableForSearch = {
             timetableId: {
                 in: timetableIds
             }
         };
 
-        // ตรวจสอบ query ที่จะใช้
-        // console.log(objectTimetableForSearch);
-
-        // ใช้ใน Prisma query
         const studingTime = await db.studingTime.findMany({
             where: objectTimetableForSearch,
             select:{
-                attendance:{
-                    include:{
-                        student:true
-                    },
-                }
+                studyTimeId:true,
             },
             orderBy:{
                 studingTimeDate:'asc'
             }
         });
-        res.json(studingTime);  
-        // ส่งผลลัพธ์
-        // res.json(studingTime);
+    
+
+        const studentInThisClassRoom = await db.classroomMember.findMany({
+            where:{
+                classId:classroomId
+            },
+            select:{
+                stdId:true,
+            }
+        });
+
         
+        const stutingTimes = studingTime.map((item) => item.studyTimeId);
+
+        const studentInClassroom = studentInThisClassRoom.map((item) => item.stdId);
+
+        const student = await db.student.findMany({
+            select:{
+                fName:true,
+                lName:true,
+                attendance:{
+                    where:{
+                        AND:{
+                            stdId: {
+                                in: studentInClassroom
+                            },
+                            studingTimeId:{
+                                in: stutingTimes
+                            }
+                        }
+                    }
+                },
+            },
+        });
+
+        const subjectName = await db.subject.findFirst({
+            select:{
+                subNameEng:true
+            }
+        })
+        createExcel(student);
+        res.json(student);
     }catch(err){
         console.error(err)
     };
