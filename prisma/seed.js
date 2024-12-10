@@ -22,7 +22,7 @@ async function main() {
             data:[
                 {
                     name:'admin test',
-                    password: await hashPassword('//..,,6565'),
+                    password: await hashPassword('12345678'),
                     username: 'admin01pp',
                     email: 'admin',
                     tel: '0651088956',
