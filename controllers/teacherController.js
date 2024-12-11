@@ -1,11 +1,19 @@
 import db from '../prisma/client.js';
+import fs from 'fs';
+//
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+//
+
 import {
     hashPassword,
     comparePassword
 } from '../helper/bcrypt.js';
 
 import {
-    createExcel
+    createExcelSubjectAttendence
 } from '../helper/excel.js'
 
 export const createTeacher = async (req, res) => {
@@ -112,6 +120,8 @@ export const getStudentAllAttendenceExcelOneSubject = async (req, res) => { // e
     const subjectId = req.body.subjectId; // uuid วิชา
     const classroomId = req.body.classId; // uuid ห้องเรียน
 
+    
+
     // uuid ของ 
     try{
         const timetable = await db.timetable.findMany({
@@ -182,9 +192,14 @@ export const getStudentAllAttendenceExcelOneSubject = async (req, res) => { // e
             select:{
                 subNameEng:true
             }
-        })
-        createExcel(student);
-        res.json(student);
+        });
+       
+        const fileName = await createExcelSubjectAttendence(student,subjectName.subNameEng);
+        const file = path.join(__dirname, `/helper/${fileName}`);
+        console.log(fileName)
+        // res.sendFile(file)
+        
+
     }catch(err){
         console.error(err)
     };

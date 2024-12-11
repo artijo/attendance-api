@@ -5,7 +5,6 @@ import cors from 'cors';
 import cookieParser from "cookie-parser";
 
 // import routes
-import testRouter from './routers/test.js';
 import studentRouter from './routers/studentRoute.js';
 import teacherRouter from './routers/teacherRoute.js';
 import adminRouter from './routers/adminRoute.js';
@@ -34,7 +33,6 @@ app.use(morgan('dev'));
 dotenv.config();
 
 // use routes
-app.use('/test', testRouter);
 app.use('/s',studentRouter); //studentRoute s= student
 app.use('/t', teacherRouter); // teacherRoute t= teacher
 app.use('/a', adminRouter);

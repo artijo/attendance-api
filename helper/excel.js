@@ -27,7 +27,7 @@ function readExcel(fileName){
 }
 
 //export
-export async function createExcel(objectInfo) {
+export async function createExcelSubjectAttendence(objectInfo, subjectName) { // สร้างไฟล์ excel ที่เกี่ยวกับการเข้าเรียนของแต่ละวิชาโดยแสดงรายชื่อนักเรียนทั้งหมด
     
     const raw_data = objectInfo;
 
@@ -56,12 +56,12 @@ export async function createExcel(objectInfo) {
             ...attendanceByPeriods, 
         };
     });
+    const fileName = `${subjectName}_Attendence.xlsx`
     const worksheet = reader.utils.json_to_sheet(rowsData);
     const workbook = reader.utils.book_new();
     reader.utils.book_append_sheet(workbook, worksheet, 'Sheet 1');
-
-    reader.writeFile(workbook, `./helper/test.xlsx`, {compression:true});
-
+    reader.writeFile(workbook, `./helper/${fileName}`, {compression:true});
+    return fileName;
 };
 
 
