@@ -195,13 +195,10 @@ export const getStudentAllAttendenceExcelOneSubject = async (req, res) => { // e
         });
        
         const fileName = await createExcelSubjectAttendence(student,subjectName.subNameEng);
-        const file = path.join(__dirname, `/helper/${fileName}`);
-        console.log(fileName)
-        // res.sendFile(file)
-        
-
+        const file = path.join(__dirname, `../public/${fileName}`);
+        // console.log(file);
+        res.sendFile(file);
     }catch(err){
         console.error(err)
     };
-
 }
