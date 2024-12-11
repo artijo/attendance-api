@@ -60,7 +60,7 @@ export async function createExcelSubjectAttendence(objectInfo, subjectName) { //
     const worksheet = reader.utils.json_to_sheet(rowsData);
     const workbook = reader.utils.book_new();
     reader.utils.book_append_sheet(workbook, worksheet, 'Sheet 1');
-    reader.writeFile(workbook, `./helper/${fileName}`, {compression:true});
+    reader.writeFile(workbook, `../public/${fileName}`, {compression:true});
     return fileName;
 };
 
