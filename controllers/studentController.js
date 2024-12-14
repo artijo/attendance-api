@@ -46,6 +46,9 @@ export const getStudent = async (req, res) => {
             const student = await db.student.findFirstOrThrow({
                 where:{
                     stdId:uuid
+                },
+                include:{
+                    attendance:true
                 }
             });
             res.json(student);
