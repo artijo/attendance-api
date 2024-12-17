@@ -19,7 +19,7 @@ export async function login(req, res) {
             return res.status(400).json({ message: 'Invalid password' });
         }
         const token = generateToken({ id: user.id, username: user.username }, '1h');
-        const refreshToken = generateToken({ id: user.id, username: user.username }, '7d');
+        const refreshToken = generateToken({ id: user.adminId, username: user.username }, '7d');
         res.cookie('token', token, { httpOnly: true });
         return res.json({ token, refreshToken });
     }catch(err){

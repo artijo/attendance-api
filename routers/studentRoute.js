@@ -2,8 +2,7 @@ import { Router } from "express";
 import {
     createStudent,getAllStudent,
     updateStudent,getStudent
-
- } from "../controllers/studentController.js";
+} from "../controllers/studentController.js";
 
 const router = Router();
 

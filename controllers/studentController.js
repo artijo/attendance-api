@@ -1,15 +1,5 @@
 import db from '../prisma/client.js';
 
-
-export const test = async (req,res) =>{
-    try{
-        const data = await db.student.findMany({});
-        res.json(data);
-    }catch(err){
-        console.log({"error":err});
-    };
-};
-
 export const createStudent = async (req, res) => { // สร้างรายชื่อนักเรียนรายบุคคล
     const body = req.body;
     if(body){
