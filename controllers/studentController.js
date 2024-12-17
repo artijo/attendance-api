@@ -63,14 +63,6 @@ export const getStudent = async (req, res) => {
                 where:{
                     stdId:uuid
                 },
-                include:{
-                    attendance:true,
-                    classroomMembers:{
-                        include:{
-                            classroom:true
-                        }
-                    }
-                }
             });
             // console.log(student);
            return res.json(student);
@@ -118,6 +110,8 @@ export const updateStudent = async(req, res) => {
         };
     };
 };
+
+const 
 
  
 

@@ -34,4 +34,5 @@ router.put('/teacher', updateTeacher); // แก้ไขข้อมูล teac
 router.get('/search', featchDataForSeachbar); 
 
 
+
 export default router;

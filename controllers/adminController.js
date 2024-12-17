@@ -5,6 +5,7 @@ export const featchDataForSeachbar  = async (req, res) => {
     try{
         const student = await db.student.findMany({
             select:{
+                stdId:true,
                 fName:true,
                 lName:true
             }
@@ -13,6 +14,7 @@ export const featchDataForSeachbar  = async (req, res) => {
         const newStudent = student.reduce((newArray, currentValue) => {
             // console.log(currentValue);
             const newObject = {
+                id: `${currentValue.stdId}`,
                 name: `${currentValue.fName} ${currentValue.lName}`,
                 role: "Student"
             }
@@ -22,6 +24,7 @@ export const featchDataForSeachbar  = async (req, res) => {
 
         const teacher = await db.teacher.findMany({
             select:{
+                tchId:true,
                 fName:true,
                 lName:true
             }
@@ -30,6 +33,7 @@ export const featchDataForSeachbar  = async (req, res) => {
         const newTeacher = teacher.reduce((newArray, currentValue) => {
             // console.log(currentValue);
             const newObject = {
+                id: `${currentValue.tchId}`,
                 name: `${currentValue.fName} ${currentValue.lName}`,
                 role: "Teacher"
             }
@@ -39,6 +43,7 @@ export const featchDataForSeachbar  = async (req, res) => {
 
         const leader = await db.leader.findMany({
             select:{
+                ldrId:true,
                 fName:true,
                 lName:true
             }
@@ -47,6 +52,7 @@ export const featchDataForSeachbar  = async (req, res) => {
         const newLeader = leader.reduce((newArray, currentValue) => {
             // console.log(currentValue);
             const newObject = {
+                id: `${currentValue.ldrId}`,
                 name: `${currentValue.fName} ${currentValue.lName}`,
                 role: "Leader"
             }
