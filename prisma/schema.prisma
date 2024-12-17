@@ -18,6 +18,7 @@ datasource db {
 // specify the schema of your database tables
 model Student {
   stdId          String                    @id
+  title          EnumNameTitle
   fName          String
   lName          String
   email          String?                   @unique
@@ -153,7 +154,8 @@ model ClassroomMember {
   stdId     String
   classroom Classrooms  @relation(fields: [classId], references: [classId])
   student   Student     @relation(fields: [stdId], references: [stdId])
-  stdNo     String      
+  stdNo     String    
+  behaviourScore    Int   @default(100)  
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 }
@@ -387,4 +389,10 @@ enum EnumLeaveStatus {
   WAITING
   APPROVED
   REJECTED
+}
+
+enum EnumNameTitle {
+  MR
+  MRS
+  MISS
 }
