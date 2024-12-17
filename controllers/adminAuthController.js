@@ -61,7 +61,6 @@ export async function checkAuth(req, res) {
         if (!decoded) {
             return res.status(401).json({ message: 'Invalid token' });
         }
-        console.log(decoded);
         const user = await db.admin.findUnique({
             where: {
                 username: decoded.username

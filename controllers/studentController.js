@@ -65,7 +65,12 @@ export const getStudent = async (req, res) => {
                     stdId:uuid
                 },
                 include:{
-                    attendance:true
+                    attendance:true,
+                    classroomMembers:{
+                        include:{
+                            classroom:true
+                        }
+                    }
                 }
             });
             res.json(student);
