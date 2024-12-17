@@ -40,7 +40,6 @@ export const getAllStudent = async (req, res) => { // ดึงรายชื�
                 }
             });
             const studentArray = student.map((item) => item.student);
-            console.log(studentArray);
             return res.json(studentArray);
         }catch(error){
             console.error(error);
@@ -73,7 +72,8 @@ export const getStudent = async (req, res) => {
                     }
                 }
             });
-            res.json(student);
+            // console.log(student);
+           return res.json(student);
         }
         catch(err){
             console.error(err);
