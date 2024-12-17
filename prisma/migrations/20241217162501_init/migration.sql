@@ -1,6 +1,7 @@
 -- CreateTable
 CREATE TABLE `Student` (
     `stdId` VARCHAR(191) NOT NULL,
+    `title` ENUM('MR', 'MRS', 'MISS') NOT NULL,
     `fName` VARCHAR(191) NOT NULL,
     `lName` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NULL,
@@ -138,6 +139,7 @@ CREATE TABLE `ClassroomMember` (
     `classId` VARCHAR(191) NOT NULL,
     `stdId` VARCHAR(191) NOT NULL,
     `stdNo` VARCHAR(191) NOT NULL,
+    `behaviourScore` INTEGER NOT NULL DEFAULT 100,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
