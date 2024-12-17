@@ -5,6 +5,10 @@ import {
     createStudent,getAllStudent,
     updateStudent, getStudent
  } from "../controllers/studentController.js";
+import {
+    createTeacher, getAllTeacher,
+    updateTeacher, getTeacher
+} from "../controllers/teacherController.js";
 
 import { featchDataForSeachbar } from "../controllers/adminController.js";
 

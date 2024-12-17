@@ -21,9 +21,36 @@ export const createStudent = async (req, res) => { // สร้างราย�
 };
 
 export const getAllStudent = async (req, res) => { // ดึงรายชื่อนักเรียนทั้งหมด
+    let classr = req.query.class;
+    if(req.query.class !== "all"){
+        classr = classr.split("-");
+        try{
+            const classroom = await db.classrooms.findFirst({
+                where:{
+                    classLevel:parseInt(classr[0]),
+                    classRoom:parseInt(classr[1])
+                }
+            });
+            const student = await db.classroomMember.findMany({
+                where:{
+                    classId: classroom.classId
+                },
+                select:{
+                    student:true
+                }
+            });
+            const studentArray = student.map((item) => item.student);
+            console.log(studentArray);
+            return res.json(studentArray);
+        }catch(error){
+            console.error(error);
+        };
+    };
     try{
-        const student = await db.student.findMany({});
-        res.json(student)
+        const student = await db.student.findMany({
+        });
+        // console.log(student);
+        return res.json(student)
     }catch(error){
         console.error(error);
     };
