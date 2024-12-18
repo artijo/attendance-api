@@ -1,11 +1,15 @@
 import db from '../prisma/client.js';
 
 export const createStudent = async (req, res) => { // สร้างรายชื่อนักเรียนรายบุคคล
-    const body = req.body;
+    let body = req.body;
+    if (body.cityzenId === "") body.cityzenId = null;
+    console.log(body);
     if(body){
         try{
             const student = await db.student.create({
                 data:{
+                    stdId:body.stdId,
+                    title:body.title,
                     fName:body.fName,
                     lName:body.lName,
                     email:body.email,
