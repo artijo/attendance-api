@@ -107,6 +107,7 @@ export const updateStudent = async(req, res) => {
                     stdId: String(body.stdId)
                 },
                 data:{
+                    title:body.title,
                     fName:body.fName,
                     lName:body.lName,
                     email:body.email,
