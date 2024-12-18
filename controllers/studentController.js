@@ -110,11 +110,3 @@ export const updateStudent = async(req, res) => {
         };
     };
 };
-
-const 
-
- 
-
-
-
-
