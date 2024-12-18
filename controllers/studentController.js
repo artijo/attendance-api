@@ -63,6 +63,13 @@ export const getStudent = async (req, res) => {
                 where:{
                     stdId:uuid
                 },
+                include:{
+                    classroomMembers:{
+                        include:{
+                            classroom:true
+                        }
+                    }
+                }
             });
             // console.log(student);
            return res.json(student);
