@@ -71,6 +71,7 @@ export async function checkAuth(req, res) {
         }
         return res.json({status: 'logged in'});
     }catch(err){
+        res.status(401).json({ err });
         console.error(err);
     }
 }
