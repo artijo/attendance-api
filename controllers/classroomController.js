@@ -20,4 +20,16 @@ export const createClassroom = async (req,res) => {
     };
 };
 
-
+export const getAllClassroom = async (req,res) => {
+    try{
+        const classroom = await db.classrooms.findMany({
+            include: {
+                classroomType: true,
+            },
+            
+        });
+        return res.json(classroom)
+    }catch(error){
+        console.error(error);
+    };
+};
