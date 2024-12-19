@@ -33,3 +33,27 @@ export const getAllClassroom = async (req,res) => {
         console.error(error);
     };
 };
+
+export const getClassroom = async (req,res) => {
+    const uuid = req.params.uuid;
+    try{
+        const classroom = await db.classrooms.findUnique({
+            where:{
+                classId:uuid
+            },
+            include: {
+                classroomType: true,
+                classroomMembers: true,
+                teacher: true,
+                timetable: {
+                    include: {
+                        subject: true,
+                    }
+                }
+            },
+        });
+        return res.json(classroom)
+    }catch(error){
+        console.error(error);
+    };
+};
