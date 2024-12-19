@@ -57,3 +57,13 @@ export const getClassroom = async (req,res) => {
         console.error(error);
     };
 };
+
+export const getAllClassroomType = async (req,res) => {
+    try{
+        const classroomType = await db.classroomType.findMany({
+        });
+        res.json(classroomType)
+    }catch(error){
+        console.error(error);
+    };
+}
