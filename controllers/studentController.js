@@ -120,15 +120,4 @@ export const updateStudent = async(req, res) => {
             console.error(error);
         };
     };
-<<<<<<< Updated upstream
 };
-=======
-};
-
-
- 
-
-
-
-
->>>>>>> Stashed changes
