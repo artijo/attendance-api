@@ -75,7 +75,7 @@ export const getStudent = async (req, res) => {
                 }
             });
             // console.log(student);
-           return res.json(student);
+           res.json(student);
         }
         catch(err){
             console.error(err);
@@ -120,4 +120,15 @@ export const updateStudent = async(req, res) => {
             console.error(error);
         };
     };
+<<<<<<< Updated upstream
 };
+=======
+};
+
+
+ 
+
+
+
+
+>>>>>>> Stashed changes
