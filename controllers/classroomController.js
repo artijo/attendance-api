@@ -6,13 +6,26 @@ export const createClassroom = async (req,res) => {
         try{
             const classroom = await db.classrooms.create({
                 data:{
-                    classLevel:body.cLevel,
-                    classRoom:body.cRoom,
-                    semester:body.semester,
-                    classTypeId:body.cTypeId,
+                    classLevel:parseInt(body.classLevel),
+                    classRoom:parseInt(body.classRoom),
+                    academicYear:parseInt(body.academicYear),
+                    semester:parseInt(body.semester),
+                    classTypeId:body.classTypeId,
                     leaderId:body.leaderId,
                 }
             })
+            body.teacherIds.forEach(async (teacherId) => {
+                await db.teacher.update({
+                    where:{
+                        teacherId:teacherId
+                    },
+                    data:{
+                        classId:classroom.classId
+                    }
+                })
+            }
+            );
+            return res.json({message:"Create Classroom Success"})
 
         }catch(err){
             console.error(err);
