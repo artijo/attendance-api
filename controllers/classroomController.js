@@ -53,7 +53,7 @@ export const updateClassroom = async (req,res) => {
             body.teacherIds.forEach(async (teacherId) => {
                 await db.teacher.update({
                     where:{
-                        teacherId:teacherId
+                        tchId:teacherId
                     },
                     data:{
                         classId:classroom.classId
@@ -94,6 +94,7 @@ export const getClassroom = async (req,res) => {
                 classroomType: true,
                 classroomMembers: true,
                 teacher: true,
+                leader: true,
                 timetable: {
                     include: {
                         subject: true,
