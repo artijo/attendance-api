@@ -9,7 +9,7 @@ import {
     createTeacher, getAllTeacher,
     updateTeacher, getTeacher
 } from "../controllers/teacherController.js";
-import { createClassroom, getAllClassroom, getClassroom, getAllClassroomType } from "../controllers/classroomController.js";
+import { createClassroom, getAllClassroom, getClassroom, getAllClassroomType, updateClassroom } from "../controllers/classroomController.js";
 import { getAllLeaders } from "../controllers/leaderController.js";
 
 import { featchDataForSeachbar } from "../controllers/adminController.js";
@@ -35,6 +35,7 @@ router.put('/teacher', updateTeacher); // แก้ไขข้อมูล teac
 // classroom Management
 router.get('/classrooms', getAllClassroom); // ดึงข้อมูลทั้งหมด classroom
 router.post('/classroom', createClassroom); // สร้าง classroom
+router.put('/classroom', updateClassroom); // แก้ไขข้อมูล classroom
 router.get('/classroom/:uuid', getClassroom); // ดึงข้อมูล classroom
 router.get('/classrooms/types', getAllClassroomType); // ดึงข้อมูลประเภทของห้องเรียน
 
