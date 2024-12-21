@@ -33,6 +33,42 @@ export const createClassroom = async (req,res) => {
     };
 };
 
+export const updateClassroom = async (req,res) => {
+    const body = req.body;
+    if(body){
+        try{
+            const classroom = await db.classrooms.update({
+                where:{
+                    classId:body.classId
+                },
+                data:{
+                    classLevel:parseInt(body.classLevel),
+                    classRoom:parseInt(body.classRoom),
+                    academicYear:parseInt(body.academicYear),
+                    semester:parseInt(body.semester),
+                    classTypeId:body.classTypeId,
+                    leaderId:body.leaderId,
+                }
+            })
+            body.teacherIds.forEach(async (teacherId) => {
+                await db.teacher.update({
+                    where:{
+                        tchId:teacherId
+                    },
+                    data:{
+                        classId:classroom.classId
+                    }
+                })
+            }
+            );
+            return res.json({message:"Update Classroom Success"})
+
+        }catch(err){
+            console.error(err);
+        };
+    };
+};
+
 export const getAllClassroom = async (req,res) => {
     try{
         const classroom = await db.classrooms.findMany({
@@ -58,6 +94,7 @@ export const getClassroom = async (req,res) => {
                 classroomType: true,
                 classroomMembers: true,
                 teacher: true,
+                leader: true,
                 timetable: {
                     include: {
                         subject: true,
