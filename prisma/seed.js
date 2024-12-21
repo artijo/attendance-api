@@ -10,6 +10,7 @@ import classrooms from './jsonSeed/classroom.json' assert { type: 'json' };
 import {
     hashPassword,
 } from '../helper/bcrypt.js';
+import { DateTime } from 'luxon';
 
 const prisma = new PrismaClient();
 
@@ -220,53 +221,64 @@ async function main() {
                 {
                   subId: subjectArrayId[0], // วิชา: GEN101
                   classId: classroomIdArray[0], // ห้อง: Class 101
-                  timeStart: "08:00:00",
-                  timeEnd: "09:30:00",
-                  timeLate: "08:15:00",
-                  dayOfWeek: 1, // Monday
-                },
-                {
-                    subId: subjectArrayId[0], // วิชา: GEN101
-                    classId: classroomIdArray[0], // ห้อง: Class 101
-                    timeStart: "13:00:00",
-                    timeEnd: "14:00:00",
-                    timeLate: "13:15:00",
-                    dayOfWeek: 2, // Monday
+                  timeStart: "14:00:00",
+                  timeEnd: "15:00:00",
+                  timeLate: "14:15:00",
+                  dayOfWeek: 6, // Saturday
                 },
                 {
                   subId: subjectArrayId[1], // วิชา: MATH101
-                  classId: classroomIdArray[0],
-                  timeStart: "09:45:00",
-                  timeEnd: "11:15:00",
-                  timeLate: "10:00:00",
-                  dayOfWeek: 2, // Tuesday
+                  classId: classroomIdArray[0], // ห้อง: Class 101
+                  timeStart: "15:00:00",
+                  timeEnd: "16:00:00",
+                  timeLate: "15:15:00",
+                  dayOfWeek: 6, // Saturday
                 },
                 {
                   subId: subjectArrayId[2], // วิชา: SCI101
-                  classId: classroomIdArray[0],
-                  timeStart:"11:30:00",
-                  timeEnd:"13:00:00",
-                  timeLate: "11:45:00",
-                  dayOfWeek: 3, // Wednesday
+                  classId: classroomIdArray[0], // ห้อง: Class 101
+                  timeStart: "16:00:00",
+                  timeEnd: "15:00:00",
+                  timeLate: "16:15:00",
+                  dayOfWeek: 6, // Saturday
                 },
                 {
                   subId: subjectArrayId[3], // วิชา: ENG101
-                  classId: classroomIdArray[0],
-                  timeStart: "13:15:00",
-                  timeEnd: "14:45:00",
-                  timeLate: "13:30:00",
-                  dayOfWeek: 4, // Thursday
+                  classId: classroomIdArray[0], // ห้อง: Class 101
+                  timeStart: "17:00:00",
+                  timeEnd: "18:00:00",
+                  timeLate: "17:15:00",
+                  dayOfWeek: 6, // Saturday
                 },
               ];
+              
               
               const timeTableIdArray = [];
               for (const timetable of timetables) {
                 const timetableCreate = await prisma.timetable.create({
                   data: timetable,
                 });
-                timeTableIdArray.push(timetableCreate.timetableId);
+                timeTableIdArray.push(timetableCreate);
                 console.log(`Timetable created for Subject ${timetable.subId} on Day ${timetable.dayOfWeek}`);
               }
+
+              for (const timetableId of timeTableIdArray) {
+                const timeStart = timetableId.timeStart.split(":").map(Number);
+              
+                const timeInBangkok = DateTime.fromISO(timetableId.timeStart, { zone: 'UTC' }).setZone('Asia/Bangkok');
+              
+                // บันทึกลงฐานข้อมูล
+                const studingTime = await db.studingTime.create({
+                  data: {
+                    timetableId: timetableId.timetableId,
+                    studingTimeDate: timeInBangkok, // บันทึกในรูปแบบ ISO-8601
+                  },
+                });
+              
+                console.log("Studing Time Created:", studingTime);
+              }
+              
+              
             
               // สร้างปฏิทินการเรียน (StudingTime) และการเข้าร่วมเรียน (Attendance)
               const attendanceMethods = [
@@ -285,66 +297,67 @@ async function main() {
                 const attendanceMethodCreate = await db.attendanceMethod.create({data:attendanceMethod});
                 attendanceMethodIdArray.push(attendanceMethodCreate.attMethodId);
               };
-    
+              
 
-        const studingTimeArray = [];
-        for (const timetableId of timeTableIdArray) {
-        // ตัวอย่าง: สร้าง StudingTime สำหรับ 7 วันนับจากวันที่เริ่มต้น
-        for (let i = 0; i < 7; i++) {
-            // สร้างวันที่เริ่มต้น
+
+        // const studingTimeArray = [];
+        // for (const timetableId of timeTableIdArray) {
+        // // ตัวอย่าง: สร้าง StudingTime สำหรับ 7 วันนับจากวันที่เริ่มต้น
+        // for (let i = 0; i < 7; i++) {
+        //     // สร้างวันที่เริ่มต้น
             const today = new Date();
-            today.setDate(today.getDate() + i);
+            today.setDate(today.getDate());
 
             // กำหนดเวลาเป็น 00:00:00
             const studyDate = new Date(today.setHours(0, 0, 0, 0));
 
-            // สร้าง StudingTime
-            const studingTime = await prisma.studingTime.create({
-            data: {
-                timetableId: timetableId,
-                studingTimeDate: studyDate,
-            },
-            });
+        //     // สร้าง StudingTime
+        //     const studingTime = await prisma.studingTime.create({
+        //         data: {
+        //             timetableId: timetableId,
+        //             studingTimeDate: studyDate,
+        //         }
+        //     });
 
-            studingTimeArray.push(studingTime.studyTimeId);
-            console.log(`StudingTime created for timetable ${timetableId} on ${studyDate.toISOString().split("T")[0]}`);
+        //     studingTimeArray.push(studingTime.studyTimeId);
+        //     console.log(`StudingTime created for timetable ${timetableId} on ${studyDate.toISOString().split("T")[0]}`);
 
             
 
-            // สร้าง Attendance สำหรับนักเรียนทุกคน
-            for (const studentId of studentArray) {
-            const attendance = await prisma.attendance.create({
-                data: {
-                stdId: studentId,
-                studingTimeId: studingTime.studyTimeId,
-                attTimestamp: new Date(), // สมมติให้การเข้าเรียนเกิดขึ้นตอนนี้
-                attStatus: "PRESENT", // ค่าเริ่มต้น: PRESENT (หรือใช้ ENUM ถ้ามี)
-                attMethodId: attendanceMethodIdArray[0], // สมมติว่าเป็นการบันทึกแบบ manual
-                latitute: null, // กำหนดค่าเป็น null หรือเพิ่ม logic ถ้าต้องการ
-                longitute: null,
-                note: null,
-                operatedBy: "Admin", // สมมติว่า Admin เป็นผู้บันทึก
-                },
-            });
+        // //     // สร้าง Attendance สำหรับนักเรียนทุกคน
+        // //     for (const studentId of studentArray) {
+        // //     const attendance = await prisma.attendance.create({
+        // //         data: {
+        // //         stdId: studentId,
+        // //         studingTimeId: studingTime.studyTimeId,
+        // //         attTimestamp: new Date(), // สมมติให้การเข้าเรียนเกิดขึ้นตอนนี้
+        // //         attStatus: "PRESENT", // ค่าเริ่มต้น: PRESENT (หรือใช้ ENUM ถ้ามี)
+        // //         attMethodId: attendanceMethodIdArray[0], // สมมติว่าเป็นการบันทึกแบบ manual
+        // //         latitute: null, // กำหนดค่าเป็น null หรือเพิ่ม logic ถ้าต้องการ
+        // //         longitute: null,
+        // //         note: null,
+        // //         operatedBy: "Admin", // สมมติว่า Admin เป็นผู้บันทึก
+        // //         },
+        // //     });
 
-            console.log(`Attendance created for student ${studentId} in StudingTime ${studingTime.studyTimeId}`);
-            }
-        }
-        }
+        // //     console.log(`Attendance created for student ${studentId} in StudingTime ${studingTime.studyTimeId}`);
+        // //     }
+        // // }
+        // // }
 
               
 
-        //   const timetables = await db.timetable.createMany({
-        //     data:[
-        //         {
-        //             subId:ds,
-        //             classId:db,
-        //             timeStart:1,
-        //             timeEnd:2,
-        //             dayOfWeek:1,
-        //         }
-        //     ]
-        //   });
+        // //   const timetables = await db.timetable.createMany({
+        // //     data:[
+        // //         {
+        // //             subId:ds,
+        // //             classId:db,
+        // //             timeStart:1,
+        // //             timeEnd:2,
+        // //             dayOfWeek:1,
+        // //         }
+        // //     ]
+        // //   });
         
     } catch (err) {
         console.error("Error during seeding process:", err);
