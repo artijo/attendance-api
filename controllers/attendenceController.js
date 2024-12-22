@@ -2,7 +2,7 @@ import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
 
 
-export const studentAttendenceSubject = async (req, res) => {
+export const studentAttendenceSubject = async (req, res) => { // เช็คชื่อเข้าเรียน
     const body = req.body;
     const dtNow = DateTime.fromISO(body.attTimestamp, { zone: 'UTC' }).setZone('Asia/Bangkok');
     let attStatusString = '';
@@ -42,7 +42,107 @@ export const studentAttendenceSubject = async (req, res) => {
             res.json({message : 1})
         };
     }
+};
+
+export const getAllStudentClassroomTerm = async (req, res) => {
+    const stdId = req.query.student;
+    if(stdId) {
+        try{
+            const classroomStudent = await db.classroomMember.findMany({
+                where:{
+                    stdId : stdId
+                },
+                select:{
+                    classId:true,
+                    classroom:true
+                }
+            })
+            res.json(classroomStudent)
+        }catch(err){
+            console.error(err);
+        };
+    }
     
+};
+
+export const getSubjectTimetableByClassroom = async (req, res) => {
+    const classId = req.query.classroom;
+    if(classId) {
+        try{
+            const timetableSubject = await db.timetable.findMany({
+                where:{
+                    classId:classId
+                },
+                select:{
+                    subId:true,
+                    subject:true
+                }
+            });
+            res.json(timetableSubject);
+        }catch(err){
+            console.error(err);
+        };
+    };
+};
+
+export const attendanceHistorySearchByTermAndSubjectId = async (req, res) => {
+    const classroomId = req.query.classroom;
+    const subjectId = req.query.subject;
+    // console.log(classroomId+ "  " + subjectId);
+    try{
+        const timetableId = await db.timetable.findMany({
+            where: {
+                classId: classroomId,
+                subId: subjectId,
+            }
+        })
+
+        const timetableIdArray = timetableId.map((value) => 
+            value.timetableId
+        )
+
+        const studingTime = await db.studingTime.findMany({
+            where :{ 
+                timetableId:{
+                    in: timetableIdArray
+                }
+            },
+            orderBy: {
+                studingTimeDate:'asc'
+            },
+            select : {
+                studyTimeId:true,
+                timetable:true,
+                attendance:{
+                    select:{
+                        attId:true,
+                        attMethod:{
+                            select:{
+                                attMethodName:true
+                            }
+                        },
+                        attStatus:true,
+                        attTimestamp:true,
+                        latitute:true,
+                        longitute:true,
+                        note:true,
+                        operatedBy:true,
+                        stdId:true,
+                        studingTime:{
+                            select:{
+                                studingTimeDate:true,
+                            }
+                        },
+                        teacher:true,
+                        leader:true,
+                    }
+                }
+            }
+        })
+        res.json(studingTime);
+    }catch(err) {
+        console.error(err);
+    };
 };
 
 // export const getStudentClassroomTerm = async (req, res) => {

@@ -4,20 +4,26 @@ const router = Router();
 
 import {
     studentAttendenceSubject,
+    attendanceHistorySearchByTermAndSubjectId, 
+    getAllStudentClassroomTerm,
+    getSubjectTimetableByClassroom
 } from "../controllers/attendenceController.js";
 
 import {
     getTimeTable
 } from "../controllers/timetableController.js";
 
-// router.get('/ping', (req, res) => {
-//     res.json({ message: 'pong' });
-// });
 
-// router.get('/studentTerm/:stdId', getStudentClassroomTerm)
-// router.get('/student/:classroomId/:studentId', attendenceBySubjectAndStuId)
+// ประวัติการเข้าเรียน
+
+router.get('/attendenceHistory', attendanceHistorySearchByTermAndSubjectId);
+router.get('/studentClassroom', getAllStudentClassroomTerm);
+router.get('/getSubject', getSubjectTimetableByClassroom);
+
+
+
 // ลงชื่อเข้าเรียน 
 router.get('/studentTimetable/:classroomId/:dayOfWeek', getTimeTable); // เอาไว้ดึงข้อมูลเพื่อเช็คว่าเริ่มเรียนตอนนไหน
-router.post('/attendenceSubject' , studentAttendenceSubject);
+router.post('/attendenceSubject' , studentAttendenceSubject); // ลงชื่อเข้าเรียน
 
 export default router;

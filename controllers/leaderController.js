@@ -19,5 +19,4 @@ export function getAllLeaders(req, res) {
     } catch (error) {
         console.error(error);
     }
-   
 }

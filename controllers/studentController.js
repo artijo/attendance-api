@@ -1,5 +1,7 @@
 import db from '../prisma/client.js';
 
+
+
 export const createStudent = async (req, res) => { // สร้างรายชื่อนักเรียนรายบุคคล
     let body = req.body;
     if (body.cityzenId === "") body.cityzenId = null;
