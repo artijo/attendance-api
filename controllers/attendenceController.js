@@ -88,6 +88,7 @@ export const getSubjectTimetableByClassroom = async (req, res) => {
 export const attendanceHistorySearchByTermAndSubjectId = async (req, res) => {
     const classroomId = req.query.classroom;
     const subjectId = req.query.subject;
+    const studentId = req.query.student;
     // console.log(classroomId+ "  " + subjectId);
     try{
         const timetableId = await db.timetable.findMany({
@@ -114,6 +115,9 @@ export const attendanceHistorySearchByTermAndSubjectId = async (req, res) => {
                 studyTimeId:true,
                 timetable:true,
                 attendance:{
+                    where:{
+                        stdId:studentId
+                    },
                     select:{
                         attId:true,
                         attMethod:{
