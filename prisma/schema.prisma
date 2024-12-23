@@ -141,8 +141,8 @@ model Classrooms {
   // timetable     Timetable?
   timetable     Timetable[]
   teacher       Teacher[]
-  leaderId      String
-  leader        Leader                     @relation(fields: [leaderId], references: [ldrId])
+  leaderId      String?
+  leader        Leader?                    @relation(fields: [leaderId], references: [ldrId])
   activity      ClassroomCanjoinActivity[]
   createdAt     DateTime                   @default(now())
   updatedAt     DateTime                   @updatedAt

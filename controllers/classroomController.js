@@ -2,6 +2,7 @@ import db from '../prisma/client.js';
 
 export const createClassroom = async (req,res) => {
     const body = req.body;
+    console.log(body.classTypeId);
     if(body){
         try{
             const classroom = await db.classrooms.create({
@@ -10,11 +11,12 @@ export const createClassroom = async (req,res) => {
                     classRoom:parseInt(body.classRoom),
                     academicYear:parseInt(body.academicYear),
                     semester:parseInt(body.semester),
-                    classTypeId:body.classTypeId,
-                    leaderId:body.leaderId,
+                    // classTypeId:body.classTypeId,
+                    leader: body.leaderId?{connect:{leaderId:body.leaderId}}:undefined,
+                    classroomType:{connect:{classTypeId:body.classTypeId}}
                 }
             })
-            body.teacherIds.forEach(async (teacherId) => {
+            body.teacherIds?.forEach(async (teacherId) => {
                 await db.teacher.update({
                     where:{
                         teacherId:teacherId
