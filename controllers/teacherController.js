@@ -87,9 +87,13 @@ export const getTeacher = async (req, res) => {
     const uuid = req.params.uuid;
     if(uuid){
         try{
-            const teacher = await db.student.findFirstOrThrow({
+            const teacher = await db.teacher.findFirstOrThrow({
                 where:{
-                    stdId:uuid
+                    tchId:uuid
+                },
+                include: {
+                    department: true,
+                    classroom: true
                 }
             });
             res.json(teacher);
