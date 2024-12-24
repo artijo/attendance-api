@@ -392,7 +392,8 @@ enum EnumLeaveStatus {
 }
 
 enum EnumNameTitle {
-  MR
-  MRS
-  MISS
+  BOY // เด็กชาย
+  GIRL // เด็กหญิง
+  MR // นาย
+  MS // นางสาว
 }
