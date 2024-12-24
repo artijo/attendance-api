@@ -77,6 +77,10 @@ export const getAllClassroom = async (req,res) => {
             include: {
                 classroomType: true,
             },
+            orderBy:[{
+                classLevel:"asc"},
+                {classRoom:"asc"
+            }]
             
         });
         return res.json(classroom)
