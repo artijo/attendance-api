@@ -3,7 +3,8 @@ import { Router } from "express";
 import { login, checkAuth, getTokenformRefreshToken } from "../controllers/adminAuthController.js";
 import {
     createStudent,getAllStudent,
-    updateStudent, getStudent
+    updateStudent, getStudent,
+    createStudentWithFile
  } from "../controllers/studentController.js";
 import {
     createTeacher, getAllTeacher,
@@ -25,6 +26,7 @@ router.get('/student/:uuid', getStudent)
 router.get('/students', getAllStudent);
 router.post('/student', createStudent);
 router.put('/student',updateStudent);
+router.post('/students/bulk', createStudentWithFile);
 
 // teacher Management
 router.get('/teacher/:uuid', getTeacher); // ดึงข้อมูล teacher

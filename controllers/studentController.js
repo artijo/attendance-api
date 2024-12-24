@@ -25,6 +25,97 @@ export const createStudent = async (req, res) => { // สร้างราย�
     };
 };
 
+export const createStudentWithFile = async (req, res) => {
+    let body = req.body;
+    if (!body?.sheets) {
+        return res.status(400).json({ message: "ไม่พบข้อมูลนักเรียน" });
+    }
+
+    try {
+        // Flatten the sheets object values into a single array
+        const allStudents = Object.values(body.sheets).flat();
+
+        const student = await db.student.createMany({
+            data: allStudents
+            .filter(item => item.studentId && item.studentId.trim() !== '')
+            .map((item) => ({
+                // if studentId is not provided, skiploop
+                stdId: item.studentId,
+                title: item.title === "เด็กชาย" ? "BOY" : 
+                       item.title === "เด็กหญิง" ? "GIRL" : 
+                       item.title === "นาย" ? "MR" : "MS",
+                fName: item.firstName,
+                lName: item.lastName,
+                email: item.email || null,
+                tel: item.tel || null,
+                cityzenId: item.cityzenId || null,
+            })),
+            skipDuplicates: true
+        });
+
+        // for (const item of allStudents) {
+        //     // ดึงข้อมูล studentId
+        //     // const student = await db.student.findUnique({
+        //     //     where: { stdId: item.studentId },
+        //     // });
+        //     if (!item.studentId || item.studentId.trim() === '') continue;
+
+        //     // ดึงข้อมูลห้องเรียน
+        //     const classroom = await db.classrooms.findFirst({
+        //         where: {
+        //             classLevel: parseInt(item.class),
+        //             classRoom: parseInt(item.room),
+        //         },
+        //     });
+
+        //     // ตรวจสอบว่าทั้ง `student` และ `classroom` มีอยู่
+        //     if (student && classroom) {
+        //         await db.classroomMember.create({
+        //             data: {
+        //                 student: {connect: {stdId: item.studentId}},
+        //                 classroom: {connect: {classId: classroom.classId}},
+        //                 stdNo: item.no.toString(),
+        //             }
+        //         });
+        //     }
+        // }
+
+        const classrooms = await db.classrooms.findMany();
+        const classroomMap = new Map();
+        classrooms.forEach(classroom => {
+            const key = `${classroom.classLevel}-${classroom.classRoom}`;
+            classroomMap.set(key, classroom.classId);
+        });
+
+        const classroomMembers = allStudents
+            .filter(item => item.studentId && item.studentId.trim() !== '')
+            .map(item => {
+                const key = `${parseInt(item.class)}-${parseInt(item.room)}`;
+                const classId = classroomMap.get(key);
+
+                if (!classId) return null; // ถ้าห้องเรียนไม่พบใน Map ให้ข้าม
+
+                return {
+                    stdId: item.studentId,
+                    classId: classId,
+                    stdNo: item.no.toString(),
+                };
+            })
+            .filter(item => item !== null); // กรองข้อมูลที่ไม่มี classId
+
+        await db.classroomMember.createMany({
+            data: classroomMembers,
+            skipDuplicates: true,
+        });
+        
+
+        res.json({ message: `สร้าง ${allStudents.length} รายชื่อนักเรียนแล้ว` });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "เกิดข้อผิดพลาดในการสร้างรายชื่อนักเรียน", error: err.message });
+    }
+};
+
 export const getAllStudent = async (req, res) => { // ดึงรายชื่อนักเรียนทั้งหมด
     let classr = req.query.class;
     if(req.query.class !== "all"){
