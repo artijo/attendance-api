@@ -98,7 +98,11 @@ export const getClassroom = async (req,res) => {
             },
             include: {
                 classroomType: true,
-                classroomMembers: true,
+                classroomMembers: {
+                    include: {
+                        student: true
+                    }
+                },
                 teacher: true,
                 leader: true,
                 timetable: {
