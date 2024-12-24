@@ -29,6 +29,7 @@ export async function login(req, res) {
 
 export async function getTokenformRefreshToken(req, res) {
     let refreshToken  = req.headers['authorization'].split(' ')[1];
+    // console.log(refreshToken);
 
     try{
         const decoded = verifyToken(refreshToken);
