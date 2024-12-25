@@ -2,19 +2,62 @@ import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
 
 
-// export const createTimetable = async (req, res) => {
-//     const body = req.body;
-//     if(body) {
-//         try{
-//             const timetable = await db.timetable.create({
-                
-//             })
-//         }catch(error) {
-    
-//         };
-//     };
-    
-// };
+export const createTimetable = async (req, res) => {
+    const { classroomId, timetable } = req.body
+
+
+
+    if(classroomId && timetable){
+        try{
+            console.log(classroomId + timetable);
+        }catch(error){
+            console.log(error)
+        }
+    };
+};
+
+
+
+
+export const getTimeTableByRoom = async (req, res) => {
+    const classid = req.query.classroomid;
+    if(classid) {
+        try{
+            const timetable = await db.timetable.findMany({
+                where:{
+                    classId : classid
+                },
+                orderBy: [
+                    {dayOfWeek : 'asc'},
+                    {timeStart : 'asc'}
+                ],
+            });
+
+            const dayOfWeek = {
+                "1" : [],
+                "2" : [],
+                "3" : [],
+                "4" : [],
+                "5" : []
+            }
+            
+            const arrayOfDayOfWeek = Object.keys(dayOfWeek);
+
+            arrayOfDayOfWeek.forEach(objectKey => {
+                timetable.forEach(subjecttimetable => {
+                    if(Number(objectKey) === Number(subjecttimetable.dayOfWeek)){
+                        dayOfWeek[objectKey].push(subjecttimetable)
+                    }
+                })
+            });
+        
+            // console.log(timetable);
+            res.json(dayOfWeek);
+        }catch(error){
+            console.log(error);
+        };
+    };
+};
 
 
 export const getTimeTable = async (req, res) => { // ใช้สำหรับการส่งข้อมูลตารางเรียนว่าวันนั้นเรียนวิชาอะไรบ้าง

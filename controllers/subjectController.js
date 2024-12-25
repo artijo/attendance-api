@@ -152,3 +152,23 @@ export const deleteSubject = async (req, res) => {
         };
     };
 };
+
+export const getSubject = async (req, res) => {
+    const subjectId = req.params.UUID;
+    if(subjectId) {
+        try{
+            const subject = await db.subject.findFirst({
+                where: {
+                    subId: subjectId
+                },
+                include:{
+                    subjectType:true,
+                    teacher:true
+                }
+            })
+            res.json(subject);
+        }catch(err){
+            console.error(err);
+        };
+    };
+};

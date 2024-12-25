@@ -40,6 +40,7 @@ export async function createExcelSubjectAttendence(objectInfo, subjectName) { //
             }
         }
 
+    
 
         let i = 1;
         const attendanceByPeriods = row.attendance.reduce((acc,attendance) => {
@@ -63,5 +64,3 @@ export async function createExcelSubjectAttendence(objectInfo, subjectName) { //
     reader.writeFile(workbook, `../public/${fileName}`, {compression:true});
     return fileName;
 };
-
-
