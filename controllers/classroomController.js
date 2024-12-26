@@ -127,3 +127,93 @@ export const getAllClassroomType = async (req,res) => {
         console.error(error);
     };
 }
+
+export const createClassroomType = async (req,res) => {
+    const body = req.body;
+    if(body){
+        try{
+            const classroomType = await db.classroomType.create({
+                data:{
+                    classTypeNameThai:body.classTypeNameThai,
+                    classTypeNameEng:body.classTypeNameEng,
+                }
+            })
+            return res.json({message:"Create Classroom Type Success"})
+
+        }catch(err){
+            console.error(err);
+        };
+    };
+};
+
+export const updateClassroomType = async (req,res) => {
+    const body = req.body;
+    if(body){
+        try{
+            const classroomType = await db.classroomType.update({
+                where:{
+                    classTypeId:body.classTypeId
+                },
+                data:{
+                    classTypeNameThai:body.classTypeNameThai,
+                    classTypeNameEng:body.classTypeNameEng,
+                }
+            })
+            return res.json({message:"Update Classroom Type Success"})
+
+        }catch(err){
+            console.error(err);
+        };
+    };
+};
+
+export const deleteClassroomType = async (req,res) => {
+    const uuid = req.params.uuid;
+    if(uuid){
+        try{
+            await db.classroomType.delete({
+                where:{
+                    classTypeId:uuid
+                }
+            });
+        }catch(err){
+            console.error(err)
+        };
+    };
+};
+
+export const createClassroomMember = async (req,res) => {
+    const body = req.body;
+    if(body){
+        try{
+            const classroomMember = await db.classroomMembers.create({
+                data:{
+                    classId:body.classId,
+                    stdId:body.stdId,
+                    stdNo:body.stdNo,
+                }
+            })
+            return res.json({message:"Create Classroom Member Success"})
+
+        }catch(err){
+            console.error(err);
+        };
+    };
+};
+
+export const deleteClassroomMember = async (req,res) => {
+    const uuid = req.params.uuid;
+    if(uuid){
+        try{
+            await db.classroomMember.delete({
+                where:{
+                    classRoomMemeberId:uuid
+                }
+            });
+        
+            res.json({message:"Delete Classroom Member Success"})
+        }catch(err){
+            console.error(err)
+        };
+    };
+};
