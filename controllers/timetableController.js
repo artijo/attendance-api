@@ -1,15 +1,38 @@
 import { time } from 'console';
 import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
+import { connect } from 'http2';
 
+
+// day: day,
+//                     timestart: timeStart,
+//                     timeend: timeEnd,
+//                     timelate: timeLate,
+//                     classroom: clasrroom,
+//                     subject: selectedSubject
 
 export const createTimetable = async (req, res) => {
-    const { classroomId, timetable } = req.body
-    if(classroomId && timetable){
+    const { day ,timestart ,timeend ,timelate , classroom, subject } = req.body;
+    
+    if(day && timestart && timeend && timelate && classroom && subject){
         try{
-            console.log(classroomId + timetable);
-        }catch(error){
-            console.log(error)
+            const timetable = await db.timetable.create({
+                data:{
+                    dayOfWeek: day,
+                    timeStart: timestart,
+                    timeEnd: timeend,
+                    timeLate : timelate,
+                    classroom: {
+                        connect: { classId : classroom}
+                    },
+                    subject : {
+                        connect: {subId: subject.subId}
+                    }
+                }
+            });
+            res.json(timetable);
+        }catch(err){
+            console.error(err);
         }
     };
 };
