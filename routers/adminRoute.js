@@ -4,7 +4,7 @@ import { login, checkAuth, getTokenformRefreshToken } from "../controllers/admin
 import {
     createStudent,getAllStudent,
     updateStudent, getStudent,
-    createStudentWithFile
+    createStudentWithFile, getStudentwithoutClassroom
  } from "../controllers/studentController.js";
 import {
     createTeacher, getAllTeacher,
@@ -29,6 +29,7 @@ router.get('/students', getAllStudent);
 router.post('/student', createStudent);
 router.put('/student',updateStudent);
 router.post('/students/bulk', createStudentWithFile);
+router.get('/students/withoutClassroom', getStudentwithoutClassroom);
 
 // teacher Management
 router.get('/teacher/:uuid', getTeacher); // ดึงข้อมูล teacher

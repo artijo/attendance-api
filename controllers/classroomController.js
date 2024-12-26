@@ -186,11 +186,11 @@ export const createClassroomMember = async (req,res) => {
     const body = req.body;
     if(body){
         try{
-            const classroomMember = await db.classroomMembers.create({
+            const classroomMember = await db.classroomMember.create({
                 data:{
+                    stdId:body.studentId,
                     classId:body.classId,
-                    stdId:body.stdId,
-                    stdNo:body.stdNo,
+                    stdNo:body.stdNo
                 }
             })
             return res.json({message:"Create Classroom Member Success"})

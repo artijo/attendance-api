@@ -214,3 +214,31 @@ export const updateStudent = async(req, res) => {
         };
     };
 };
+export const getStudentwithoutClassroom = async (req, res) => {
+    try {
+        const students = await db.student.findMany({
+            where: {
+                classroomMembers: {
+                    none: {}
+                }
+            },
+            select: {
+                stdId: true,
+                title: true,
+                fName: true,
+                lName: true,
+                email: true,
+                tel: true,
+                cityzenId: true
+            },
+            orderBy: {
+                stdId: 'asc'
+            }
+        });
+
+        res.status(200).json(students);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูลนักเรียน", error: error.message });
+    }
+};
