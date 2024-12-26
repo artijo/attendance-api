@@ -1,12 +1,10 @@
+import { time } from 'console';
 import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
 
 
 export const createTimetable = async (req, res) => {
     const { classroomId, timetable } = req.body
-
-
-
     if(classroomId && timetable){
         try{
             console.log(classroomId + timetable);
@@ -15,6 +13,7 @@ export const createTimetable = async (req, res) => {
         }
     };
 };
+
 
 
 
@@ -55,6 +54,45 @@ export const getTimeTableByRoom = async (req, res) => {
             res.json(dayOfWeek);
         }catch(error){
             console.log(error);
+        };
+    };
+};
+
+export const deleteTimetable =async (req, res) => {
+    const timetableId = req.params.timetableId;
+    if(timetableId){    
+        try{
+            const studyingTime = await db.studingTime.findMany({
+                where:{
+                    timetableId:timetableId
+                }
+            });
+
+            const studyTimeId = studyingTime.map((item) => item.studyTimeId);
+
+            const attendance = await db.attendance.deleteMany({
+                where:{
+                    studingTimeId:{
+                        in:studyTimeId
+                    }
+                }
+            })
+            
+            const studyingTimeDelete = await db.studingTime.deleteMany({    
+                where:{
+                    timetableId:timetableId
+                }
+            });
+
+            const timetable = await db.timetable.delete({
+                where:{
+                    timetableId:timetableId
+                }
+            });
+            
+            res.json("delete successfully!");
+        }catch(err){
+            console.error(err);
         };
     };
 };

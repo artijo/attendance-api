@@ -221,34 +221,34 @@ async function main() {
                 {
                   subId: subjectArrayId[0], // วิชา: GEN101
                   classId: classroomIdArray[0], // ห้อง: Class 101
-                  timeStart: "12:00:00",
-                  timeEnd: "15:00:00",
-                  timeLate: "14:15:00",
+                  timeStart: "08:40:00",
+                  timeEnd: "09:30:00",
+                  timeLate: "08:55:00",
                   dayOfWeek: 1, // Saturday
                 },
                 {
                   subId: subjectArrayId[1], // วิชา: MATH101
                   classId: classroomIdArray[0], // ห้อง: Class 101
-                  timeStart: "12:00:00",
-                  timeEnd: "16:00:00",
-                  timeLate: "15:15:00",
-                  dayOfWeek: 1, // Saturday
+                  timeStart: "09:30:00",
+                  timeEnd: "10:20:00",
+                  timeLate: "09:45:00",
+                  dayOfWeek: 2, // Saturday
                 },
                 {
                   subId: subjectArrayId[2], // วิชา: SCI101
                   classId: classroomIdArray[0], // ห้อง: Class 101
-                  timeStart: "12:00:00",
-                  timeEnd: "17:00:00",
-                  timeLate: "16:15:00",
-                  dayOfWeek: 1, // Saturday
+                  timeStart: "10:20:00",
+                  timeEnd: "11:10:00",
+                  timeLate: "10:35:00",
+                  dayOfWeek: 3, // Saturday
                 },
                 {
                   subId: subjectArrayId[3], // วิชา: ENG101
                   classId: classroomIdArray[0], // ห้อง: Class 101
-                  timeStart: "12:00:00",
-                  timeEnd: "18:00:00",
-                  timeLate: "17:15:00",
-                  dayOfWeek: 1, // Saturday
+                  timeStart: "11:10:00",
+                  timeEnd: "12:00:00",
+                  timeLate: "11:25:00",
+                  dayOfWeek: 4, // Saturday
                 },
               ];
               

@@ -172,3 +172,17 @@ export const getSubject = async (req, res) => {
         };
     };
 };
+
+export const getAllSubject = async (req, res) => {
+    try{
+        const subject = await db.subject.findMany({
+            include:{
+                subjectType:true,
+                teacher:true
+            }
+        });
+        res.json(subject);
+    }catch(err){
+        console.error(err);
+    };
+}

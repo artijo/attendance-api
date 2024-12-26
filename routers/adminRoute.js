@@ -14,8 +14,8 @@ import { createClassroom, getAllClassroom, getClassroom, getAllClassroomType, up
 import { getAllLeaders } from "../controllers/leaderController.js";
 
 import { featchDataForSeachbar } from "../controllers/adminController.js";
-import { getTimeTableByRoom } from "../controllers/timetableController.js";
-import { getSubject } from "../controllers/subjectController.js";
+import { getTimeTableByRoom, deleteTimetable } from "../controllers/timetableController.js";
+import { getSubject,getAllSubject} from "../controllers/subjectController.js";
 
 const router = Router();
 
@@ -49,9 +49,10 @@ router.get('/leaders', getAllLeaders); // ดึงข้อมูลทั้�
 router.get('/search', featchDataForSeachbar); 
 // timetable Management
 router.get('/timetableR', getTimeTableByRoom);
+router.delete('/timetable/:timetableId', deleteTimetable);
 // subject Management
 router.get('/subject/:UUID', getSubject )
-
+router.get('/subjects', getAllSubject);
 
 
 export default router;
