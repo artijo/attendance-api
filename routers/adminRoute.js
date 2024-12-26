@@ -10,7 +10,7 @@ import {
     createTeacher, getAllTeacher,
     updateTeacher, getTeacher
 } from "../controllers/teacherController.js";
-import { createClassroom, getAllClassroom, getClassroom, getAllClassroomType, updateClassroom } from "../controllers/classroomController.js";
+import { createClassroom, getAllClassroom, getClassroom, getAllClassroomType, updateClassroom, createClassroomType, createClassroomMember, deleteClassroomMember, deleteClassroomType, updateClassroomType } from "../controllers/classroomController.js";
 import { getAllLeaders } from "../controllers/leaderController.js";
 
 import { featchDataForSeachbar } from "../controllers/adminController.js";
@@ -42,6 +42,12 @@ router.post('/classroom', createClassroom); // สร้าง classroom
 router.put('/classroom', updateClassroom); // แก้ไขข้อมูล classroom
 router.get('/classroom/:uuid', getClassroom); // ดึงข้อมูล classroom
 router.get('/classrooms/types', getAllClassroomType); // ดึงข้อมูลประเภทของห้องเรียน
+router.post('/classroom/type', createClassroomType); // สร้างประเภทห้องเรียน
+router.put('/classroom/type', updateClassroomType); // แก้ไขประเภทห้องเรียน
+router.delete('/classroom/type/:uuid', deleteClassroomType); // ลบประเภทห้องเรียน
+router.post('/classroom/member', createClassroomMember); // เพิ่มสมาชิกห้องเรียน
+router.delete('/classroom/member/:uuid', deleteClassroomMember); // ลบสมาชิกห้องเรียน
+
 
 // leader Management
 router.get('/leaders', getAllLeaders); // ดึงข้อมูลทั้งหมด leader
