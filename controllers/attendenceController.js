@@ -4,7 +4,7 @@ import { DateTime } from 'luxon';
 
 export const studentAttendenceSubject = async (req, res) => { // เช็คชื่อเข้าเรียน
     const body = req.body;
-    const dtNow = DateTime.fromISO(body.attTimestamp, { zone: 'UTC' }).setZone('Asia/Bangkok');
+    const dtNow = DateTime.fromISO(body.attTimestamp, { zone: 'UTC' });
     let attStatusString = '';
     if(dtNow.minute <= Number(body.timeLate[1])){
         attStatusString = 'PRESENT'
@@ -24,19 +24,33 @@ export const studentAttendenceSubject = async (req, res) => { // เช็คช
                 }
             });
 
-            await db.attendance.create({
+            const attendance = await db.attendance.create({
                 data:{
-                    stdId:body.stdId,
-                    studingTimeId:body.studingTimeId,
+                    // stdId:body.stdId,
+                    student: {
+                        connect:{
+                            stdId:body.stdId
+                        }
+                    },
+                    studingTime: {
+                        connect: {
+                            studyTimeId: body.studingTimeId
+                        }
+                    },
+                    attMethod: {
+                        connect:{
+                            attMethodId: AttMethodId.attMethodId
+                        }
+                    },
                     attTimestamp:dtNow,
-                    attMethodId:AttMethodId.attMethodId,
                     attStatus:String(attStatusString),
                     latitute:body.latitude,
                     longitute:body.longtitude,
                     operatedBy: "Student"
                 }
             })
-            res.json({message : 0})
+            console.log(dtNow);
+            res.json(attendance);
         }catch(err){
             console.error(err);
             res.json({message : 1})

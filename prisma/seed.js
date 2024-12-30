@@ -224,7 +224,7 @@ async function main() {
                   timeStart: "08:40:00",
                   timeEnd: "09:30:00",
                   timeLate: "08:55:00",
-                  dayOfWeek: 1, // Saturday
+                  dayOfWeek: 5, // Saturday
                 },
                 {
                   subId: subjectArrayId[1], // วิชา: MATH101
@@ -232,7 +232,7 @@ async function main() {
                   timeStart: "09:30:00",
                   timeEnd: "10:20:00",
                   timeLate: "09:45:00",
-                  dayOfWeek: 2, // Saturday
+                  dayOfWeek: 5, // Saturday
                 },
                 {
                   subId: subjectArrayId[2], // วิชา: SCI101
@@ -240,7 +240,7 @@ async function main() {
                   timeStart: "10:20:00",
                   timeEnd: "11:10:00",
                   timeLate: "10:35:00",
-                  dayOfWeek: 3, // Saturday
+                  dayOfWeek: 5, // Saturday
                 },
                 {
                   subId: subjectArrayId[3], // วิชา: ENG101
@@ -248,7 +248,7 @@ async function main() {
                   timeStart: "11:10:00",
                   timeEnd: "12:00:00",
                   timeLate: "11:25:00",
-                  dayOfWeek: 4, // Saturday
+                  dayOfWeek: 5, // Saturday
                 },
               ];
               
@@ -263,16 +263,19 @@ async function main() {
               }
 
               for (const timetableId of timeTableIdArray) {
-                const timeStart = timetableId.timeStart.split(":").map(Number);
+                const formatTime = (time) => {
+                    const dt = DateTime.now();
+                    const utfString = `${dt.year}-${dt.month}-${dt.day}T${time}`;
+                    const timeInBangkok = DateTime.fromISO(utfString, { zone: 'UTC' });
+                    return timeInBangkok;
+                }
                
-                const timeInBangkok = DateTime.fromISO(timetableId.timeStart, { zone: 'UTC' }).setZone('Asia/Bangkok');
-               
-              
+                const timeInBangkok = DateTime.fromISO(timetableId.timeStart, { zone: 'UTC' })
                 // บันทึกลงฐานข้อมูล
                 const studingTime = await db.studingTime.create({
                   data: {
                     timetableId: timetableId.timetableId,
-                    studingTimeDate: timeInBangkok, // บันทึกในรูปแบบ ISO-8601
+                    studingTimeDate: formatTime(timetableId.timeStart), // บันทึกในรูปแบบ ISO-8601
                   },
                 });
                 console.log("Studing Time Created:", studingTime);

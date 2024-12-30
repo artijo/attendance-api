@@ -174,7 +174,7 @@ export const getTimeTable = async (req, res) => { // ใช้สำหรับ
                         }
                     }
                 });
-                console.log(st)
+                // console.log(st)
                 arrayOfTimeToAttendence.push(...st);
             };
             res.json(arrayOfTimeToAttendence);
