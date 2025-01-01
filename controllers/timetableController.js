@@ -1,44 +1,59 @@
-import { time } from 'console';
 import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
-import { connect } from 'http2';
-
-
-// day: day,
-//                     timestart: timeStart,
-//                     timeend: timeEnd,
-//                     timelate: timeLate,
-//                     classroom: clasrroom,
-//                     subject: selectedSubject
 
 export const createTimetable = async (req, res) => {
-    const { day ,timestart ,timeend ,timelate , classroom, subject } = req.body;
-    
-    if(day && timestart && timeend && timelate && classroom && subject){
-        try{
-            const timetable = await db.timetable.create({
-                data:{
-                    dayOfWeek: day,
-                    timeStart: timestart,
-                    timeEnd: timeend,
-                    timeLate : timelate,
-                    classroom: {
-                        connect: { classId : classroom}
-                    },
-                    subject : {
-                        connect: {subId: subject.subId}
+    const { day, timestart, timeend, timelate, classroom, subject } = req.body;
+    if (day && timestart && timeend && timelate && classroom && subject) {
+        try {
+            const existingTimetable = await db.timetable.findFirst({
+                where: {
+                    AND:{
+                        classId: classroom,
+                        dayOfWeek: day,
+                        timeStart: timestart,
+                        timeEnd: timeend,
+                        timeLate: timelate,
                     }
                 }
+                
             });
+            let timetable;
+            if (existingTimetable !== null) {
+                timetable = await db.timetable.update({
+                    where: {
+                        timetableId: existingTimetable.timetableId
+                    },
+                    data: {
+                        subject: {
+                            connect: { subId: subject.subId }
+                        }
+                    }
+                });
+            } else {
+                timetable = await db.timetable.create({
+                    data: {
+                        dayOfWeek: day,
+                        timeStart: timestart,
+                        timeEnd: timeend,
+                        timeLate: timelate,
+                        classroom: {
+                            connect: { classId: classroom }
+                        },
+                        subject: {
+                            connect: { subId: subject.subId }
+                        }
+                    }
+                });
+            }
             res.json(timetable);
-        }catch(err){
+        } catch (err) {
             console.error(err);
+            res.status(500).json({ error: "An error occurred while creating the timetable." });
         }
-    };
+    } else {
+        res.status(400).json({ error: "Invalid input data." });
+    }
 };
-
-
-
 
 
 export const getTimeTableByRoom = async (req, res) => {
@@ -53,6 +68,55 @@ export const getTimeTableByRoom = async (req, res) => {
                     {dayOfWeek : 'asc'},
                     {timeStart : 'asc'}
                 ],
+                select:{
+                    timetableId:true,
+                    dayOfWeek:true,
+                    timeStart:true,
+                    timeEnd:true,
+                    timeLate:true,
+                    subId:true,
+                    classId:true,
+                    classroom:{
+                        select:{
+                            classId:true,
+                            classLevel:true,
+                            classRoom:true,
+                            academicYear:true,
+                            semester:true,
+                            leader:{
+                                select:{
+                                    ldrId:true,
+                                    fName:true,
+                                    lName:true,
+                                }
+                            },
+                            classroomType:{
+                                select:{
+                                    classTypeId:true,
+                                    classTypeNameEng:true,
+                                    classTypeNameThai:true,
+                                }
+                            }
+
+                        }
+                    },
+                    subject:{
+                        select:{
+                            subId:true,
+                            subNameEng:true,
+                            subNameThai:true,
+                            subCode:true,
+                            subCredit:true,
+                            teacher:{
+                                select:{
+                                    tchId:true,
+                                    fName:true,
+                                    lName:true,
+                                }
+                            }
+                        }
+                    }
+                }
             });
 
             const dayOfWeek = {
@@ -77,7 +141,10 @@ export const getTimeTableByRoom = async (req, res) => {
             res.json(dayOfWeek);
         }catch(error){
             console.log(error);
+            res.status(500).json({ error: "error qurey timetable." });
         };
+    }else {
+        res.status(400).json({ error: "Invalid input data." });
     };
 };
 
