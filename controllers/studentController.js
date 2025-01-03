@@ -1,7 +1,5 @@
 import db from '../prisma/client.js';
 
-
-
 export const createStudent = async (req, res) => { // สร้างรายชื่อนักเรียนรายบุคคล
     let body = req.body;
     if (body.cityzenId === "") body.cityzenId = null;
@@ -39,7 +37,6 @@ export const createStudentWithFile = async (req, res) => {
             data: allStudents
             .filter(item => item.studentId && item.studentId.trim() !== '')
             .map((item) => ({
-                // if studentId is not provided, skiploop
                 stdId: item.studentId,
                 title: item.title === "เด็กชาย" ? "BOY" : 
                        item.title === "เด็กหญิง" ? "GIRL" : 
@@ -53,32 +50,8 @@ export const createStudentWithFile = async (req, res) => {
             skipDuplicates: true
         });
 
-        // for (const item of allStudents) {
-        //     // ดึงข้อมูล studentId
-        //     // const student = await db.student.findUnique({
-        //     //     where: { stdId: item.studentId },
-        //     // });
-        //     if (!item.studentId || item.studentId.trim() === '') continue;
-
-        //     // ดึงข้อมูลห้องเรียน
-        //     const classroom = await db.classrooms.findFirst({
-        //         where: {
-        //             classLevel: parseInt(item.class),
-        //             classRoom: parseInt(item.room),
-        //         },
-        //     });
-
-        //     // ตรวจสอบว่าทั้ง `student` และ `classroom` มีอยู่
-        //     if (student && classroom) {
-        //         await db.classroomMember.create({
-        //             data: {
-        //                 student: {connect: {stdId: item.studentId}},
-        //                 classroom: {connect: {classId: classroom.classId}},
-        //                 stdNo: item.no.toString(),
-        //             }
-        //         });
-        //     }
-        // }
+        // Get current academic year
+        const currentYear = new Date().getFullYear() + 543; // Convert to Buddhist Era
 
         const classrooms = await db.classrooms.findMany();
         const classroomMap = new Map();
@@ -86,6 +59,29 @@ export const createStudentWithFile = async (req, res) => {
             const key = `${classroom.classLevel}-${classroom.classRoom}`;
             classroomMap.set(key, classroom.classId);
         });
+
+        // Create missing classrooms
+        for (const student of allStudents) {
+            if (!student.class || !student.room) continue;
+            
+            const key = `${parseInt(student.class)}-${parseInt(student.room)}`;
+            if (!classroomMap.has(key)) {
+                const newClassroom = await db.classrooms.create({
+                    data: {
+                        classLevel: parseInt(student.class),
+                        classRoom: parseInt(student.room),
+                        academicYear: currentYear,
+                        semester: 1,
+                        classTypeId: {
+                            connect: {
+                                classTypeId: 1
+                            }
+                        }
+                    }
+                });
+                classroomMap.set(key, newClassroom.classId);
+            }
+        }
 
         const classroomMembers = allStudents
             .filter(item => item.studentId && item.studentId.trim() !== '')

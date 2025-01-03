@@ -49,6 +49,7 @@ export async function getTokenformRefreshToken(req, res) {
         return res.json({ token });
     }catch(err){
         console.error(err);
+        return res.status(401).json({ status: 'error', message: 'Invalid token' });
     }
 }
 
