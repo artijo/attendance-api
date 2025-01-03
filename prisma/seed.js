@@ -93,6 +93,7 @@ async function main() {
                 data: {
                     classTypeNameThai: crType.cNameTH,
                     classTypeNameEng: crType.cNameEng,
+                    ...(crType.cTypeId && { classTypeId: crType.cTypeId })
                 },
             });
             console.log(`Classroom type created: สาย ${crType.cNameTH}`);
