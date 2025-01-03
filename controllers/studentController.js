@@ -66,17 +66,23 @@ export const createStudentWithFile = async (req, res) => {
             
             const key = `${parseInt(student.class)}-${parseInt(student.room)}`;
             if (!classroomMap.has(key)) {
+                // Get classType for Unspecified
+                const defaultClassType = await db.classroomType.findFirst({
+                    where: {
+                        OR: [
+                            { classTypeNameEng: "Unspecified" },
+                            { classTypeNameThai: "ไม่ระบุ" }
+                        ]
+                    }
+                });
+                
                 const newClassroom = await db.classrooms.create({
                     data: {
                         classLevel: parseInt(student.class),
                         classRoom: parseInt(student.room),
                         academicYear: currentYear,
                         semester: 1,
-                        classTypeId: {
-                            connect: {
-                                classTypeId: 1
-                            }
-                        }
+                        classTypeId: defaultClassType.classTypeId
                     }
                 });
                 classroomMap.set(key, newClassroom.classId);
