@@ -16,6 +16,7 @@ import { getAllLeaders } from "../controllers/leaderController.js";
 import { featchDataForSeachbar } from "../controllers/adminController.js";
 import { getTimeTableByRoom, deleteTimetable, createTimetable } from "../controllers/timetableController.js";
 import { getSubject,getAllSubject} from "../controllers/subjectController.js";
+import { getHoliday, createStuingCalendar } from "../controllers/stuyingTimeController.js";
 
 const router = Router();
 
@@ -59,8 +60,11 @@ router.get('/timetableR', getTimeTableByRoom);
 router.post('/timetable', createTimetable);
 router.delete('/timetable/:timetableId', deleteTimetable);
 // subject Management
-router.get('/subject/:UUID', getSubject )
+router.get('/subject/:UUID', getSubject);
 router.get('/subjects', getAllSubject);
 
+//stuyingTime Management
+router.get('/holiday', getHoliday);
+router.post('/calendar', createStuingCalendar);
 
 export default router;
