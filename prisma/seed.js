@@ -218,70 +218,69 @@ async function main() {
                 subjectArrayId.push(subjectCreate.subId);
             };
 
-            const timetables = [
-                {
-                  subId: subjectArrayId[0], // วิชา: GEN101
-                  classId: classroomIdArray[0], // ห้อง: Class 101
-                  timeStart: "08:40:00",
-                  timeEnd: "09:30:00",
-                  timeLate: "08:55:00",
-                  dayOfWeek: 5, // Saturday
-                },
-                {
-                  subId: subjectArrayId[1], // วิชา: MATH101
-                  classId: classroomIdArray[0], // ห้อง: Class 101
-                  timeStart: "09:30:00",
-                  timeEnd: "10:20:00",
-                  timeLate: "09:45:00",
-                  dayOfWeek: 5, // Saturday
-                },
-                {
-                  subId: subjectArrayId[2], // วิชา: SCI101
-                  classId: classroomIdArray[0], // ห้อง: Class 101
-                  timeStart: "10:20:00",
-                  timeEnd: "11:10:00",
-                  timeLate: "10:35:00",
-                  dayOfWeek: 5, // Saturday
-                },
-                {
-                  subId: subjectArrayId[3], // วิชา: ENG101
-                  classId: classroomIdArray[0], // ห้อง: Class 101
-                  timeStart: "11:10:00",
-                  timeEnd: "12:00:00",
-                  timeLate: "11:25:00",
-                  dayOfWeek: 5, // Saturday
-                },
-              ];
+            // const timetables = [
+            //     {
+            //       subId: subjectArrayId[0], // วิชา: GEN101
+            //       classId: classroomIdArray[0], // ห้อง: Class 101
+            //       timeStart: "08:40:00",
+            //       timeEnd: "09:30:00",
+            //       timeLate: "08:55:00",
+            //       dayOfWeek: 5, // Saturday
+            //     },
+            //     {
+            //       subId: subjectArrayId[1], // วิชา: MATH101
+            //       classId: classroomIdArray[0], // ห้อง: Class 101
+            //       timeStart: "09:30:00",
+            //       timeEnd: "10:20:00",
+            //       timeLate: "09:45:00",
+            //       dayOfWeek: 5, // Saturday
+            //     },
+            //     {
+            //       subId: subjectArrayId[2], // วิชา: SCI101
+            //       classId: classroomIdArray[0], // ห้อง: Class 101
+            //       timeStart: "10:20:00",
+            //       timeEnd: "11:10:00",
+            //       timeLate: "10:35:00",
+            //       dayOfWeek: 5, // Saturday
+            //     },
+            //     {
+            //       subId: subjectArrayId[3], // วิชา: ENG101
+            //       classId: classroomIdArray[0], // ห้อง: Class 101
+            //       timeStart: "11:10:00",
+            //       timeEnd: "12:00:00",
+            //       timeLate: "11:25:00",
+            //       dayOfWeek: 5, // Saturday
+            //     },
+            //   ];
               
               
-              const timeTableIdArray = [];
-              for (const timetable of timetables) {
-                const timetableCreate = await prisma.timetable.create({
-                  data: timetable,
-                });
-                timeTableIdArray.push(timetableCreate);
-                console.log(`Timetable created for Subject ${timetable.subId} on Day ${timetable.dayOfWeek}`);
-              }
+            //   const timeTableIdArray = [];
+            //   for (const timetable of timetables) {
+            //     const timetableCreate = await prisma.timetable.create({
+            //       data: timetable,
+            //     });
+            //     timeTableIdArray.push(timetableCreate);
+            //     console.log(`Timetable created for Subject ${timetable.subId} on Day ${timetable.dayOfWeek}`);
+            //   }
 
-              for (const timetableId of timeTableIdArray) {
-                const formatTime = (time) => {
-                    const dt = DateTime.now();
-                    const utfString = `${dt.year}-${dt.month}-${dt.day}T${time}`;
-                    const timeInBangkok = DateTime.fromISO(utfString, { zone: 'UTC' });
-                    return timeInBangkok;
-                }
+            //   for (const timetableId of timeTableIdArray) {
+            //     const formatTime = (time) => {
+            //         const dt = DateTime.now();
+            //         const utfString = `${dt.year}-${dt.month}-${dt.day}T${time}`;
+            //         const timeInBangkok = DateTime.fromISO(utfString, { zone: 'UTC' });
+            //         return timeInBangkok;
+            //     }
                
-                const timeInBangkok = DateTime.fromISO(timetableId.timeStart, { zone: 'UTC' })
-                // บันทึกลงฐานข้อมูล
-                const studingTime = await db.studingTime.create({
-                  data: {
-                    timetableId: timetableId.timetableId,
-                    studingTimeDate: formatTime(timetableId.timeStart), // บันทึกในรูปแบบ ISO-8601
-                  },
-                });
-                console.log("Studing Time Created:", studingTime);
-              }
-              
+            //     const timeInBangkok = DateTime.fromISO(timetableId.timeStart, { zone: 'UTC' })
+            //     // บันทึกลงฐานข้อมูล
+            //     const studingTime = await db.studingTime.create({
+            //       data: {
+            //         timetableId: timetableId.timetableId,
+            //         studingTimeDate: formatTime(timetableId.timeStart), // บันทึกในรูปแบบ ISO-8601
+            //       },
+            //     });
+            //     console.log("Studing Time Created:", studingTime);
+            //   }
               const attendanceMethods = [
                 {
                     attMethodName:"ยังไม่ลงชื่อ",
