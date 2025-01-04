@@ -56,23 +56,27 @@ export const getAllTeacher = async (req, res) => {
 
 export const updateTeacher = async (req, res) => {
     const body = req.body;
-    const password = await hashPassword(body.password) ;// รหัสผ่่านที่ผ่านการเข้ารหัสแล้วเรียบร้อยแล้ว
+    const {uuid} = req.params;
     if(body){
         try{
+            let updateData = {
+                fName: body.fName,
+                lName: body.lName,
+                email: body.email,
+                tel: body.tel,
+                tchCode: body.tchCode
+            };
+            
+            if (body.password) {
+                const hashedPassword = await hashPassword(body.password);
+                updateData.password = hashedPassword;
+            }
+
             const teacher = await db.teacher.update({
-                where:{
-                    tchId:body.tchId
+                where: {
+                    tchId: uuid
                 },
-                data:{
-                    fName:body.fName,
-                    lName:body.lName,
-                    password:password,
-                    email:body.email,
-                    tel:body.tel,
-                    deptId:body.departmentId,
-                    classId:body.classroomId,
-                    tchCode:body.tchCode
-                }
+                data: updateData
             });
             res.json(teacher);
         }catch(err){
