@@ -28,8 +28,6 @@ export const createTeacher = async (req, res) => {
                     password:password,
                     email:body.email,
                     tel:body.tel,
-                    deptId:body.departmentId,
-                    classId:body.classroomId,
                     tchCode:body.tchCode
                 }
             });
