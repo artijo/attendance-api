@@ -138,6 +138,10 @@ model Classrooms {
   classTypeId   String
   classroomType ClassroomType              @relation(fields: [classTypeId], references: [classTypeId])
   classroomMembers ClassroomMember[]
+
+  //holiday 
+  holidays      Holiday[]
+
   // timetable     Timetable?
   timetable     Timetable[]
   teacher       Teacher[]
@@ -366,6 +370,19 @@ model EditActivityParticipate {
   updatedAt        DateTime @updatedAt
 }
 
+model Holiday{
+  holyDayId String @id @default(uuid())
+  holyDayDate DateTime
+  holyDayName String
+
+  classroom Classrooms @relation(fields: [classId], references: [classId])
+  classId String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
 model Admin {
   adminId   String   @id @default(uuid())
   username  String   @unique
@@ -397,3 +414,5 @@ enum EnumNameTitle {
   MR // นาย
   MS // นางสาว
 }
+
+
