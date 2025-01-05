@@ -16,7 +16,8 @@ import { getAllLeaders } from "../controllers/leaderController.js";
 import { featchDataForSeachbar } from "../controllers/adminController.js";
 import { getTimeTableByRoom, deleteTimetable, createTimetable } from "../controllers/timetableController.js";
 import { getSubject,getAllSubject} from "../controllers/subjectController.js";
-import { getHoliday, createStuingCalendar } from "../controllers/stuyingTimeController.js";
+import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar } from "../controllers/stuyingTimeController.js";
+import { get } from "http";
 
 const router = Router();
 
@@ -64,7 +65,10 @@ router.get('/subject/:UUID', getSubject);
 router.get('/subjects', getAllSubject);
 
 //stuyingTime Management
-router.get('/holiday', getHoliday);
-router.post('/calendar', createStuingCalendar);
+router.get('/holiday', getHoliday); // get holiday ราชการ
+router.post('/holiday', createHoliday); //สร้างวันหยุด 
+router.get('/holidayCalendar', getHolidayCalendar); //ดึงวันหยุดทั้งหมด
+router.post('/calendar', createStuingCalendar); //สร้างตารางเรียน 
+
 
 export default router;

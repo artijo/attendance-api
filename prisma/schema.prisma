@@ -371,15 +371,20 @@ model EditActivityParticipate {
 }
 
 model Holiday{
-  holyDayId String @id @default(uuid())
-  holyDayDate DateTime
-  holyDayName String
-
+  holidayId String @id @default(uuid())
+  startHolidayDate String
+  endHolidayDate String 
+  holidayName String
+  howAddType holidayType
   classroom Classrooms @relation(fields: [classId], references: [classId])
   classId String
-  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum holidayType {
+  RATCHAKHAN // ราชกาล
+  SCHOOL // วันหยุดของโรงเรียนเอง
 }
 
 

@@ -13,7 +13,6 @@ export const getHoliday = async (req, res) => {
     }
 }
 
-
 export const createStuingCalendar = async (req, res) => {
     const { classroomId, termStart, termEnd, holiday } = req.body;
     try{
@@ -86,6 +85,71 @@ export const createStuingCalendar = async (req, res) => {
     }
 }
 
+export const createHoliday = async (req, res) => {
+    const { holiday, classroomId } = req.body;
+    try{
+        for(const item of holiday){
+            const holiday = await db.holiday.create({
+                data:{
+                    holidayName:item.SUMMARY,
+                    startHolidayDate:item["DTSTART;VALUE=DATE"], // YYYYMMDD
+                    endHolidayDate:item["DTEND;VALUE=DATE"], // YYYYMMDD
+                    howAddType:item.TYPE,
+                    classId:classroomId
+                }
+            });
+        }
+        res.json({msg:"Create Holiday Success"});
+    }catch(err){
+        console.error(err);
+        res.json(err);
+    }
+};
+
+export const getHolidayCalendar = async (req, res) => {
+    try{
+
+        const colorOfType = {
+            "ratchakhan":"#FF0000",
+            "school":"#0000FF",
+        };
+
+        
+
+        const holiday = await db.holiday.findMany({
+            orderBy: [
+                {startHolidayDate : 'asc'},
+                {endHolidayDate : 'asc'},
+            ]
+        });
+    
+        const newHoliday = holiday.map((item) => {
+            let sdate = DateTime.fromISO(item.startHolidayDate + "T00:00:00", { zone: 'UTC' });
+            let edate = DateTime.fromISO(item.endHolidayDate + "T23:59:59", { zone: 'UTC' });
+            if(item.startHolidayDate === item.endHolidayDate){
+                return {
+                    title:item.holidayName,
+                    start:sdate,
+                    end:edate,
+                    color:item.howAddType === "RATCHAKHAN" ? colorOfType.ratchakhan : colorOfType.school,
+                }
+            }else{
+                return {
+                    title:item.holidayName,
+                    start:sdate,
+                    end:edate,
+                    color:item.howAddType === "RATCHAKHAN" ? colorOfType.ratchakhan : colorOfType.school,
+                }
+            }
+            
+        });
+        console.log(newHoliday);
+        res.json(newHoliday);
+    }catch(err){
+        console.error(err);
+        res.json(err);
+    }
+}
 
 
 
