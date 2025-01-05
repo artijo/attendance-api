@@ -37,7 +37,7 @@ router.get('/students/withoutClassroom', getStudentwithoutClassroom);
 router.get('/teacher/:uuid', getTeacher); // ดึงข้อมูล teacher
 router.get('/teachers', getAllTeacher); // ดึงข้อมูลทั้งหมด teacher
 router.post('/teacher', createTeacher); // สร้าง teacher
-router.put('/teacher', updateTeacher); // แก้ไขข้อมูล teacher
+router.put('/teacher/:uuid', updateTeacher); // แก้ไขข้อมูล teacher
 
 // classroom Management
 router.get('/classrooms', getAllClassroom); // ดึงข้อมูลทั้งหมด classroom
