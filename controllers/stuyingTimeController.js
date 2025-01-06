@@ -14,13 +14,17 @@ export const getHoliday = async (req, res) => {
 }
 
 export const createStuingCalendar = async (req, res) => {
-    const { classroomId, termStart, termEnd, holiday } = req.body;
+    const { semester, termStart, termEnd, holiday } = req.body;
     try{
         const dateTimeStart = DateTime.fromISO(termStart, { zone: 'UTC' }); //YYYY-MM-DD T HH:MM:SS Z
         const dateTimeEnd = DateTime.fromISO(termEnd, { zone: 'UTC' }); //YYYY-MM-DD T HH:MM:SS Z
+
         const timetables = await db.timetable.findMany({
             where:{
-                classId:classroomId
+                classroom:{
+                    academicYear: parseInt(semester.split("|")[1]),
+                    semester: parseInt(semester.split("|")[0])
+                }
             },
             orderBy: [
                 {dayOfWeek : 'asc'},
@@ -53,10 +57,10 @@ export const createStuingCalendar = async (req, res) => {
             }
         }
 
-        const schoolCalendarDays = calendar.filter((item) => { //เอาวันที่ที่เรียนออกจากวันหยุด
+        const schoolCalendarDays = calendar.filter((item) => { //เอาแค่วันที่มีเรียน
             return !calendarHoliday.includes(item);
         });
-        
+
         
         for(const timetable of timetables) {
             for(const day of schoolCalendarDays){
@@ -69,13 +73,15 @@ export const createStuingCalendar = async (req, res) => {
                         hour: formatTime(timetable.timeStart)[0], 
                         minute: formatTime(timetable.timeStart)[1], 
                         second: 0 }, { zone: 'UTC' }
-                    );
-                const studingTime = await db.studingTime.create({
-                    data:{
-                        timetableId:timetable.timetableId,
-                        studingTimeDate:setTime,
-                    }
-                });
+                );
+                if(time.weekday == timetable.dayOfWeek) {
+                    const studingTime = await db.studingTime.create({
+                        data:{
+                            timetableId:timetable.timetableId,
+                            studingTimeDate:setTime,
+                        }
+                    });
+                }
             }
         }
         res.json({msg:"Create Studing Calendar Success"});
@@ -86,18 +92,27 @@ export const createStuingCalendar = async (req, res) => {
 }
 
 export const createHoliday = async (req, res) => {
-    const { holiday, classroomId } = req.body;
+    const { holiday, semester } = req.body;
     try{
-        for(const item of holiday){
-            const holiday = await db.holiday.create({
-                data:{
-                    holidayName:item.SUMMARY,
-                    startHolidayDate:item["DTSTART;VALUE=DATE"], // YYYYMMDD
-                    endHolidayDate:item["DTEND;VALUE=DATE"], // YYYYMMDD
-                    howAddType:item.TYPE,
-                    classId:classroomId
-                }
-            });
+        const classrooms  = await db.classrooms.findMany({
+            where:{
+                academicYear: parseInt(semester.split("|")[1]),
+                semester: parseInt(semester.split("|")[0])
+            }
+        });
+
+        for(const classroom of classrooms) {
+            for(const item of holiday){
+                const holiday = await db.holiday.create({
+                    data:{
+                        holidayName:item.SUMMARY,
+                        startHolidayDate:item["DTSTART;VALUE=DATE"], // YYYYMMDD
+                        endHolidayDate:item["DTEND;VALUE=DATE"], // YYYYMMDD
+                        howAddType:item.TYPE,
+                        classId:classroom.classId
+                    }
+                });
+            }
         }
         res.json({msg:"Create Holiday Success"});
     }catch(err){
@@ -106,7 +121,62 @@ export const createHoliday = async (req, res) => {
     }
 };
 
+export const getStudyCalendar = async (req, res) => {
+    const classroomId = req.query.classroomId
+    try{
+        const timetable = await db.timetable.findMany({
+            where: {
+                classId: classroomId
+            }
+        })
+
+        let timetableId = timetable.map((item) => {
+            return (
+                item.timetableId
+            )
+        })
+
+        const stuydingTime = await db.studingTime.findMany({
+            where:{
+                timetableId:{
+                    in:timetableId
+                }
+            },
+            select: {
+                studyTimeId:true,
+                studingTimeDate:true,
+                timetable: {
+                    select:{
+                        subject:{
+                            select:{
+                                subCode: true
+                            }
+                        }
+                    }
+                }
+            }
+        })
+        
+        const newCalendar = stuydingTime.map((item) => {
+            // console.log(item)
+            // let sdate = DateTime.fromISO(item.startHolidayDate + "T00:00:00", { zone: 'UTC' });
+            // let edate = DateTime.fromISO(item.endHolidayDate + "T23:59:59", { zone: 'UTC' });
+            return {
+                title:item.timetable.subject.subCode,
+                date:item.studingTimeDate,
+                color:"##708090",
+            }
+        });
+        res.json(newCalendar);
+    }catch(err){
+        console.error(err);
+        res.json(err);
+    }
+}
+
+
 export const getHolidayCalendar = async (req, res) => {
+    const classroomId = req.query.classroomId
     try{
 
         const colorOfType = {
@@ -114,9 +184,10 @@ export const getHolidayCalendar = async (req, res) => {
             "school":"#0000FF",
         };
 
-        
-
         const holiday = await db.holiday.findMany({
+            where: {
+                classId: classroomId
+            },
             orderBy: [
                 {startHolidayDate : 'asc'},
                 {endHolidayDate : 'asc'},
@@ -143,7 +214,6 @@ export const getHolidayCalendar = async (req, res) => {
             }
             
         });
-        console.log(newHoliday);
         res.json(newHoliday);
     }catch(err){
         console.error(err);
