@@ -40,8 +40,8 @@ export const selectSubjectType = async (req, res) => {
 
 export const getAllSubjectType = async (req, res) => {
     try{
-        const subjectArrayType = await db.subjectType.findMany({});
-        res.json(subjectArrayType);
+        const subjectType = await db.subjectType.findMany();
+        res.json(subjectType);
     }catch(err){
         console.error(err);
         res.json(err)
