@@ -166,7 +166,8 @@ export const getStudent = async (req, res) => {
                         include:{
                             classroom:true
                         }
-                    }
+                    },
+                    parent:true
                 }
             });
             // console.log(student);
