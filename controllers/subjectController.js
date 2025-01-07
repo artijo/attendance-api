@@ -99,7 +99,7 @@ export const createSubject = async (req, res) => {
                     subCode:body.subCode,
                     subNameThai:body.subNameThai,
                     subNameEng:body.subNameEng,
-                    subCredit:body.subCredit,
+                    subCredit:parseInt(body.subCredit),
                     tchId:body.tchId,
                     subTypeId:body.subTypeId
                 }
