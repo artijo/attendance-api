@@ -114,17 +114,18 @@ export const createSubject = async (req, res) => {
 
 export const editSubject = async (req, res) => {
     const body = req.body;
+    const {UUID} = req.params;
     if(body) {
         try{
             const subject = await db.subject.update({
                 where:{
-                    subId: body.UUID
+                    subId: UUID
                 },
                 data:{
                     subCode:body.subCode,
                     subNameEng:body.subNameEng,
                     subNameThai:body.subNameThai,
-                    subCredit:body.subCredit,
+                    subCredit:parseInt(body.subCredit),
                     tchId:body.tchId,
                     subTypeId:body.subTypeId
                 }
