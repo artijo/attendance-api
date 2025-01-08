@@ -217,3 +217,38 @@ export const deleteClassroomMember = async (req,res) => {
         };
     };
 };
+
+export const getAcademicYearClassroom = async(req, res) => {
+    function semesterSortUnqiueData(VALUE) {
+        const uniqueData = [];
+        if(VALUE) {
+            const semesterMap = VALUE.map((items) => {
+                return {semester: items.semester, academicYear: items.academicYear}
+            });  
+            for(const item of semesterMap) {
+                let found = uniqueData.some(
+                    (uniqueData) => {
+                        uniqueData.semester === item.semester &&
+                        uniqueData.academicYear === item.academicYear  
+                    }
+                          
+                );
+                if (!found) {
+                    uniqueData.push(item);
+                }
+            };
+            return uniqueData;
+        };
+        return [];
+    }
+    try{
+        const classrooms = await db.classrooms.findMany({
+            orderBy:{
+                academicYear:'asc'
+            }
+        })
+        res.json(semesterSortUnqiueData(classrooms));
+    }catch(err){
+        console.error(err)
+    }
+}

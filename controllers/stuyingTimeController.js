@@ -164,7 +164,7 @@ export const getStudyCalendar = async (req, res) => {
             return {
                 title:item.timetable.subject.subCode,
                 date:item.studingTimeDate,
-                color:"##708090",
+                color:"#708090",
             }
         });
         res.json(newCalendar);
@@ -221,5 +221,101 @@ export const getHolidayCalendar = async (req, res) => {
     }
 }
 
+export const getHolidayCalendarList = async (req, res) => {
+    const body = req.body;
+    const semester = body.semester;
+    const academicYear = body.academicYear;
 
+    function uniqueData(VALUE) {
+        const uniqueData = [];
+        if(VALUE) {
+            const semesterMap = VALUE.map((items) => {
+                return {holidayName: items.holidayName, sDate: items.startHolidayDate, eDate: items.endHolidayDate }
+            });  
+            for(const item of semesterMap) {
+                let found = uniqueData.some(
+                    (uniqueData) => {
+                        uniqueData.holidayName === item.holidayName &&
+                        uniqueData.startHolidayDate === item.startHolidayDate &&
+                        uniqueData.endHolidayDate === item.endHolidayDate  
+                    }
+                );
+                if (!found) {
+                    uniqueData.push(item);
+                }
+            };
+            return uniqueData;
+        };
+        return [];
+    }
+
+    if(body) {
+        try{
+            const classrooms = await db.classrooms.findMany({
+                where:{
+                    AND:{
+                        semester:semester,
+                        academicYear:academicYear
+                    }
+                },
+                select:{
+                    classId:true
+                }
+            })
+
+            const holiday = await db.holiday.findMany({
+                where:{
+                    classId:{
+                        in:[...classrooms.map(item => item.classId)]
+                    }
+                },
+                orderBy: {
+                    startHolidayDate:'asc'
+                }
+            })
+            console.log(uniqueData(holiday));
+            res.json(uniqueData(holiday));
+        }catch(err){
+            console.error(err);
+        };
+    };
+    
+};
+
+export const deleteHoliday = async (req, res) => {
+    const { holidayName, sDate, eDate, semester, academicYear} = req.body;
+    try{
+        const classrooms  = await db.classrooms.findMany({
+            where:{
+                academicYear: parseInt(academicYear),
+                semester: parseInt(semester),
+            }
+        });
+
+        const holiday = await db.holiday.findMany({
+            where:{
+                AND:{
+                        classId:{
+                            in:[...classrooms.map(item => item.classId)]
+                        },
+                        holidayName:holidayName,
+                        startHolidayDate:sDate,
+                        endHolidayDate:eDate 
+                } 
+            }
+        });
+
+        for(const item of holiday){
+            const deleteHoliday = await db.holiday.delete({
+                where:{
+                    holidayId:item.holidayId
+                }
+            });
+        };
+        res.status(200).json({msg:"Delete Holiday Success"});
+    }catch(err){
+        console.error(err);
+        res.status(500).json(err);
+    }
+};
 
