@@ -50,7 +50,7 @@ router.put('/classroom', updateClassroom); // แก้ไขข้อมูล 
 router.get('/classroom/:uuid', getClassroom); // ดึงข้อมูล classroom
 router.get('/classrooms/types', getAllClassroomType); // ดึงข้อมูลประเภทของห้องเรียน
 router.post('/classroom/type', createClassroomType); // สร้างประเภทห้องเรียน
-router.put('/classroom/type', updateClassroomType); // แก้ไขประเภทห้องเรียน
+router.put('/classroom/type/:uuid', updateClassroomType); // แก้ไขประเภทห้องเรียน
 router.delete('/classroom/type/:uuid', deleteClassroomType); // ลบประเภทห้องเรียน
 router.post('/classroom/member', createClassroomMember); // เพิ่มสมาชิกห้องเรียน
 router.delete('/classroom/member/:uuid', deleteClassroomMember); // ลบสมาชิกห้องเรียน

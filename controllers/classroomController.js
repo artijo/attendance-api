@@ -148,11 +148,12 @@ export const createClassroomType = async (req,res) => {
 
 export const updateClassroomType = async (req,res) => {
     const body = req.body;
+    const uuid = req.params.uuid;
     if(body){
         try{
             const classroomType = await db.classroomType.update({
                 where:{
-                    classTypeId:body.classTypeId
+                    classTypeId:uuid
                 },
                 data:{
                     classTypeNameThai:body.classTypeNameThai,
@@ -176,6 +177,7 @@ export const deleteClassroomType = async (req,res) => {
                     classTypeId:uuid
                 }
             });
+            return res.json({message:"Delete Classroom Type Success"})
         }catch(err){
             console.error(err)
         };
