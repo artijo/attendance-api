@@ -51,11 +51,12 @@ export const getAllSubjectType = async (req, res) => {
 
 export const editSubjectType = async (req, res) => {
     const body = req.body
+    const {uuid} = req.params;
     if(body){
         try{
-            const subjectType = db.subjectType.update({
+            const subjectType = await db.subjectType.update({
                 where:{
-                    subTypeId:body.UUID
+                    subTypeId:uuid
                 },
                 data:{
                     subTypeCode:body.subTypeCode,
@@ -73,7 +74,7 @@ export const editSubjectType = async (req, res) => {
 };
 
 export const deleteSubejectType = async (req, res) => {
-    const subjectTypeId = req.params.UUID;
+    const subjectTypeId = req.params.uuid;
     if(subjectTypeId){
         try{
             await db.subjectType.delete({
@@ -81,7 +82,7 @@ export const deleteSubejectType = async (req, res) => {
                     subTypeId:subjectTypeId
                 }
             })
-            console.log("delete successfully!")
+            return res.json({message:"Delete Success"})
         }catch(err){
             console.error(err);
             res.json(err);
