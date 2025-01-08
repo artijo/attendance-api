@@ -8,7 +8,7 @@ import {
  } from "../controllers/studentController.js";
 import {
     createTeacher, getAllTeacher,
-    updateTeacher, getTeacher
+    updateTeacher, getTeacher, getAllDepartment, createDepartment, getDepartment, updateDepartment, deleteDepartment
 } from "../controllers/teacherController.js";
 import { createClassroom, getAllClassroom, getClassroom, getAllClassroomType, updateClassroom, createClassroomType, createClassroomMember, deleteClassroomMember, deleteClassroomType, updateClassroomType } from "../controllers/classroomController.js";
 import { getAllLeaders } from "../controllers/leaderController.js";
@@ -37,6 +37,11 @@ router.get('/teacher/:uuid', getTeacher); // ดึงข้อมูล teacher
 router.get('/teachers', getAllTeacher); // ดึงข้อมูลทั้งหมด teacher
 router.post('/teacher', createTeacher); // สร้าง teacher
 router.put('/teacher/:uuid', updateTeacher); // แก้ไขข้อมูล teacher
+router.get('/departments', getAllDepartment); // ดึงข้อมูลทั้งหมด department
+router.post('/department', createDepartment); // สร้าง department
+router.get('/department/:uuid', getDepartment); // ดึงข้อมูล department
+router.put('/department/:uuid', updateDepartment); // แก้ไขข้อมูล department
+router.delete('/department/:uuid', deleteDepartment); // ลบข้อมูล department
 
 // classroom Management
 router.get('/classrooms', getAllClassroom); // ดึงข้อมูลทั้งหมด classroom
