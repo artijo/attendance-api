@@ -10,13 +10,13 @@ import {
     createTeacher, getAllTeacher,
     updateTeacher, getTeacher, getAllDepartment, createDepartment, getDepartment, updateDepartment, deleteDepartment
 } from "../controllers/teacherController.js";
-import { createClassroom, getAllClassroom, getClassroom, getAllClassroomType, updateClassroom, createClassroomType, createClassroomMember, deleteClassroomMember, deleteClassroomType, updateClassroomType } from "../controllers/classroomController.js";
+import { getAcademicYearClassroom,createClassroom, getAllClassroom, getClassroom, getAllClassroomType, updateClassroom, createClassroomType, createClassroomMember, deleteClassroomMember, deleteClassroomType, updateClassroomType } from "../controllers/classroomController.js";
 import { getAllLeaders } from "../controllers/leaderController.js";
 
 import { featchDataForSeachbar } from "../controllers/adminController.js";
 import { getTimeTableByRoom, deleteTimetable, createTimetable } from "../controllers/timetableController.js";
 import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject, createSubjectType, deleteSubejectType, editSubjectType} from "../controllers/subjectController.js";
-import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar } from "../controllers/stuyingTimeController.js";
+import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday } from "../controllers/stuyingTimeController.js";
 
 const router = Router();
 
@@ -54,6 +54,7 @@ router.put('/classroom/type/:uuid', updateClassroomType); // แก้ไขป�
 router.delete('/classroom/type/:uuid', deleteClassroomType); // ลบประเภทห้องเรียน
 router.post('/classroom/member', createClassroomMember); // เพิ่มสมาชิกห้องเรียน
 router.delete('/classroom/member/:uuid', deleteClassroomMember); // ลบสมาชิกห้องเรียน
+router.get('/termAndAcademicYear', getAcademicYearClassroom); // List เทอมและ ปีการศึกษา
 
 // leader Management
 router.get('/leaders', getAllLeaders); // ดึงข้อมูลทั้งหมด leader
@@ -82,6 +83,7 @@ router.get('/holidayCalendar', getHolidayCalendar); //ดึงวันหย�
 router.get('/calendarStudy', getStudyCalendar)
 
 router.post('/calendar', createStuingCalendar); //สร้างตารางเรียน 
-
+router.post('/holidayList', getHolidayCalendarList);
+router.delete('/holiday', deleteHoliday);
 
 export default router;
