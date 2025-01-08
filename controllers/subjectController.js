@@ -40,8 +40,8 @@ export const selectSubjectType = async (req, res) => {
 
 export const getAllSubjectType = async (req, res) => {
     try{
-        const subjectArrayType = await db.subjectType.findMany({});
-        res.json(subjectArrayType);
+        const subjectType = await db.subjectType.findMany();
+        res.json(subjectType);
     }catch(err){
         console.error(err);
         res.json(err)
@@ -99,7 +99,7 @@ export const createSubject = async (req, res) => {
                     subCode:body.subCode,
                     subNameThai:body.subNameThai,
                     subNameEng:body.subNameEng,
-                    subCredit:body.subCredit,
+                    subCredit:parseInt(body.subCredit),
                     tchId:body.tchId,
                     subTypeId:body.subTypeId
                 }
@@ -114,17 +114,18 @@ export const createSubject = async (req, res) => {
 
 export const editSubject = async (req, res) => {
     const body = req.body;
+    const {UUID} = req.params;
     if(body) {
         try{
             const subject = await db.subject.update({
                 where:{
-                    subId: body.UUID
+                    subId: UUID
                 },
                 data:{
                     subCode:body.subCode,
                     subNameEng:body.subNameEng,
                     subNameThai:body.subNameThai,
-                    subCredit:body.subCredit,
+                    subCredit:parseInt(body.subCredit),
                     tchId:body.tchId,
                     subTypeId:body.subTypeId
                 }

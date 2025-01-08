@@ -208,3 +208,86 @@ export const getStudentAllAttendenceExcelOneSubject = async (req, res) => { // e
         console.error(err)
     };
 }
+
+export const getAllDepartment = async (req, res) => {
+    try{
+        const department = await db.department.findMany();
+        res.json(department);
+    }catch(err){
+        console.error(err);
+    }
+}
+
+export const getDepartment = async (req, res) => {
+    const uuid = req.params.uuid;
+    if(uuid){
+        try{
+            const department = await db.department.findFirstOrThrow({
+                where:{
+                    deptId:uuid
+                }
+            });
+            res.json(department);
+        }
+        catch(err){
+            console.error(err);
+        };
+    };
+}
+
+export const createDepartment = async (req, res) => {
+    const body = req.body;
+    if(body){
+        try{
+            const department = await db.department.create({
+                data:{
+                    deptCode:body.deptCode,
+                    deptName:body.deptName
+                }
+            });
+            res.json(department);
+        }catch(err){
+            console.error(err);
+        }
+    };
+}
+
+export const updateDepartment = async (req, res) => {
+    const body = req.body;
+    const {uuid} = req.params;
+    if(body){
+        try{
+            
+            const department = await db.department.update({
+                where:{
+                    deptId: uuid
+                },
+                data:{
+                    deptCode: body.deptCode,
+                    deptName: body.deptName
+                }
+            });
+            res.json(department);
+        }catch(err){
+            console.error(err);
+        }
+    };
+}
+
+export const deleteDepartment = async (req, res) => {
+    const uuid = req.params.uuid;
+    if(uuid){
+        try{
+            await db.department.delete({
+                where:{
+                    deptId:uuid
+                }
+            });
+            return  res.json({
+                message: 'delete success'
+            });
+        }catch(err){
+            console.error(err);
+        }
+    }
+}

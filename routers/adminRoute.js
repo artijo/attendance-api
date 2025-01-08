@@ -8,16 +8,17 @@ import {
  } from "../controllers/studentController.js";
 import {
     createTeacher, getAllTeacher,
-    updateTeacher, getTeacher
+    updateTeacher, getTeacher, getAllDepartment, createDepartment, getDepartment, updateDepartment, deleteDepartment
 } from "../controllers/teacherController.js";
 import { getAcademicYearClassroom,createClassroom, getAllClassroom, getClassroom, getAllClassroomType, updateClassroom, createClassroomType, createClassroomMember, deleteClassroomMember, deleteClassroomType, updateClassroomType } from "../controllers/classroomController.js";
 import { getAllLeaders } from "../controllers/leaderController.js";
 
 import { featchDataForSeachbar } from "../controllers/adminController.js";
 import { getTimeTableByRoom, deleteTimetable, createTimetable } from "../controllers/timetableController.js";
-import { getSubject,getAllSubject} from "../controllers/subjectController.js";
-import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday } from "../controllers/stuyingTimeController.js";
 
+
+import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject} from "../controllers/subjectController.js";
+import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday } from "../controllers/stuyingTimeController.js";
 
 const router = Router();
 
@@ -38,6 +39,11 @@ router.get('/teacher/:uuid', getTeacher); // ดึงข้อมูล teacher
 router.get('/teachers', getAllTeacher); // ดึงข้อมูลทั้งหมด teacher
 router.post('/teacher', createTeacher); // สร้าง teacher
 router.put('/teacher/:uuid', updateTeacher); // แก้ไขข้อมูล teacher
+router.get('/departments', getAllDepartment); // ดึงข้อมูลทั้งหมด department
+router.post('/department', createDepartment); // สร้าง department
+router.get('/department/:uuid', getDepartment); // ดึงข้อมูล department
+router.put('/department/:uuid', updateDepartment); // แก้ไขข้อมูล department
+router.delete('/department/:uuid', deleteDepartment); // ลบข้อมูล department
 
 // classroom Management
 router.get('/classrooms', getAllClassroom); // ดึงข้อมูลทั้งหมด classroom
@@ -46,7 +52,7 @@ router.put('/classroom', updateClassroom); // แก้ไขข้อมูล 
 router.get('/classroom/:uuid', getClassroom); // ดึงข้อมูล classroom
 router.get('/classrooms/types', getAllClassroomType); // ดึงข้อมูลประเภทของห้องเรียน
 router.post('/classroom/type', createClassroomType); // สร้างประเภทห้องเรียน
-router.put('/classroom/type', updateClassroomType); // แก้ไขประเภทห้องเรียน
+router.put('/classroom/type/:uuid', updateClassroomType); // แก้ไขประเภทห้องเรียน
 router.delete('/classroom/type/:uuid', deleteClassroomType); // ลบประเภทห้องเรียน
 router.post('/classroom/member', createClassroomMember); // เพิ่มสมาชิกห้องเรียน
 router.delete('/classroom/member/:uuid', deleteClassroomMember); // ลบสมาชิกห้องเรียน
@@ -63,6 +69,9 @@ router.delete('/timetable/:timetableId', deleteTimetable);
 // subject Management
 router.get('/subject/:UUID', getSubject);
 router.get('/subjects', getAllSubject);
+router.post('/subject', createSubject);
+router.put('/subject/:UUID', editSubject);
+router.get('/subjects/type', getAllSubjectType);
 
 //stuyingTime Management
 
