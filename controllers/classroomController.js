@@ -19,7 +19,7 @@ export const createClassroom = async (req,res) => {
             body.teacherIds?.forEach(async (teacherId) => {
                 await db.teacher.update({
                     where:{
-                        teacherId:teacherId
+                        tchId:teacherId
                     },
                     data:{
                         classId:classroom.classId
