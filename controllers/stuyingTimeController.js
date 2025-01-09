@@ -225,7 +225,6 @@ export const getHolidayCalendarList = async (req, res) => {
     const body = req.body;
     const semester = body.semester;
     const academicYear = body.academicYear;
-
     function uniqueData(VALUE) {
         const uniqueData = [];
         if(VALUE) {
@@ -248,7 +247,6 @@ export const getHolidayCalendarList = async (req, res) => {
         };
         return [];
     }
-
     if(body) {
         try{
             const classrooms = await db.classrooms.findMany({
@@ -273,7 +271,7 @@ export const getHolidayCalendarList = async (req, res) => {
                     startHolidayDate:'asc'
                 }
             })
-            console.log(uniqueData(holiday));
+            // console.log(uniqueData(holiday));
             res.json(uniqueData(holiday));
         }catch(err){
             console.error(err);
