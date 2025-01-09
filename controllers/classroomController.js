@@ -203,6 +203,28 @@ export const createClassroomMember = async (req,res) => {
     };
 };
 
+export const updateClassroomMember = async (req,res) => {
+    const body = req.body;
+    const uuid = req.params.uuid;
+    if(body){
+        try{
+            const classroomMember = await db.classroomMember.update({
+                where:{
+                    classRoomMemeberId:uuid
+                },
+                data:{
+                    stdNo:body.stdNo,
+                    behaviourScore:parseInt(body.behaviourScore),
+                }
+            })
+            return res.json({message:"Update Classroom Member Success"})
+
+        }catch(err){
+            console.error(err);
+        };
+    };
+}
+
 export const deleteClassroomMember = async (req,res) => {
     const uuid = req.params.uuid;
     if(uuid){

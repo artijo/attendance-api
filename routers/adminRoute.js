@@ -10,7 +10,7 @@ import {
     createTeacher, getAllTeacher,
     updateTeacher, getTeacher, getAllDepartment, createDepartment, getDepartment, updateDepartment, deleteDepartment
 } from "../controllers/teacherController.js";
-import { getAcademicYearClassroom,createClassroom, getAllClassroom, getClassroom, getAllClassroomType, updateClassroom, createClassroomType, createClassroomMember, deleteClassroomMember, deleteClassroomType, updateClassroomType } from "../controllers/classroomController.js";
+import { getAcademicYearClassroom,createClassroom, getAllClassroom, getClassroom, getAllClassroomType, updateClassroom, createClassroomType, createClassroomMember, deleteClassroomMember, deleteClassroomType, updateClassroomType, updateClassroomMember } from "../controllers/classroomController.js";
 import { getAllLeaders } from "../controllers/leaderController.js";
 
 import { featchDataForSeachbar } from "../controllers/adminController.js";
@@ -53,6 +53,7 @@ router.post('/classroom/type', createClassroomType); // สร้างประ
 router.put('/classroom/type/:uuid', updateClassroomType); // แก้ไขประเภทห้องเรียน
 router.delete('/classroom/type/:uuid', deleteClassroomType); // ลบประเภทห้องเรียน
 router.post('/classroom/member', createClassroomMember); // เพิ่มสมาชิกห้องเรียน
+router.put('/classroom/member/:uuid', updateClassroomMember); // แก้ไขสมาชิกห้องเรียน
 router.delete('/classroom/member/:uuid', deleteClassroomMember); // ลบสมาชิกห้องเรียน
 router.get('/termAndAcademicYear', getAcademicYearClassroom); // List เทอมและ ปีการศึกษา
 
