@@ -123,6 +123,7 @@ export const createHoliday = async (req, res) => {
 
 export const getStudyCalendar = async (req, res) => {
     const classroomId = req.query.classroomId
+    console.log(classroomId);
     try{
         const timetable = await db.timetable.findMany({
             where: {
@@ -149,22 +150,30 @@ export const getStudyCalendar = async (req, res) => {
                     select:{
                         subject:{
                             select:{
-                                subCode: true
+                                subCode: true,
+                                subNameEng: true,
+                                subNameThai: true
                             }
-                        }
+                        },
+                        classId:true,
+                        timeStart:true,
+                        timeEnd:true, 
                     }
                 }
             }
         })
         
         const newCalendar = stuydingTime.map((item) => {
-            // console.log(item)
-            // let sdate = DateTime.fromISO(item.startHolidayDate + "T00:00:00", { zone: 'UTC' });
-            // let edate = DateTime.fromISO(item.endHolidayDate + "T23:59:59", { zone: 'UTC' });
+            let sdate = DateTime.fromISO(item.studingTimeDate.toISOString(), { zone: 'UTC' });
+            let edateString = `${item.studingTimeDate.year}-${item.studingTimeDate.month}-${item.studingTimeDate.day}T${item.timetable.timeEnd} `;
+            let edate = DateTime.fromISO(edateString, { zone: 'UTC' });
+            // console.log(sdate.day);
+            // let edate = DateTime.fromISO(item.endHolidayDate + `T${item.timetable.timeEnd} `, { zone: 'UTC' });
             return {
-                title:item.timetable.subject.subCode,
-                date:item.studingTimeDate,
-                color:"#708090",
+                title:`${item.timetable.subject.subNameThai}`,
+                start:sdate.toString(),
+                end:edate.toString(),
+                color:"#aec6cf ",
             }
         });
         res.json(newCalendar);
@@ -195,24 +204,14 @@ export const getHolidayCalendar = async (req, res) => {
         });
     
         const newHoliday = holiday.map((item) => {
-            let sdate = DateTime.fromISO(item.startHolidayDate + "T00:00:00", { zone: 'UTC' });
-            let edate = DateTime.fromISO(item.endHolidayDate + "T23:59:59", { zone: 'UTC' });
-            if(item.startHolidayDate === item.endHolidayDate){
-                return {
-                    title:item.holidayName,
-                    start:sdate,
-                    end:edate,
-                    color:item.howAddType === "RATCHAKHAN" ? colorOfType.ratchakhan : colorOfType.school,
-                }
-            }else{
-                return {
-                    title:item.holidayName,
-                    start:sdate,
-                    end:edate,
-                    color:item.howAddType === "RATCHAKHAN" ? colorOfType.ratchakhan : colorOfType.school,
-                }
+            let sdate = DateTime.fromISO(item.startHolidayDate + "T00:00:00Z", { zone: 'UTC' });
+            let edate = DateTime.fromISO(item.endHolidayDate + "T23:59:59Z", { zone: 'UTC' });
+            return {
+                title:item.holidayName,
+                start:sdate,
+                end:edate,
+                color:item.howAddType === "RATCHAKHAN" ? colorOfType.ratchakhan : colorOfType.school,
             }
-            
         });
         res.json(newHoliday);
     }catch(err){
