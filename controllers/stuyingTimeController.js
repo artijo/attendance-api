@@ -270,7 +270,6 @@ export const getHolidayCalendarList = async (req, res) => {
                     startHolidayDate:'asc'
                 }
             })
-            // console.log(uniqueData(holiday));
             res.json(uniqueData(holiday));
         }catch(err){
             console.error(err);
@@ -310,6 +309,52 @@ export const deleteHoliday = async (req, res) => {
             });
         };
         res.status(200).json({msg:"Delete Holiday Success"});
+    }catch(err){
+        console.error(err);
+        res.status(500).json(err);
+    }
+};
+
+export const updateHoliday = async (req, res) => {
+    const { newData, oldData, semesterAndAcademicYear} = req.body;
+    // console.log(newData, oldData, semesterAndAcademicYear);
+    try{
+        const classrooms  = await db.classrooms.findMany({
+            where:{
+                academicYear: parseInt(semesterAndAcademicYear.academicYear),
+                semester: parseInt(semesterAndAcademicYear.semester),
+            }
+        });
+
+        const holiday = await db.holiday.findMany({
+            where:{
+                AND:{
+                        classId:{
+                            in:[...classrooms.map(item => item.classId)]
+                        },
+                        holidayName:oldData.holidayName,
+                        startHolidayDate:oldData.sDate,
+                        endHolidayDate:oldData.eDate 
+                } 
+            }
+        });
+
+        const sDate = newData.sDate.split("-");
+        const eDate = newData.eDate.split("-");
+
+        for(const item of holiday){
+            const updateHoliday = await db.holiday.update({
+                where:{
+                    holidayId:item.holidayId
+                },
+                data:{
+                    holidayName:newData.holidayName,
+                    startHolidayDate:`${parseInt(sDate[0])-543}${sDate[1]}${sDate[2]}`,
+                    endHolidayDate:`${parseInt(eDate[0])-543}${eDate[1]}${eDate[2]}`,
+                }
+            });
+        };
+        res.status(200).json({msg:"Update Holiday Success"});
     }catch(err){
         console.error(err);
         res.status(500).json(err);

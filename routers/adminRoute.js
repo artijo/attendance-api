@@ -16,7 +16,7 @@ import { getAllLeaders } from "../controllers/leaderController.js";
 import { featchDataForSeachbar } from "../controllers/adminController.js";
 import { getTimeTableByRoom, deleteTimetable, createTimetable } from "../controllers/timetableController.js";
 import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject, createSubjectType, deleteSubejectType, editSubjectType} from "../controllers/subjectController.js";
-import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday } from "../controllers/stuyingTimeController.js";
+import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday ,updateHoliday} from "../controllers/stuyingTimeController.js";
 
 const router = Router();
 
@@ -79,6 +79,7 @@ router.delete('/subject/type/:uuid', deleteSubejectType);
 
 router.get('/holiday', getHoliday); // get holiday ราชการ
 router.post('/holiday', createHoliday); //สร้างวันหยุด 
+router.put('/holiday', updateHoliday); // test
 
 router.get('/holidayCalendar', getHolidayCalendar); //ดึงวันหยุดของแต่ละห้อง 
 router.get('/calendarStudy', getStudyCalendar)
