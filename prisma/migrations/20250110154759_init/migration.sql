@@ -1,7 +1,7 @@
 -- CreateTable
 CREATE TABLE `Student` (
     `stdId` VARCHAR(191) NOT NULL,
-    `title` ENUM('MR', 'MRS', 'MISS') NOT NULL,
+    `title` ENUM('BOY', 'GIRL', 'MR', 'MS') NOT NULL,
     `fName` VARCHAR(191) NOT NULL,
     `lName` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NULL,
@@ -41,8 +41,8 @@ CREATE TABLE `Teacher` (
     `email` VARCHAR(191) NULL,
     `tel` VARCHAR(191) NULL,
     `password` VARCHAR(191) NOT NULL,
-    `deptId` VARCHAR(191) NOT NULL,
-    `classId` VARCHAR(191) NOT NULL,
+    `deptId` VARCHAR(191) NULL,
+    `classId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -126,7 +126,7 @@ CREATE TABLE `Classrooms` (
     `academicYear` INTEGER NOT NULL,
     `semester` INTEGER NOT NULL,
     `classTypeId` VARCHAR(191) NOT NULL,
-    `leaderId` VARCHAR(191) NOT NULL,
+    `leaderId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -352,6 +352,20 @@ CREATE TABLE `EditActivityParticipate` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `Holiday` (
+    `holidayId` VARCHAR(191) NOT NULL,
+    `startHolidayDate` VARCHAR(191) NOT NULL,
+    `endHolidayDate` VARCHAR(191) NOT NULL,
+    `holidayName` VARCHAR(191) NOT NULL,
+    `howAddType` ENUM('RATCHAKHAN', 'SCHOOL') NOT NULL,
+    `classId` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`holidayId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `Admin` (
     `adminId` VARCHAR(191) NOT NULL,
     `username` VARCHAR(191) NOT NULL,
@@ -369,10 +383,10 @@ CREATE TABLE `Admin` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `Teacher` ADD CONSTRAINT `Teacher_deptId_fkey` FOREIGN KEY (`deptId`) REFERENCES `Department`(`deptId`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Teacher` ADD CONSTRAINT `Teacher_deptId_fkey` FOREIGN KEY (`deptId`) REFERENCES `Department`(`deptId`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Teacher` ADD CONSTRAINT `Teacher_classId_fkey` FOREIGN KEY (`classId`) REFERENCES `Classrooms`(`classId`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Teacher` ADD CONSTRAINT `Teacher_classId_fkey` FOREIGN KEY (`classId`) REFERENCES `Classrooms`(`classId`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `StudentParent` ADD CONSTRAINT `StudentParent_stdId_fkey` FOREIGN KEY (`stdId`) REFERENCES `Student`(`stdId`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -390,7 +404,7 @@ ALTER TABLE `Subject` ADD CONSTRAINT `Subject_subTypeId_fkey` FOREIGN KEY (`subT
 ALTER TABLE `Classrooms` ADD CONSTRAINT `Classrooms_classTypeId_fkey` FOREIGN KEY (`classTypeId`) REFERENCES `ClassroomType`(`classTypeId`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Classrooms` ADD CONSTRAINT `Classrooms_leaderId_fkey` FOREIGN KEY (`leaderId`) REFERENCES `Leader`(`ldrId`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Classrooms` ADD CONSTRAINT `Classrooms_leaderId_fkey` FOREIGN KEY (`leaderId`) REFERENCES `Leader`(`ldrId`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `ClassroomMember` ADD CONSTRAINT `ClassroomMember_classId_fkey` FOREIGN KEY (`classId`) REFERENCES `Classrooms`(`classId`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -490,3 +504,6 @@ ALTER TABLE `EditActivityParticipate` ADD CONSTRAINT `EditActivityParticipate_te
 
 -- AddForeignKey
 ALTER TABLE `EditActivityParticipate` ADD CONSTRAINT `EditActivityParticipate_leaderId_fkey` FOREIGN KEY (`leaderId`) REFERENCES `Leader`(`ldrId`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Holiday` ADD CONSTRAINT `Holiday_classId_fkey` FOREIGN KEY (`classId`) REFERENCES `Classrooms`(`classId`) ON DELETE RESTRICT ON UPDATE CASCADE;
