@@ -51,7 +51,7 @@ export const createStudentWithFile = async (req, res) => {
         });
 
         // Get current academic year
-        const currentYear = new Date().getFullYear() + 543; // Convert to Buddhist Era
+        const currentYear = new Date().getFullYear(); // Convert to Buddhist Era
 
         const classrooms = await db.classrooms.findMany();
         const classroomMap = new Map();
