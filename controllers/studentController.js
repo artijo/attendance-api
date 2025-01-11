@@ -120,7 +120,7 @@ export const createStudentWithFile = async (req, res) => {
 
 export const getAllStudent = async (req, res) => { // ดึงรายชื่อนักเรียนทั้งหมด
     let classr = req.query.class;
-    if(req.query.class !== "all"){
+    if(req.query.class && req.query.class !== "all"){
         classr = classr.split("-");
         try{
             const classroom = await db.classrooms.findFirst({
