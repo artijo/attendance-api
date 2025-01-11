@@ -25,19 +25,27 @@ export const createStudent = async (req, res) => { // สร้างราย�
 
 export const createStudentWithFile = async (req, res) => {
     let body = req.body;
+    console.log(body.sheets);
     if (!body?.sheets) {
         return res.status(400).json({ message: "ไม่พบข้อมูลนักเรียน" });
     }
 
+    // เช็คว่ามี item.studentId && item.class && item.room && item.no && item.title && item.firstName && item.lastName หรือไม่
+    const checkempty = Object.values(body.sheets).flat().filter(item => !item.studentId || !item.class || !item.room || !item.no || !item.title || !item.firstName || !item.lastName);
+
     try {
         // Flatten the sheets object values into a single array
+
+        if (checkempty.length > 0) {
+            return res.status(400).json({ message: "ข้อมูลนักเรียนไม่ครบถ้วน" });
+        }
         const allStudents = Object.values(body.sheets).flat();
 
         const student = await db.student.createMany({
             data: allStudents
-            .filter(item => item.studentId && item.studentId.trim() !== '')
+            .filter(item => item.studentId && item.studentId.toString().trim() !== '')
             .map((item) => ({
-                stdId: item.studentId,
+                stdId: item.studentId.toString(),
                 title: item.title === "เด็กชาย" ? "BOY" : 
                        item.title === "เด็กหญิง" ? "GIRL" : 
                        item.title === "นาย" ? "MR" : "MS",
@@ -90,7 +98,7 @@ export const createStudentWithFile = async (req, res) => {
         }
 
         const classroomMembers = allStudents
-            .filter(item => item.studentId && item.studentId.trim() !== '')
+            .filter(item => item.studentId && item.studentId.toString().trim() !== '')
             .map(item => {
                 const key = `${parseInt(item.class)}-${parseInt(item.room)}`;
                 const classId = classroomMap.get(key);
@@ -98,7 +106,7 @@ export const createStudentWithFile = async (req, res) => {
                 if (!classId) return null; // ถ้าห้องเรียนไม่พบใน Map ให้ข้าม
 
                 return {
-                    stdId: item.studentId,
+                    stdId: item.studentId.toString(),
                     classId: classId,
                     stdNo: item.no.toString(),
                 };
