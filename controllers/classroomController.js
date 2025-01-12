@@ -2,15 +2,16 @@ import db from '../prisma/client.js';
 
 export const createClassroom = async (req,res) => {
     const body = req.body;
-    console.log(body.classTypeId);
+
     if(body){
         try{
             const classroom = await db.classrooms.create({
                 data:{
                     classLevel:parseInt(body.classLevel),
                     classRoom:parseInt(body.classRoom),
-                    academicYear:parseInt(body.academicYear),
-                    semester:parseInt(body.semester),
+                    term :{
+                        connect: {termId:body.termId}
+                    },
                     // classTypeId:body.classTypeId,
                     leader: body.leaderId?{connect:{leaderId:body.leaderId}}:undefined,
                     classroomType:{connect:{classTypeId:body.classTypeId}}
@@ -46,10 +47,11 @@ export const updateClassroom = async (req,res) => {
                 data:{
                     classLevel:parseInt(body.classLevel),
                     classRoom:parseInt(body.classRoom),
-                    academicYear:parseInt(body.academicYear),
-                    semester:parseInt(body.semester),
-                    classTypeId:body.classTypeId,
-                    leaderId:body.leaderId,
+                    term :{
+                        connect: {termId:body.termId}
+                    },
+                    classroomType:{connect:{classTypeId:body.classTypeId}},
+                    leader: body.leaderId?{connect:{leaderId:body.leaderId}}:undefined,
                 }
             })
             body.teacherIds.forEach(async (teacherId) => {
@@ -76,6 +78,7 @@ export const getAllClassroom = async (req,res) => {
         const classroom = await db.classrooms.findMany({
             include: {
                 classroomType: true,
+                term: true
             },
             orderBy:[{
                 classLevel:"asc"},
@@ -98,6 +101,7 @@ export const getClassroom = async (req,res) => {
             },
             include: {
                 classroomType: true,
+                term: true,
                 classroomMembers: {
                     include: {
                         student: true
@@ -117,6 +121,16 @@ export const getClassroom = async (req,res) => {
         console.error(error);
     };
 };
+
+export const getAllAcademicTerms = async (req,res) => {
+    try{
+        const academicTerms = await db.academicTerms.findMany({
+        });
+        res.json(academicTerms)
+    }catch(error){
+        console.error(error);
+    };
+}
 
 export const getAllClassroomType = async (req,res) => {
     try{

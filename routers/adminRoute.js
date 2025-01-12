@@ -17,6 +17,7 @@ import { featchDataForSeachbar } from "../controllers/adminController.js";
 import { getTimeTableByRoom, deleteTimetable, createTimetable } from "../controllers/timetableController.js";
 import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject, createSubjectType, deleteSubejectType, editSubjectType} from "../controllers/subjectController.js";
 import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday ,updateHoliday, deleteStudingTime} from "../controllers/stuyingTimeController.js";
+import { getAllAcademicTerms } from "../controllers/classroomController.js";
 
 const router = Router();
 
@@ -56,6 +57,7 @@ router.post('/classroom/member', createClassroomMember); // เพิ่มส�
 router.put('/classroom/member/:uuid', updateClassroomMember); // แก้ไขสมาชิกห้องเรียน
 router.delete('/classroom/member/:uuid', deleteClassroomMember); // ลบสมาชิกห้องเรียน
 router.get('/termAndAcademicYear', getAcademicYearClassroom); // List เทอมและ ปีการศึกษา
+router.get('/academicterms', getAllAcademicTerms); // List เทอมและ ปีการศึกษา
 
 // leader Management
 router.get('/leaders', getAllLeaders); // ดึงข้อมูลทั้งหมด leader
