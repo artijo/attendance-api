@@ -126,6 +126,7 @@ CREATE TABLE `Classrooms` (
     `academicYear` INTEGER NOT NULL,
     `semester` INTEGER NOT NULL,
     `classTypeId` VARCHAR(191) NOT NULL,
+    `termId` VARCHAR(191) NOT NULL,
     `leaderId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -358,11 +359,24 @@ CREATE TABLE `Holiday` (
     `endHolidayDate` VARCHAR(191) NOT NULL,
     `holidayName` VARCHAR(191) NOT NULL,
     `howAddType` ENUM('RATCHAKHAN', 'SCHOOL') NOT NULL,
-    `classId` VARCHAR(191) NOT NULL,
+    `termId` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`holidayId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Academic_terms` (
+    `termId` VARCHAR(191) NOT NULL,
+    `academicYear` INTEGER NOT NULL,
+    `semester` INTEGER NOT NULL,
+    `termStart` DATETIME(3) NOT NULL,
+    `termEnd` DATETIME(3) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`termId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -402,6 +416,9 @@ ALTER TABLE `Subject` ADD CONSTRAINT `Subject_subTypeId_fkey` FOREIGN KEY (`subT
 
 -- AddForeignKey
 ALTER TABLE `Classrooms` ADD CONSTRAINT `Classrooms_classTypeId_fkey` FOREIGN KEY (`classTypeId`) REFERENCES `ClassroomType`(`classTypeId`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Classrooms` ADD CONSTRAINT `Classrooms_termId_fkey` FOREIGN KEY (`termId`) REFERENCES `Academic_terms`(`termId`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Classrooms` ADD CONSTRAINT `Classrooms_leaderId_fkey` FOREIGN KEY (`leaderId`) REFERENCES `Leader`(`ldrId`) ON DELETE SET NULL ON UPDATE CASCADE;
@@ -506,4 +523,4 @@ ALTER TABLE `EditActivityParticipate` ADD CONSTRAINT `EditActivityParticipate_te
 ALTER TABLE `EditActivityParticipate` ADD CONSTRAINT `EditActivityParticipate_leaderId_fkey` FOREIGN KEY (`leaderId`) REFERENCES `Leader`(`ldrId`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Holiday` ADD CONSTRAINT `Holiday_classId_fkey` FOREIGN KEY (`classId`) REFERENCES `Classrooms`(`classId`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Holiday` ADD CONSTRAINT `Holiday_termId_fkey` FOREIGN KEY (`termId`) REFERENCES `Academic_terms`(`termId`) ON DELETE RESTRICT ON UPDATE CASCADE;

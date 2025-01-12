@@ -5,6 +5,7 @@ import parents from './jsonSeed/parent.json' assert { type: 'json' };
 import departments from './jsonSeed/department.json' assert { type: 'json' };
 import classroomType from './jsonSeed/classroomType.json' assert { type: 'json' };
 import classrooms from './jsonSeed/classroom.json' assert { type: 'json' };
+import academicterm from './jsonSeed/academicterm.json' assert { type: 'json' };
 
 
 import {
@@ -109,6 +110,20 @@ async function main() {
             return classroomtype.classTypeId;
         };
 
+        // Create academic term
+        for (const term of academicterm) {
+            await db.academic_terms.create({
+                data: {
+                    termId: term.termId,
+                    academicYear: term.academicYear,
+                    semester: term.semester,
+                    termStart: term.termStart,
+                    termEnd: term.termEnd,
+                },
+            });
+            console.log(`Academic term created: ${term.academicYear} ภาคเรียนที่ ${term.semester}`);
+        }
+
         let classroomIdArray = [];
         let departmentIdArray = [];
         // Create classrooms
@@ -117,8 +132,11 @@ async function main() {
                 data: {
                     classLevel: classroom.classLevel,
                     classRoom: classroom.classRoom,
-                    academicYear: classroom.adcmicYear,
-                    semester: classroom.semester,
+                    term: {
+                        connect: {
+                            termId: classroom.termId
+                        }
+                    },
                     classroomType: {
                         connect: {
                             classTypeId: await classroomTypeFind(classroom.cType),
