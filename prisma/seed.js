@@ -112,7 +112,7 @@ async function main() {
 
         // Create academic term
         for (const term of academicterm) {
-            await db.academic_terms.create({
+            await db.academicTerms.create({
                 data: {
                     termId: term.termId,
                     academicYear: term.academicYear,

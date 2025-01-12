@@ -137,7 +137,7 @@ model Classrooms {
   classroomType ClassroomType              @relation(fields: [classTypeId], references: [classTypeId])
   classroomMembers ClassroomMember[]
   termId        String
-  term          Academic_terms              @relation(fields: [termId], references: [termId])
+  term          AcademicTerms              @relation(fields: [termId], references: [termId])
   // timetable     Timetable?
   timetable     Timetable[]
   teacher       Teacher[]
@@ -373,12 +373,12 @@ model Holiday{
   holidayName String
   howAddType holidayType
   termId String
-  term Academic_terms @relation(fields: [termId], references: [termId])
+  term AcademicTerms @relation(fields: [termId], references: [termId])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Academic_terms {
+model AcademicTerms {
   termId String @id @default(uuid())
   academicYear Int
   semester Int
