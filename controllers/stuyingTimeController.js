@@ -1,6 +1,6 @@
 import db from '../prisma/client.js';
 import { fecthHolidayDateTime } from '../helper/holidayApi.js';
-import { formatTime } from '../helper/helper.js';
+import { formatTime, formatDateYYYYMMDD } from '../helper/helper.js';
 import { DateTime } from 'luxon';
 
 export const getHoliday = async (req, res) => {
@@ -91,6 +91,65 @@ export const createStuingCalendar = async (req, res) => {
     }
 }
 
+export const deleteStudingTime = async (req, res) => {
+    const { semester, academicYear, date} = req.body;
+
+    const dateUTC = DateTime.fromISO(date, { zone: 'UTC' })
+    //date format YYYY-MM-DD
+    try{
+        const classrooms  = await db.classrooms.findMany({
+            where:{
+                academicYear: parseInt(academicYear),
+                semester: parseInt(semester),
+            }
+        });
+
+        const timetable = await db.timetable.findMany({
+            where: {
+                AND: {
+                    classId: {
+                        in: [...classrooms.map(item => item.classId)]
+                    },
+                    dayOfWeek: dateUTC.weekday
+                }
+            }
+        })
+        const timetableId = timetable.map((item) => {
+            return (
+                item.timetableId
+            )
+        })
+
+        const studingTime = await db.studingTime.findMany({
+            where: {
+                timetableId: {
+                    in: timetableId
+                }
+            }
+        })
+
+        const studyTimeId = studingTime.filter((item) => {
+            const itemUTC = DateTime.fromISO(item.studingTimeDate.toISOString(), { zone: 'UTC' });     
+            return itemUTC.dayOfWeek === dateUTC.weekday, itemUTC.year === dateUTC.year, itemUTC.month === dateUTC.month, itemUTC.day === dateUTC.day
+        }).map((item) => {
+            return (
+                item.studyTimeId
+            )
+        })
+        const deleteStudingTime = await db.studingTime.deleteMany({
+            where: {
+                studyTimeId: {
+                    in: studyTimeId
+                }
+            }
+        });
+        res.json({msg:"Delete Studing Time Success"});
+    }catch(err){
+        console.error(err);
+        res.json(err);
+    }
+}
+
 export const createHoliday = async (req, res) => {
     const { holiday, semester } = req.body;
     try{
@@ -123,7 +182,6 @@ export const createHoliday = async (req, res) => {
 
 export const getStudyCalendar = async (req, res) => {
     const classroomId = req.query.classroomId
-    console.log(classroomId);
     try{
         const timetable = await db.timetable.findMany({
             where: {
@@ -167,8 +225,6 @@ export const getStudyCalendar = async (req, res) => {
             let sdate = DateTime.fromISO(item.studingTimeDate.toISOString(), { zone: 'UTC' });
             let edateString = `${item.studingTimeDate.year}-${item.studingTimeDate.month}-${item.studingTimeDate.day}T${item.timetable.timeEnd} `;
             let edate = DateTime.fromISO(edateString, { zone: 'UTC' });
-            // console.log(sdate.day);
-            // let edate = DateTime.fromISO(item.endHolidayDate + `T${item.timetable.timeEnd} `, { zone: 'UTC' });
             return {
                 title:`${item.timetable.subject.subNameThai}`,
                 start:sdate.toString(),
@@ -183,16 +239,14 @@ export const getStudyCalendar = async (req, res) => {
     }
 }
 
+const colorOfType = {
+    "ratchakhan":"#FF0000",
+    "school":"#0000FF",
+};
 
 export const getHolidayCalendar = async (req, res) => {
     const classroomId = req.query.classroomId
     try{
-
-        const colorOfType = {
-            "ratchakhan":"#FF0000",
-            "school":"#0000FF",
-        };
-
         const holiday = await db.holiday.findMany({
             where: {
                 classId: classroomId
@@ -228,7 +282,8 @@ export const getHolidayCalendarList = async (req, res) => {
         const uniqueData = [];
         if(VALUE) {
             const semesterMap = VALUE.map((items) => {
-                return {holidayName: items.holidayName, sDate: items.startHolidayDate, eDate: items.endHolidayDate }
+                // console.log(items.startHolidayDate);
+                return {holidayName: items.holidayName, sDate: items.startHolidayDate, eDate: items.endHolidayDate, howAddType: items.howAddType, color:items.howAddType === "RATCHAKHAN" ? colorOfType.ratchakhan : colorOfType.school}
             });  
             for(const item of semesterMap) {
                 let found = uniqueData.some(
@@ -270,17 +325,57 @@ export const getHolidayCalendarList = async (req, res) => {
                     startHolidayDate:'asc'
                 }
             })
+
             res.json(uniqueData(holiday));
         }catch(err){
             console.error(err);
         };
     };
-    
 };
+async function createStudingTime(classroomIdArray, date) {
+    const betweenDate = [];
+    const startDate = DateTime.fromISO(date, { zone: 'UTC' });
+    const weekday = startDate.weekday;
+    
+    const timetable = await db.timetable.findMany({
+        where: {
+            AND:{
+                classId:{
+                    in:classroomIdArray
+                },
+                dayOfWeek: weekday
+            }
+        }
+    });
+    
+    if(timetable.length > 0) {
+        for(const item of timetable) {
+            const time = DateTime.fromISO(date, { zone: 'UTC' });
+            const setTime = DateTime.fromObject(
+                { 
+                    year: time.year, 
+                    month: time.month, 
+                    day: time.day, 
+                    hour: formatTime(item.timeStart)[0], 
+                    minute: formatTime(item.timeStart)[1], 
+                    second: 0 }, { zone: 'UTC' }
+            );
+            const studingTime = await db.studingTime.create({
+                data:{
+                    timetableId:item.timetableId,
+                    studingTimeDate:setTime,
+                }
+            });
+        }
+    }else{
+        console.log("No timetable found");
+    }
+}
 
 export const deleteHoliday = async (req, res) => {
     const { holidayName, sDate, eDate, semester, academicYear} = req.body;
     try{
+
         const classrooms  = await db.classrooms.findMany({
             where:{
                 academicYear: parseInt(academicYear),
@@ -300,7 +395,6 @@ export const deleteHoliday = async (req, res) => {
                 } 
             }
         });
-
         for(const item of holiday){
             const deleteHoliday = await db.holiday.delete({
                 where:{
@@ -308,6 +402,7 @@ export const deleteHoliday = async (req, res) => {
                 }
             });
         };
+        createStudingTime(classrooms.map(item => item.classId), sDate);
         res.status(200).json({msg:"Delete Holiday Success"});
     }catch(err){
         console.error(err);
@@ -317,7 +412,6 @@ export const deleteHoliday = async (req, res) => {
 
 export const updateHoliday = async (req, res) => {
     const { newData, oldData, semesterAndAcademicYear} = req.body;
-    // console.log(newData, oldData, semesterAndAcademicYear);
     try{
         const classrooms  = await db.classrooms.findMany({
             where:{
@@ -338,10 +432,7 @@ export const updateHoliday = async (req, res) => {
                 } 
             }
         });
-
-        const sDate = newData.sDate.split("-");
-        const eDate = newData.eDate.split("-");
-
+        
         for(const item of holiday){
             const updateHoliday = await db.holiday.update({
                 where:{
@@ -349,8 +440,8 @@ export const updateHoliday = async (req, res) => {
                 },
                 data:{
                     holidayName:newData.holidayName,
-                    startHolidayDate:`${parseInt(sDate[0])-543}${sDate[1]}${sDate[2]}`,
-                    endHolidayDate:`${parseInt(eDate[0])-543}${eDate[1]}${eDate[2]}`,
+                    startHolidayDate:oldData.sDate,
+                    endHolidayDate:oldData.eDate 
                 }
             });
         };

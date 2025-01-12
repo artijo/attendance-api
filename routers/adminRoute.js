@@ -16,7 +16,7 @@ import { getAllLeaders } from "../controllers/leaderController.js";
 import { featchDataForSeachbar } from "../controllers/adminController.js";
 import { getTimeTableByRoom, deleteTimetable, createTimetable } from "../controllers/timetableController.js";
 import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject, createSubjectType, deleteSubejectType, editSubjectType} from "../controllers/subjectController.js";
-import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday ,updateHoliday} from "../controllers/stuyingTimeController.js";
+import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday ,updateHoliday, deleteStudingTime} from "../controllers/stuyingTimeController.js";
 
 const router = Router();
 
@@ -77,15 +77,19 @@ router.delete('/subject/type/:uuid', deleteSubejectType);
 
 //stuyingTime Management
 
+
+router.delete('/studingtime', deleteStudingTime);
+
 router.get('/holiday', getHoliday); // get holiday ราชการ
 router.post('/holiday', createHoliday); //สร้างวันหยุด 
 router.put('/holiday', updateHoliday); // test
+router.delete('/holiday', deleteHoliday);
 
 router.get('/holidayCalendar', getHolidayCalendar); //ดึงวันหยุดของแต่ละห้อง 
 router.get('/calendarStudy', getStudyCalendar)
 
 router.post('/calendar', createStuingCalendar); //สร้างตารางเรียน 
 router.post('/holidayList', getHolidayCalendarList);
-router.delete('/holiday', deleteHoliday);
+
 
 export default router;
