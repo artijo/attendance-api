@@ -17,7 +17,7 @@ import { featchDataForSeachbar } from "../controllers/adminController.js";
 import { getTimeTableByRoom, deleteTimetable, createTimetable } from "../controllers/timetableController.js";
 import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject, createSubjectType, deleteSubejectType, editSubjectType} from "../controllers/subjectController.js";
 import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday ,updateHoliday, deleteStudingTime} from "../controllers/stuyingTimeController.js";
-import { getAllAcademicTerms, createTerm } from "../controllers/termController.js";
+import { getAllAcademicTerms, createTerm, deleteTerm, getOneAcademicTerm,updateTerm } from "../controllers/termController.js";
 
 const router = Router();
 
@@ -57,7 +57,7 @@ router.post('/classroom/member', createClassroomMember); // เพิ่มส�
 router.put('/classroom/member/:uuid', updateClassroomMember); // แก้ไขสมาชิกห้องเรียน
 router.delete('/classroom/member/:uuid', deleteClassroomMember); // ลบสมาชิกห้องเรียน
 router.get('/termAndAcademicYear', getAcademicYearClassroom); // List เทอมและ ปีการศึกษา
-router.get('/academicterms', getAllAcademicTerms); // List เทอมและ ปีการศึกษา
+
 
 // leader Management
 router.get('/leaders', getAllLeaders); // ดึงข้อมูลทั้งหมด leader
@@ -94,7 +94,10 @@ router.post('/calendar', createStuingCalendar); //สร้างตาราง
 router.post('/holidayList', getHolidayCalendarList);
 
 // AcademicYear And Term
-router.post('/academicYearTerm', createTerm) // สร้างปีการศึกษาและเทอม
-
+router.get('/academicterms', getAllAcademicTerms); // List เทอมและ ปีการศึกษา
+router.get('/academicterms/:termId', getOneAcademicTerm); // ดึงอันเดียว
+router.put('/academicterms',updateTerm) // แก้ไข
+router.post('/academicYearTerm', createTerm); // สร้างปีการศึกษาและเทอม
+router.delete('/academicterms/:termId', deleteTerm); // ลบปีการศึกษาและเทอม
 
 export default router;
