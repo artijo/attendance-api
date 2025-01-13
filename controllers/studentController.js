@@ -83,14 +83,31 @@ export const createStudentWithFile = async (req, res) => {
                         ]
                     }
                 });
+
+                let term = await db.academicTerms.findFirst({
+                    where: {
+                        academicYear: currentYear,
+                        semester: 1
+                    }
+                });
+
+                if (!term) {
+                    term = await db.academicTerms.create({
+                        data: {
+                            academicYear: currentYear,
+                            semester: 1,
+                            termStart: new Date(currentYear, 5, 16),
+                            termEnd: new Date(currentYear, 9, 30)
+                        }
+                    });
+                }
                 
                 const newClassroom = await db.classrooms.create({
                     data: {
                         classLevel: parseInt(student.class),
                         classRoom: parseInt(student.room),
-                        academicYear: currentYear,
-                        semester: 1,
-                        classTypeId: defaultClassType.classTypeId
+                        term: { connect: { termId: term.termId } },
+                        classroomType: { connect: { classTypeId: defaultClassType.classTypeId } }
                     }
                 });
                 classroomMap.set(key, newClassroom.classId);
