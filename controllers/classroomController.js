@@ -122,15 +122,7 @@ export const getClassroom = async (req,res) => {
     };
 };
 
-export const getAllAcademicTerms = async (req,res) => {
-    try{
-        const academicTerms = await db.academicTerms.findMany({
-        });
-        res.json(academicTerms)
-    }catch(error){
-        console.error(error);
-    };
-}
+
 
 export const getAllClassroomType = async (req,res) => {
     try{
