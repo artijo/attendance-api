@@ -369,9 +369,9 @@ model EditActivityParticipate {
 model Holiday{
   holidayId String @id @default(uuid())
   startHolidayDate String
-  endHolidayDate String 
-  holidayName String
-  howAddType holidayType
+  endHolidayDate DateTime
+  holidayName DateTime
+  type holidayType
   termId String
   term AcademicTerms @relation(fields: [termId], references: [termId])
   createdAt DateTime @default(now())

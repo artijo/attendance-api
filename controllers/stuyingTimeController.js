@@ -1,17 +1,7 @@
 import db from '../prisma/client.js';
-import { fecthHolidayDateTime } from '../helper/holidayApi.js';
 import { formatTime, formatDateYYYYMMDD } from '../helper/helper.js';
 import { DateTime } from 'luxon';
 
-export const getHoliday = async (req, res) => {
-    try {
-        const holiday = await fecthHolidayDateTime();
-        res.json(holiday);
-    } catch (err) {
-        console.error(err);
-        res.json(err);
-    }
-}
 
 export const createStuingCalendar = async (req, res) => {
     const { semester, termStart, termEnd, holiday } = req.body;

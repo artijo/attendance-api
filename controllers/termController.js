@@ -98,3 +98,4 @@ export const deleteTerm = async (req, res) => {
         };
     };
 };
+

@@ -16,9 +16,9 @@ import { getAllLeaders } from "../controllers/leaderController.js";
 import { featchDataForSeachbar } from "../controllers/adminController.js";
 import { getTimeTableByRoom, deleteTimetable, createTimetable } from "../controllers/timetableController.js";
 import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject, createSubjectType, deleteSubejectType, editSubjectType} from "../controllers/subjectController.js";
-import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday ,updateHoliday, deleteStudingTime} from "../controllers/stuyingTimeController.js";
+// import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday ,updateHoliday} from "../controllers/stuyingTimeController.js";
 import { getAllAcademicTerms, createTerm, deleteTerm, getOneAcademicTerm,updateTerm } from "../controllers/termController.js";
-
+import { getHolidayListAuto } from "../controllers/holidayController.js"
 const router = Router();
 
 router.post('/auth/login', login);
@@ -80,18 +80,20 @@ router.delete('/subject/type/:uuid', deleteSubejectType);
 //stuyingTime Management
 
 
-router.delete('/studingtime', deleteStudingTime);
+// router.delete('/studingtime', deleteStudingTime);
 
-router.get('/holiday', getHoliday); // get holiday ราชการ
-router.post('/holiday', createHoliday); //สร้างวันหยุด 
-router.put('/holiday', updateHoliday); // test
-router.delete('/holiday', deleteHoliday);
+// router.get('/holiday', getHoliday); // get holiday ราชการ
+// router.post('/holiday', createHoliday); //สร้างวันหยุด 
+// router.put('/holiday', updateHoliday); // test
+// router.delete('/holiday', deleteHoliday);
 
-router.get('/holidayCalendar', getHolidayCalendar); //ดึงวันหยุดของแต่ละห้อง 
-router.get('/calendarStudy', getStudyCalendar)
+// router.get('/holidayCalendar', getHolidayCalendar); //ดึงวันหยุดของแต่ละห้อง 
+// router.get('/calendarStudy', getStudyCalendar)
 
-router.post('/calendar', createStuingCalendar); //สร้างตารางเรียน 
-router.post('/holidayList', getHolidayCalendarList);
+// router.post('/calendar', createStuingCalendar); //สร้างตารางเรียน 
+// router.post('/holidayList', getHolidayCalendarList);
+// Holiday
+router.get('/holidayauto', getHolidayListAuto); // Holiday List 
 
 // AcademicYear And Term
 router.get('/academicterms', getAllAcademicTerms); // List เทอมและ ปีการศึกษา
