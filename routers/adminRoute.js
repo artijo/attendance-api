@@ -18,7 +18,7 @@ import { getTimeTableByRoom, deleteTimetable, createTimetable } from "../control
 import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject, createSubjectType, deleteSubejectType, editSubjectType} from "../controllers/subjectController.js";
 // import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday ,updateHoliday} from "../controllers/stuyingTimeController.js";
 import { getAllAcademicTerms, createTerm, deleteTerm, getOneAcademicTerm,updateTerm } from "../controllers/termController.js";
-import { getHolidayListAuto } from "../controllers/holidayController.js"
+import { getHolidayListAuto, createHoliday, getHolidayList, deleteHoliday, getOneHoliday, updateHoliday } from "../controllers/holidayController.js"
 const router = Router();
 
 router.post('/auth/login', login);
@@ -93,7 +93,13 @@ router.delete('/subject/type/:uuid', deleteSubejectType);
 // router.post('/calendar', createStuingCalendar); //สร้างตารางเรียน 
 // router.post('/holidayList', getHolidayCalendarList);
 // Holiday
-router.get('/holidayauto', getHolidayListAuto); // Holiday List 
+router.get('/holiday/:termId', getHolidayList); // Holiday List แต่ละเทอม
+router.get('/holidayauto', getHolidayListAuto); // Holiday List สำหรับ Auto วันหยุดราชกาล
+router.post('/holiday', createHoliday); // สร้างวันหยุด
+router.put('/holiday/:holidayId', updateHoliday);
+router.get('/holiday/one/:holidayId', getOneHoliday);
+router.delete('/holiday/:holidayId', deleteHoliday); // ลบวันหยุด
+
 
 // AcademicYear And Term
 router.get('/academicterms', getAllAcademicTerms); // List เทอมและ ปีการศึกษา
