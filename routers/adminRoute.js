@@ -18,9 +18,9 @@ import { getTimeTableByRoom, deleteTimetable, createTimetable } from "../control
 import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject, createSubjectType, deleteSubejectType, editSubjectType} from "../controllers/subjectController.js";
 // import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday ,updateHoliday} from "../controllers/stuyingTimeController.js";
 import { getAllAcademicTerms, createTerm, deleteTerm, getOneAcademicTerm,updateTerm } from "../controllers/termController.js";
-import { getHolidayListAuto, createHoliday, getHolidayList, deleteHoliday, getOneHoliday, updateHoliday } from "../controllers/holidayController.js"
+import { getHolidayListAuto, createHoliday, getHolidayList, deleteHoliday, getOneHoliday, updateHoliday, fullCalendarHoliday } from "../controllers/holidayController.js"
+import { createStudingTime, getFullCalendarStudyTime } from "../controllers/stuyingTimeController.js";
 const router = Router();
-
 router.post('/auth/login', login);
 router.get('/auth/check', checkAuth);
 router.post('/auth/refresh', getTokenformRefreshToken);
@@ -78,7 +78,7 @@ router.put('/subject/type/:uuid', editSubjectType);
 router.delete('/subject/type/:uuid', deleteSubejectType);
 
 //stuyingTime Management
-
+router.post('/studingtime', createStudingTime); // สร้างปฎิทินการเรียนของทุกห้องเรียนในเทอมนั้น
 
 // router.delete('/studingtime', deleteStudingTime);
 
@@ -92,6 +92,9 @@ router.delete('/subject/type/:uuid', deleteSubejectType);
 
 // router.post('/calendar', createStuingCalendar); //สร้างตารางเรียน 
 // router.post('/holidayList', getHolidayCalendarList);
+// calendar(stuingtime management)
+
+
 // Holiday
 router.get('/holiday/:termId', getHolidayList); // Holiday List แต่ละเทอม
 router.get('/holidayauto', getHolidayListAuto); // Holiday List สำหรับ Auto วันหยุดราชกาล
@@ -107,5 +110,10 @@ router.get('/academicterms/:termId', getOneAcademicTerm); // ดึงอัน�
 router.put('/academicterms',updateTerm) // แก้ไข
 router.post('/academicYearTerm', createTerm); // สร้างปีการศึกษาและเทอม
 router.delete('/academicterms/:termId', deleteTerm); // ลบปีการศึกษาและเทอม
+
+//Full calendar
+router.get('/fullcalendarStudyTime/:classroomId',getFullCalendarStudyTime);
+router.get('/fullcalendarHoliday/:classroomId',fullCalendarHoliday);
+
 
 export default router;

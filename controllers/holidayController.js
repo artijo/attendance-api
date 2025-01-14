@@ -2,6 +2,40 @@ import { DateTime } from 'luxon';
 import { fecthHolidayDateTime } from '../helper/holidayApi.js';
 import db from '../prisma/client.js';
 
+export const fullCalendarHoliday = async (req, res) => {
+    const classroomId = req.params.classroomId;
+    try {
+        const classroom = await db.classrooms.findUnique({
+            where: {
+                classId: classroomId
+            },
+            select: {
+                termId: true
+            }
+        });
+        const holiday = await db.holiday.findMany({
+            where: {
+                termId: classroom.termId
+            },
+            orderBy:[
+                {
+                    startHolidayDate:'asc'
+                }
+            ]
+        });
+        const fullCalendarHoliday = holiday.map((holiday) => ({
+            title: holiday.holidayName,
+            start: holiday.startHolidayDate,
+            end: holiday.endHolidayDate,
+            allDay: true,
+            color: holiday.type === 'RATCHAKHAN' ? 'red' : 'blue'
+        }));
+        res.json(fullCalendarHoliday);
+    }catch(err){
+        console.error(err);
+    }
+};
+
 export const getHolidayList = async (req, res) => {
     const termId = req.params.termId;
     if (termId) {
@@ -9,7 +43,12 @@ export const getHolidayList = async (req, res) => {
             const holiday = await db.holiday.findMany({
                 where: {
                     termId: req.params.termId
-                }
+                },
+                orderBy:[
+                    {
+                        startHolidayDate:'asc'
+                    }
+                ]
             });
             res.json(holiday);
         } catch (err) {
