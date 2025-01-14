@@ -81,8 +81,14 @@ export const getTimeTableByRoom = async (req, res) => {
                             classId:true,
                             classLevel:true,
                             classRoom:true,
-                            academicYear:true,
-                            semester:true,
+                            term:{
+                                select:{
+                                    semester:true,
+                                    academicYear:true
+                                }
+                            },
+                            // academicYear:true,
+                            // semester:true,
                             leader:{
                                 select:{
                                     ldrId:true,
