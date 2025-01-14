@@ -13,7 +13,7 @@ export const createClassroom = async (req,res) => {
                         connect: {termId:body.termId}
                     },
                     // classTypeId:body.classTypeId,
-                    leader: body.leaderId?{connect:{leaderId:body.leaderId}}:undefined,
+                    leader: body.leaderId?{connect:{ldrId:body.leaderId}}:undefined,
                     classroomType:{connect:{classTypeId:body.classTypeId}}
                 }
             })
@@ -51,7 +51,7 @@ export const updateClassroom = async (req,res) => {
                         connect: {termId:body.termId}
                     },
                     classroomType:{connect:{classTypeId:body.classTypeId}},
-                    leader: body.leaderId?{connect:{leaderId:body.leaderId}}:undefined,
+                    leader: body.leaderId?{connect:{ldrId:body.leaderId}}:undefined,
                 }
             })
             body.teacherIds.forEach(async (teacherId) => {
