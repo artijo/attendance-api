@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 export function formatTime(stringTime) { // HH:MM:SS ->  [HH, MM, SS]
     const time = stringTime.split(':');
     return time;
@@ -8,4 +10,21 @@ export function formatDateYYYYMMDD(stringDate) {
     const month = stringDate.slice(4, 6);
     const day = stringDate.slice(6);
     return `${year}-${month}-${day}`;
+}
+
+
+export function daybetween(Start, End) {
+    const dates = [];
+    if (Start !== "" && End !== "") {
+        const startDate = DateTime.fromISO(Start);
+        const endDate = DateTime.fromISO(End);
+        let currentDate = startDate;
+        while (currentDate <= endDate) {
+            dates.push(currentDate.toISODate().split("-").join("-")); // เพิ่มวันที่ในรูปแบบ YYYY-MM-DD
+            currentDate = currentDate.plus({ days: 1 }); // เพิ่มวันทีละ 1
+        }
+    } else {
+        console.error("termStart or termEnd is not set!");
+    }
+    return dates;
 }
