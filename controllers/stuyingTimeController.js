@@ -7,6 +7,8 @@ export const createStudingTime = async (req, res) => {
     const body = req.body;
     const termId = body.termId;
     const holidayList = body.holidayList.map((holiday) => holiday.startDate);
+    const classroomids = body.classroomids;
+    console.log(classroomids);
     // console.log(termId);
     // Ex..term-2024-1
     // console.log(holidayList);
@@ -23,29 +25,11 @@ export const createStudingTime = async (req, res) => {
                 termId: termId
             },
         });
-        // console.log(academicYearTerm);
-        // {
-        //     termId: 'term-2024-1',
-        //     academicYear: 2025,
-        //     semester: 1,
-        //     termStart: 2025-05-15T00:00:00.000Z,
-        //     termEnd: 2025-09-09T00:00:00.000Z,
-        //     createdAt: 2025-01-14T14:28:07.634Z,
-        //     updatedAt: 2025-01-14T14:28:07.634Z
-        // }
-    
-        const classrooms = await db.classrooms.findMany({
-            where: {
-                term: {
-                    termId: termId
-                }
-            },
-        });
-        
+      
         const timetables = await db.timetable.findMany({
             where: {
                 classId: {
-                    in: classrooms.map((classroom) => classroom.classId)
+                    in: [...classroomids]
                 }
             },
             orderBy: [
@@ -137,6 +121,32 @@ export const getFullCalendarStudyTime = async (req, res) => {
     }
 };
 
+export const deleteStudingTime = async (req, res) => {
+    const classroomId = req.params.classroomId;
+    if(classroomId){
+        try{
+            const timetables = await db.timetable.findMany({
+                where: {
+                    classId: classroomId
+                },
+                select: {
+                    timetableId: true
+                }
+            });
+            const timetableId = timetables.map((timetable) => timetable.timetableId);
+            await db.studingTime.deleteMany({
+                where: {
+                    timetableId: {
+                        in: [...timetableId]
+                    }
+                }
+            });
+            res.json({msg:"Delete Studing Calendar Success"});
+        }catch(err){
+            console.error(err);
+        };
+    };
+};
 
 // export const createStuingCalendar = async (req, res) => {
 //     const { semester, termStart, termEnd, holiday } = req.body;

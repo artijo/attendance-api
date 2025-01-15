@@ -26,7 +26,7 @@ import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject
 // import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday ,updateHoliday} from "../controllers/stuyingTimeController.js";
 import { getAllAcademicTerms, createTerm, deleteTerm, getOneAcademicTerm,updateTerm } from "../controllers/termController.js";
 import { getHolidayListAuto, createHoliday, getHolidayList, deleteHoliday, getOneHoliday, updateHoliday, fullCalendarHoliday } from "../controllers/holidayController.js"
-import { createStudingTime, getFullCalendarStudyTime } from "../controllers/stuyingTimeController.js";
+import { createStudingTime, getFullCalendarStudyTime, deleteStudingTime } from "../controllers/stuyingTimeController.js";
 const router = Router();
 router.post('/auth/login', login);
 router.get('/auth/check', checkAuth);
@@ -85,6 +85,7 @@ router.put('/subject/type/:uuid', editSubjectType);
 router.delete('/subject/type/:uuid', deleteSubejectType);
 
 //stuyingTime Management
+router.delete('/studingtime/:classroomId', deleteStudingTime);
 router.post('/studingtime', createStudingTime); // สร้างปฎิทินการเรียนของทุกห้องเรียนในเทอมนั้น
 
 // router.delete('/studingtime', deleteStudingTime);
