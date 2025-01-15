@@ -10,7 +10,14 @@ import {
     createTeacher, getAllTeacher,
     updateTeacher, getTeacher, getAllDepartment, createDepartment, getDepartment, updateDepartment, deleteDepartment
 } from "../controllers/teacherController.js";
-import { getAcademicYearClassroom,createClassroom, getAllClassroom, getClassroom, getAllClassroomType, updateClassroom, createClassroomType, createClassroomMember, deleteClassroomMember, deleteClassroomType, updateClassroomType, updateClassroomMember } from "../controllers/classroomController.js";
+import { 
+    getAcademicYearClassroom,createClassroom, 
+    getAllClassroom, getClassroom, 
+    getAllClassroomType, updateClassroom, 
+    createClassroomType, createClassroomMember, 
+    deleteClassroomMember, deleteClassroomType, 
+    updateClassroomType, updateClassroomMember ,
+    getClassroomByAcademicYearTerm } from "../controllers/classroomController.js";
 import { getAllLeaders } from "../controllers/leaderController.js";
 
 import { featchDataForSeachbar } from "../controllers/adminController.js";
@@ -57,7 +64,7 @@ router.post('/classroom/member', createClassroomMember); // เพิ่มส�
 router.put('/classroom/member/:uuid', updateClassroomMember); // แก้ไขสมาชิกห้องเรียน
 router.delete('/classroom/member/:uuid', deleteClassroomMember); // ลบสมาชิกห้องเรียน
 router.get('/termAndAcademicYear', getAcademicYearClassroom); // List เทอมและ ปีการศึกษา
-
+router.get('/classrooms/byterm/:termId', getClassroomByAcademicYearTerm); // ดึงห้องเรียนตามปีการศึกษาและเทอม
 
 // leader Management
 router.get('/leaders', getAllLeaders); // ดึงข้อมูลทั้งหมด leader

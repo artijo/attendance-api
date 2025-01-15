@@ -248,6 +248,42 @@ export const deleteClassroomMember = async (req,res) => {
     };
 };
 
+export const getClassroomByAcademicYearTerm = async (req, res) => {
+    const termId = req.params.termId;
+    if(termId) {
+        try{
+            const classrooms = await db.classrooms.findMany({
+                where: {
+                    termId: termId
+                },
+                include: {
+                    classroomType: true,
+                    term: true,
+                    classroomMembers: {
+                        include: {
+                            student: true
+                        }
+                    },
+                    teacher: true,
+                    leader: true,
+                    timetable: {
+                        include: {
+                            subject: true,
+                        }
+                    }
+                },
+                orderBy:[{
+                    classLevel:"asc"},
+                    {classRoom:"asc"}
+                ]
+            });
+            res.json(classrooms);
+        }catch(err){
+            console.error(err)
+        };
+    };
+};
+
 export const getAcademicYearClassroom = async(req, res) => {
     function semesterSortUnqiueData(VALUE) {
         const uniqueData = [];
