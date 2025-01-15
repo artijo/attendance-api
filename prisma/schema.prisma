@@ -315,8 +315,9 @@ model ActivityType {
 }
 
 model ActivityTeacher {
-  actId     String   @unique
-  tchId     String   @unique
+  actTeacherId String  @id @default(uuid())
+  actId     String
+  tchId     String
   teacher   Teacher  @relation(fields: [tchId], references: [tchId])
   activity  Activity @relation(fields: [actId], references: [actId])
   createdAt DateTime @default(now())

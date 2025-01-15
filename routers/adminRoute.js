@@ -27,6 +27,8 @@ import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject
 import { getAllAcademicTerms, createTerm, deleteTerm, getOneAcademicTerm,updateTerm } from "../controllers/termController.js";
 import { getHolidayListAuto, createHoliday, getHolidayList, deleteHoliday, getOneHoliday, updateHoliday, fullCalendarHoliday } from "../controllers/holidayController.js"
 import { createStudingTime, getFullCalendarStudyTime, deleteStudingTime } from "../controllers/stuyingTimeController.js";
+import { getAllActivitiesByType } from "../controllers/activitiesController.js";
+
 const router = Router();
 router.post('/auth/login', login);
 router.get('/auth/check', checkAuth);
@@ -122,6 +124,10 @@ router.delete('/academicterms/:termId', deleteTerm); // ลบปีการศ
 //Full calendar
 router.get('/fullcalendarStudyTime/:classroomId',getFullCalendarStudyTime);
 router.get('/fullcalendarHoliday/:classroomId',fullCalendarHoliday);
+
+// Activities
+router.get('/activities/:type', getAllActivitiesByType);
+
 
 
 export default router;
