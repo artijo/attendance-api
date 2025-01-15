@@ -6,7 +6,7 @@ import departments from './jsonSeed/department.json' assert { type: 'json' };
 import classroomType from './jsonSeed/classroomType.json' assert { type: 'json' };
 import classrooms from './jsonSeed/classroom.json' assert { type: 'json' };
 import academicterm from './jsonSeed/academicterm.json' assert { type: 'json' };
-
+import activityTypes from './jsonSeed/activityType.json' assert { type: 'json' };
 
 import {
     hashPassword,
@@ -315,6 +315,14 @@ async function main() {
                 const attendanceMethodCreate = await db.attendanceMethod.create({data:attendanceMethod});
                 attendanceMethodIdArray.push(attendanceMethodCreate.attMethodId);
               };
+
+            //   seed activityType
+            
+            for(const activityType of activityTypes){
+                const activityTypeCreate = await db.activityType.create({data:activityType});
+                console.log(`Activity Type Created: ${activityTypeCreate.actTypeName}`);
+            }
+
               
     } catch (err) {
         console.error("Error during seeding process:", err);
