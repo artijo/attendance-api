@@ -33,6 +33,7 @@ model Student {
   editActivity   EditActivityParticipate[]
   createdAt      DateTime                  @default(now())
   updatedAt      DateTime                  @updatedAt
+  deletedAt      DateTime?
 }
 
 model Leader {
@@ -50,6 +51,7 @@ model Leader {
   editActivity   EditActivityParticipate[]
   createdAt      DateTime                  @default(now())
   updatedAt      DateTime                  @updatedAt
+  deletedAt      DateTime?
 }
 
 model Teacher {
@@ -73,6 +75,7 @@ model Teacher {
   editActParticipate EditActivityParticipate[]
   createdAt          DateTime                  @default(now())
   updatedAt          DateTime                  @updatedAt
+  deletedAt          DateTime?
 }
 
 model Department {
@@ -82,6 +85,7 @@ model Department {
   teacher   Teacher[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model Parent {
@@ -92,6 +96,7 @@ model Parent {
   student   StudentParent[]
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
+  deletedAt DateTime?
 }
 
 model StudentParent {
@@ -102,6 +107,7 @@ model StudentParent {
   parent    Parent   @relation(fields: [prntId], references: [prntId])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
 }
 
 model Subject {
@@ -117,6 +123,7 @@ model Subject {
   timetable   Timetable[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
 }
 
 model SubjectType {
@@ -127,6 +134,7 @@ model SubjectType {
   subject         Subject[]
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
 }
 
 model Classrooms {
@@ -146,6 +154,7 @@ model Classrooms {
   activity      ClassroomCanjoinActivity[]
   createdAt     DateTime                   @default(now())
   updatedAt     DateTime                   @updatedAt
+  deletedAt     DateTime?
 }
 
 model ClassroomMember {
@@ -158,6 +167,7 @@ model ClassroomMember {
   behaviourScore    Int   @default(100)  
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+  deletedAt DateTime?
 }
 
 
@@ -169,6 +179,7 @@ model ClassroomType {
   classroom         Classrooms[]
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
+  deletedAt         DateTime?
 }
 
 model Timetable {
@@ -185,6 +196,7 @@ model Timetable {
   studyTime   StudingTime[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
 }
 
 model StudingTime {
@@ -195,6 +207,9 @@ model StudingTime {
   editAttendance  EditAttendance[]
   leaveRequest    LeaveRequestStudingTime[]
   studingTimeDate DateTime
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  deletedAt       DateTime?
 }
 
 model Attendance {
@@ -218,6 +233,7 @@ model Attendance {
   leader        Leader?          @relation(fields: [leaderId], references: [ldrId])
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
+  deletedAt     DateTime?
 }
 
 model AttendanceMethod {
@@ -227,6 +243,7 @@ model AttendanceMethod {
   editAttendance EditAttendance[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
 }
 
 model EditAttendance {
@@ -249,6 +266,7 @@ model EditAttendance {
   leader        Leader?          @relation(fields: [leaderId], references: [ldrId])
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
+  deletedAt     DateTime?
 }
 
 model LeaveRequest {
@@ -267,6 +285,7 @@ model LeaveRequest {
   studingTime       LeaveRequestStudingTime[]
   createdAt         DateTime                  @default(now())
   updatedAt         DateTime                  @updatedAt
+  deletedAt         DateTime?
 }
 
 model LeaveRequestType {
@@ -275,6 +294,7 @@ model LeaveRequestType {
   leaveRequest  LeaveRequest[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
 }
 
 model LeaveRequestStudingTime {
@@ -284,6 +304,7 @@ model LeaveRequestStudingTime {
   studingTime  StudingTime  @relation(fields: [studyTimeId], references: [studyTimeId])
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
 }
 
 model Activity {
@@ -305,6 +326,7 @@ model Activity {
   editActParticipate EditActivityParticipate[]
   createdAt          DateTime                   @default(now())
   updatedAt          DateTime                   @updatedAt
+  deletedAt          DateTime?
 }
 
 model ActivityType {
@@ -313,6 +335,7 @@ model ActivityType {
   activity    Activity[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
 }
 
 model ActivityTeacher {
@@ -323,6 +346,7 @@ model ActivityTeacher {
   activity  Activity @relation(fields: [actId], references: [actId])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
 }
 
 model ClassroomCanjoinActivity {
@@ -333,6 +357,7 @@ model ClassroomCanjoinActivity {
   activity  Activity   @relation(fields: [actId], references: [actId])
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
 }
 
 model ActivityParticipate {
@@ -350,6 +375,7 @@ model ActivityParticipate {
   leader           Leader?  @relation(fields: [leaderId], references: [ldrId])
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  deletedAt        DateTime?
 }
 
 model EditActivityParticipate {
@@ -367,6 +393,7 @@ model EditActivityParticipate {
   leader           Leader?  @relation(fields: [leaderId], references: [ldrId])
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  deletedAt        DateTime?
 }
 
 model Holiday{
@@ -379,6 +406,7 @@ model Holiday{
   term AcademicTerms @relation(fields: [termId], references: [termId])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
 }
 
 model AcademicTerms {
@@ -391,6 +419,7 @@ model AcademicTerms {
   holiday Holiday[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
 }
 
 enum holidayType {
@@ -408,6 +437,7 @@ model Admin {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
 }
 
 enum EnumAttendanceStatus {
