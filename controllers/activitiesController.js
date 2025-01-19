@@ -46,6 +46,11 @@ export const getActivity = async (req, res) => {
                     include: {
                         student: true
                     }
+                },
+                classroom: {
+                    include: {
+                        classroom: true
+                    }
                 }
             }
         });
