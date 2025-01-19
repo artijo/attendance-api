@@ -290,13 +290,14 @@ model Activity {
   actId              String                     @id @default(uuid())
   actName            String
   actDate            DateTime
+  actDateEnd         DateTime
   actTypeId          String
   activityType       ActivityType               @relation(fields: [actTypeId], references: [actTypeId])
-  actStatus          String
+  actStatus          EnumActivityStatus
   actDesc            String?
   actLocation        String?
-  actStartTime       DateTime?
-  actEndTime         DateTime?
+  actStartTime       String?
+  actEndTime         String?
   joinLimit          Boolean
   teacher            ActivityTeacher[]
   classroom          ClassroomCanjoinActivity[]
@@ -429,4 +430,7 @@ enum EnumNameTitle {
   MS // นางสาว
 }
 
-
+enum EnumActivityStatus {
+  PROCESSING
+  FINISHED
+}

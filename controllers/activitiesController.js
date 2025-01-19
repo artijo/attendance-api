@@ -53,3 +53,32 @@ export const getActivity = async (req, res) => {
         console.error(error);
     };
 }
+
+export const getActivityType = async (req, res) => {
+    try {
+        const activityType = await db.activityType.findMany();
+        return res.json(activityType)
+    } catch (error) {
+        console.error(error);
+    };
+}
+
+export const createActivity = async (req, res) => {
+    const { actName, actDate, actTime, actLocation, actDescription, actTypeId, tchId } = req.body;
+    try {
+        const activity = await db.activity.create({
+            data: {
+                actName,
+                actDate,
+                actTime,
+                actLocation,
+                actDescription,
+                actTypeId,
+                tchId
+            }
+        });
+        return res.json(activity)
+    } catch (error) {
+        console.error(error);
+    };
+}
