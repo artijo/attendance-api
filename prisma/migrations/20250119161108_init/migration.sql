@@ -310,13 +310,13 @@ CREATE TABLE `ActivityTeacher` (
 
 -- CreateTable
 CREATE TABLE `ClassroomCanjoinActivity` (
+    `classCanjoinId` VARCHAR(191) NOT NULL,
     `classId` VARCHAR(191) NOT NULL,
     `actId` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `ClassroomCanjoinActivity_classId_key`(`classId`),
-    UNIQUE INDEX `ClassroomCanjoinActivity_actId_key`(`actId`)
+    PRIMARY KEY (`classCanjoinId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
