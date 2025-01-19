@@ -63,6 +63,7 @@ export const createStudingTime = async (req, res) => {
                 };
             }
         }
+        res.json({msg:"Create Studing Calendar Success"});
     }catch(err){
         console.error(err);
     };

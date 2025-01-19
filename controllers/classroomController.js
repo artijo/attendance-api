@@ -318,3 +318,27 @@ export const getAcademicYearClassroom = async(req, res) => {
         console.error(err)
     }
 }
+
+export const getClassroomFilterByAcademicYearAndLevel = async (req, res) => {
+    const academicYear = req.params.academicYear;
+    const classroomLevel = req.params.classroomLevel;
+    console.log(academicYear, classroomLevel);
+    try{
+        const classrooms = await db.classrooms.findMany({
+            where:{
+                AND: {
+                    termId:academicYear,
+                    classLevel:parseInt(classroomLevel)
+                }
+            },
+            orderBy:[{
+                classLevel:"asc"},
+                {classRoom:"asc"}
+            ]
+        });
+        // console.log(classrooms);
+        res.json(classrooms);
+    }catch(err){
+        console.error(err)
+    };
+};

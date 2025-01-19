@@ -17,11 +17,11 @@ import {
     createClassroomType, createClassroomMember, 
     deleteClassroomMember, deleteClassroomType, 
     updateClassroomType, updateClassroomMember ,
-    getClassroomByAcademicYearTerm } from "../controllers/classroomController.js";
+    getClassroomByAcademicYearTerm, getClassroomFilterByAcademicYearAndLevel } from "../controllers/classroomController.js";
 import { getAllLeaders } from "../controllers/leaderController.js";
 
 import { featchDataForSeachbar } from "../controllers/adminController.js";
-import { getTimeTableByRoom, deleteTimetable, createTimetable } from "../controllers/timetableController.js";
+import { getTimeTableByRoom, deleteTimetable, createTimetable, getSubjectTimetable } from "../controllers/timetableController.js";
 import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject, createSubjectType, deleteSubejectType, editSubjectType} from "../controllers/subjectController.js";
 // import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday ,updateHoliday} from "../controllers/stuyingTimeController.js";
 import { getAllAcademicTerms, createTerm, deleteTerm, getOneAcademicTerm,updateTerm } from "../controllers/termController.js";
@@ -67,7 +67,7 @@ router.put('/classroom/member/:uuid', updateClassroomMember); // แก้ไข
 router.delete('/classroom/member/:uuid', deleteClassroomMember); // ลบสมาชิกห้องเรียน
 router.get('/termAndAcademicYear', getAcademicYearClassroom); // List เทอมและ ปีการศึกษา
 router.get('/classrooms/byterm/:termId', getClassroomByAcademicYearTerm); // ดึงห้องเรียนตามปีการศึกษาและเทอม
-
+router.get('/classrooms/filterTA/:academicYear/:classroomLevel', getClassroomFilterByAcademicYearAndLevel);
 // leader Management
 router.get('/leaders', getAllLeaders); // ดึงข้อมูลทั้งหมด leader
 
@@ -76,6 +76,7 @@ router.get('/search', featchDataForSeachbar);
 router.get('/timetableR', getTimeTableByRoom);
 router.post('/timetable', createTimetable);
 router.delete('/timetable/:timetableId', deleteTimetable);
+router.get('/subjectTimetable/:classroomId', getSubjectTimetable);
 // subject Management
 router.get('/subject/:UUID', getSubject);
 router.get('/subjects', getAllSubject);

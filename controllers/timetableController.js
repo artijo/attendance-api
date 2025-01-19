@@ -193,6 +193,48 @@ export const deleteTimetable =async (req, res) => {
     };
 };
 
+export const getSubjectTimetable = async (req, res) => {
+    const classroomId = req.params.classroomId;
+    console.log(classroomId);
+    if(classroomId){
+        try{
+            const timetables = await db.timetable.findMany({
+                where:{
+                    classId : classroomId
+                },
+                orderBy: [
+                    {dayOfWeek : 'asc'},
+                    {timeStart : 'asc'}
+                ],
+                select:{
+                    subject:{
+                        select:{
+                            subId:true,
+                            subNameEng:true,
+                            subNameThai:true,
+                            subCode:true,
+                            subCredit:true,
+                            teacher:{
+                                select:{
+                                    tchId:true,
+                                    fName:true,
+                                    lName:true,
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            const listSubject = timetables.map((item) => item.subject);
+            const uniqueSubject = listSubject.filter((value, index, self) => self.findIndex((item) => item.subId === value.subId) === index);
+            console.log(listSubject);
+            res.json(uniqueSubject);   
+        }catch(err){
+            console.error(err);
+        };
+    };
+};
+
 
 export const getTimeTable = async (req, res) => { // ใช้สำหรับการส่งข้อมูลตารางเรียนว่าวันนั้นเรียนวิชาอะไรบ้าง
     const classId = req.params.classroomId;

@@ -22,6 +22,9 @@ export const getOneAcademicTerm = async (req, res) => {
             const academicTerm = await db.academicTerms.findFirst({
                 where:{
                     termId:String(termId)
+                },
+                include:{
+                    holiday: true
                 }
             });
             res.json(academicTerm);
