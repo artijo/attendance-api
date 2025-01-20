@@ -163,3 +163,88 @@ export const attendanceHistorySearchByTermAndSubjectId = async (req, res) => {
     };
 };
 
+export const getAttendenceBySubject = async (req, res) => {
+    const subjectId = req.params.subjectId;
+    const classroomId = req.params.classroomId;
+    if(subjectId) {
+        try{
+            const timetables = await db.timetable.findMany({
+                where:{
+                    AND:{
+                        subId:subjectId,
+                        classId:classroomId
+                    }
+                    
+                },
+                orderBy: [
+                    {dayOfWeek : 'asc'},
+                    {timeStart : 'asc'}
+                ],
+            });
+            const student = await db.classroomMember.findMany({
+                where:{
+                    classId:classroomId
+                },
+                select:{
+                    stdId:true,
+                    stdNo:true,
+                    student:{
+                    
+                        select:{    
+                            fName:true,
+                            lName:true,
+                            attendance:true
+                        }
+                    }
+                },
+                orderBy:{
+                    stdNo:'asc'
+                }
+            });
+            const stuidingTime = await db.studingTime.findMany({
+                where: {
+                    timetableId: {
+                        in: timetables.map((timetable) => timetable.timetableId)
+                    }
+                },
+                orderBy: {
+                    studingTimeDate:'asc'
+                }
+            });
+
+            const newData = () => {
+                const newStudent = student.map((item) => {
+                    const attendence = item.student.attendance.map((item) => item.studingTimeId);
+                    const Attendence = stuidingTime.map((studTime) => {
+                        if(attendence.includes(studTime.studyTimeId)){
+                            return {
+                                studyTimeId:studTime.studyTimeId,
+                                attId:item.student.attendance.find((att) => att.studingTimeId === studTime.studyTimeId).attId,
+                                attStatus:item.student.attendance.find((att) => att.studingTimeId === studTime.studyTimeId).attStatus,
+                                studingTimeDate:studTime.studingTimeDate
+                            }
+                        }else{
+                            return {
+                                studyTimeId:studTime.studyTimeId,
+                                attId:null,
+                                attStatus:null,
+                                studingTimeDate:studTime.studingTimeDate
+                            };
+                        };
+                    });
+                    return {
+                        stdId:item.stdId,
+                        stdNo:item.stdNo,
+                        fName:item.student.fName,
+                        lName:item.student.lName,
+                        attendance:Attendence
+                    };
+                });
+                return newStudent;
+            }
+            res.json(newData());
+        }catch(err){
+            console.error(err);
+        };
+    };
+}; 

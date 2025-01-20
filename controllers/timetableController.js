@@ -195,7 +195,6 @@ export const deleteTimetable =async (req, res) => {
 
 export const getSubjectTimetable = async (req, res) => {
     const classroomId = req.params.classroomId;
-    console.log(classroomId);
     if(classroomId){
         try{
             const timetables = await db.timetable.findMany({
@@ -207,6 +206,11 @@ export const getSubjectTimetable = async (req, res) => {
                     {timeStart : 'asc'}
                 ],
                 select:{
+                    classroom:{
+                        select:{
+                            classId:true
+                        }
+                    },
                     subject:{
                         select:{
                             subId:true,
@@ -227,7 +231,7 @@ export const getSubjectTimetable = async (req, res) => {
             });
             const listSubject = timetables.map((item) => item.subject);
             const uniqueSubject = listSubject.filter((value, index, self) => self.findIndex((item) => item.subId === value.subId) === index);
-            console.log(listSubject);
+            // console.log([...uniqueSubject]);
             res.json(uniqueSubject);   
         }catch(err){
             console.error(err);

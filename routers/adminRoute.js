@@ -28,7 +28,7 @@ import { getAllAcademicTerms, createTerm, deleteTerm, getOneAcademicTerm,updateT
 import { getHolidayListAuto, createHoliday, getHolidayList, deleteHoliday, getOneHoliday, updateHoliday, fullCalendarHoliday } from "../controllers/holidayController.js"
 import { createStudingTime, getFullCalendarStudyTime, deleteStudingTime } from "../controllers/stuyingTimeController.js";
 import { getAllActivitiesByType, getActivity, getActivityType, createActivity } from "../controllers/activitiesController.js";
-
+import {getAttendenceBySubject} from "../controllers/attendenceController.js";
 const router = Router();
 router.post('/auth/login', login);
 router.get('/auth/check', checkAuth);
@@ -77,6 +77,7 @@ router.get('/timetableR', getTimeTableByRoom);
 router.post('/timetable', createTimetable);
 router.delete('/timetable/:timetableId', deleteTimetable);
 router.get('/subjectTimetable/:classroomId', getSubjectTimetable);
+// router.get('/timetable/bysubId/:subjectId', getTimeTableBySubjectId);
 // subject Management
 router.get('/subject/:UUID', getSubject);
 router.get('/subjects', getAllSubject);
@@ -131,6 +132,9 @@ router.post('/activity', createActivity);
 router.get('/activities/:type', getAllActivitiesByType);
 router.get('/activity/:uuid', getActivity);
 router.get('/activityType', getActivityType);
+
+//Attendence
+router.get('/attendence/:subjectId/:classroomId', getAttendenceBySubject);
 
 
 
