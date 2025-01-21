@@ -1,6 +1,5 @@
 import { Router } from "express";
 
-import { login, checkAuth, getTokenformRefreshToken } from "../controllers/adminAuthController.js";
 import {
     createStudent,getAllStudent,
     updateStudent, getStudent,
@@ -30,9 +29,6 @@ import { createStudingTime, getFullCalendarStudyTime, deleteStudingTime } from "
 import { getAllActivitiesByType, getActivity, getActivityType, createActivity, editActivity } from "../controllers/activitiesController.js";
 import {getAttendenceBySubject} from "../controllers/attendenceController.js";
 const router = Router();
-router.post('/auth/login', login);
-router.get('/auth/check', checkAuth);
-router.post('/auth/refresh', getTokenformRefreshToken);
 
 // students Management
 router.get('/student/:uuid', getStudent)

@@ -8,7 +8,7 @@ import cookieParser from "cookie-parser";
 import studentRouter from './routers/studentRoute.js';
 import teacherRouter from './routers/teacherRoute.js';
 import adminRouter from './routers/adminRoute.js';
-import { DateTime } from 'luxon';
+import authRouter from './routers/authRouter.js';
 
 
 
@@ -39,6 +39,7 @@ app.use(morgan('dev'));
 dotenv.config();
 
 // use routes
+app.use('/auth', authRouter);
 app.use('/s',studentRouter); //studentRoute s= student
 app.use('/t', teacherRouter); // teacherRoute t= teacher
 app.use('/a', adminRouter);
