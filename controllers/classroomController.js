@@ -76,6 +76,9 @@ export const updateClassroom = async (req,res) => {
 export const getAllClassroom = async (req,res) => {
     try{
         const classroom = await db.classrooms.findMany({
+            where: {
+                deletedAt: null
+            },
             include: {
                 classroomType: true,
                 term: true
@@ -84,7 +87,6 @@ export const getAllClassroom = async (req,res) => {
                 classLevel:"asc"},
                 {classRoom:"asc"
             }]
-            
         });
         return res.json(classroom)
     }catch(error){
@@ -97,12 +99,16 @@ export const getClassroom = async (req,res) => {
     try{
         const classroom = await db.classrooms.findUnique({
             where:{
-                classId:uuid
+                classId:uuid,
+                deletedAt: null
             },
             include: {
                 classroomType: true,
                 term: true,
                 classroomMembers: {
+                    where: {
+                        deletedAt: null
+                    },
                     include: {
                         student: true
                     }
@@ -110,6 +116,9 @@ export const getClassroom = async (req,res) => {
                 teacher: true,
                 leader: true,
                 timetable: {
+                    where: {
+                        deletedAt: null
+                    },
                     include: {
                         subject: true,
                     }
@@ -122,11 +131,12 @@ export const getClassroom = async (req,res) => {
     };
 };
 
-
-
 export const getAllClassroomType = async (req,res) => {
     try{
         const classroomType = await db.classroomType.findMany({
+            where: {
+                deletedAt: null
+            }
         });
         res.json(classroomType)
     }catch(error){
@@ -178,9 +188,12 @@ export const deleteClassroomType = async (req,res) => {
     const uuid = req.params.uuid;
     if(uuid){
         try{
-            await db.classroomType.delete({
+            await db.classroomType.update({
                 where:{
                     classTypeId:uuid
+                },
+                data: {
+                    deletedAt: new Date()
                 }
             });
             return res.json({message:"Delete Classroom Type Success"})
@@ -235,9 +248,12 @@ export const deleteClassroomMember = async (req,res) => {
     const uuid = req.params.uuid;
     if(uuid){
         try{
-            await db.classroomMember.delete({
+            await db.classroomMember.update({
                 where:{
                     classRoomMemeberId:uuid
+                },
+                data: {
+                    deletedAt: new Date()
                 }
             });
         
@@ -254,12 +270,16 @@ export const getClassroomByAcademicYearTerm = async (req, res) => {
         try{
             const classrooms = await db.classrooms.findMany({
                 where: {
-                    termId: termId
+                    termId: termId,
+                    deletedAt: null
                 },
                 include: {
                     classroomType: true,
                     term: true,
                     classroomMembers: {
+                        where: {
+                            deletedAt: null
+                        },
                         include: {
                             student: true
                         }
@@ -267,6 +287,9 @@ export const getClassroomByAcademicYearTerm = async (req, res) => {
                     teacher: true,
                     leader: true,
                     timetable: {
+                        where: {
+                            deletedAt: null
+                        },
                         include: {
                             subject: true,
                         }
@@ -309,6 +332,9 @@ export const getAcademicYearClassroom = async(req, res) => {
     }
     try{
         const classrooms = await db.classrooms.findMany({
+            where: {
+                deletedAt: null
+            },
             orderBy:{
                 academicYear:'asc'
             }
@@ -322,13 +348,13 @@ export const getAcademicYearClassroom = async(req, res) => {
 export const getClassroomFilterByAcademicYearAndLevel = async (req, res) => {
     const academicYear = req.params.academicYear;
     const classroomLevel = req.params.classroomLevel;
-    console.log(academicYear, classroomLevel);
     try{
         const classrooms = await db.classrooms.findMany({
             where:{
                 AND: {
                     termId:academicYear,
-                    classLevel:parseInt(classroomLevel)
+                    classLevel:parseInt(classroomLevel),
+                    deletedAt: null
                 }
             },
             orderBy:[{
@@ -336,7 +362,6 @@ export const getClassroomFilterByAcademicYearAndLevel = async (req, res) => {
                 {classRoom:"asc"}
             ]
         });
-        // console.log(classrooms);
         res.json(classrooms);
     }catch(err){
         console.error(err)
