@@ -10,6 +10,9 @@ import teacherRouter from './routers/teacherRoute.js';
 import adminRouter from './routers/adminRoute.js';
 import authRouter from './routers/authRouter.js';
 
+// import middleware
+import { isAuth } from './middleware.js';
+
 
 
 const PORT = process.env.PORT || 3000;
@@ -42,7 +45,7 @@ dotenv.config();
 app.use('/auth', authRouter);
 app.use('/s',studentRouter); //studentRoute s= student
 app.use('/t', teacherRouter); // teacherRoute t= teacher
-app.use('/a', adminRouter);
+app.use('/a', isAuth, adminRouter);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
