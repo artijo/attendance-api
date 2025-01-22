@@ -248,3 +248,106 @@ export const getAttendenceBySubject = async (req, res) => {
         };
     };
 }; 
+
+export const getAttendenceByDate = async (req, res) => {
+    const date = req.params.date;
+    const classroomId = req.params.classroomId;
+    if(date && classroomId) {
+        try{
+            const weekdayOnDateInput = DateTime.fromISO(`${date}T00:00:00Z`, { zone: 'UTC' }).weekday;
+            const timetables = await db.timetable.findMany({
+                where:{
+                    AND:{
+                        classId:classroomId,
+                        dayOfWeek:weekdayOnDateInput
+                    }
+                },
+            });
+
+            const stuidingTime = await db.studingTime.findMany({
+                where: {
+                    AND:[
+                        {timetableId: {
+                            in: timetables.map((timetable) => timetable.timetableId)
+                        }},
+                        {studingTimeDate:{
+                            gte:DateTime.fromISO(`${date}T00:00:00Z`, { zone: 'UTC' }),
+                        }}
+                    ]
+                },
+                include:{
+                    timetable:{
+                        include:{
+                            subject:true
+                        }
+                    }
+                },
+                orderBy: {
+                    studingTimeDate:'asc'
+                }
+            });
+            if(stuidingTime.length == 0) return res.json([]);
+            // console.log(stuidingTime[0].timetable.subject);
+
+            const student = await db.classroomMember.findMany({
+                where:{
+                    classId:classroomId
+                },
+                select:{
+                    stdId:true,
+                    stdNo:true,
+                    student:{
+                        select:{    
+                            fName:true,
+                            lName:true,
+                            attendance:true
+                        }
+                    }
+                },
+                orderBy:{
+                    stdNo:'asc'
+                }
+            });
+
+            const newData = () => {
+                const newStudent = student.map((item) => {
+                    const attendence = item.student.attendance.map((item) => item.studingTimeId);
+                    const Attendence = stuidingTime.map((studTime) => {
+                        if(attendence.includes(studTime.studyTimeId)){
+                            return {
+                                studyTimeId:studTime.studyTimeId,
+                                subjectName:studTime.timetable.subject.subNameThai,
+                                subjectCode:studTime.timetable.subject.subCode,
+                                attId:item.student.attendance.find((att) => att.studingTimeId === studTime.studyTimeId).attId,
+                                attStatus:item.student.attendance.find((att) => att.studingTimeId === studTime.studyTimeId).attStatus,
+                                studingTimeDate:studTime.studingTimeDate
+                            }
+                        }else{
+                            return {
+                                studyTimeId:studTime.studyTimeId,
+                                subjectName:studTime.timetable.subject.subNameThai,
+                                subjectCode:studTime.timetable.subject.subCode,
+                                attId:null,
+                                attStatus:null,
+                                studingTimeDate:studTime.studingTimeDate
+                            };
+                        };
+                    });
+                    return {
+                        stdId:item.stdId,
+                        stdNo:item.stdNo,
+                        fName:item.student.fName,
+                        lName:item.student.lName,
+                        attendance:Attendence
+                    };
+                });
+                return newStudent;
+            }
+            const data = newData();
+            console.log(data[0].attendance);
+            res.json(data);  
+        }catch(err){
+            console.error(err);
+        };
+    }
+};
