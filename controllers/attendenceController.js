@@ -247,7 +247,7 @@ export const getAttendenceBySubject = async (req, res) => {
             console.error(err);
         };
     };
-}; 
+};
 
 export const getAttendenceByDate = async (req, res) => {
     const date = req.params.date;
@@ -287,7 +287,6 @@ export const getAttendenceByDate = async (req, res) => {
                 }
             });
             if(stuidingTime.length == 0) return res.json([]);
-            // console.log(stuidingTime[0].timetable.subject);
 
             const student = await db.classroomMember.findMany({
                 where:{

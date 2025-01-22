@@ -113,6 +113,7 @@ router.delete('/holiday/:holidayId', deleteHoliday); // ลบวันหยุ
 
 
 // AcademicYear And Term
+
 router.get('/academicterms', getAllAcademicTerms); // List เทอมและ ปีการศึกษา
 router.get('/academicterms/:termId', getOneAcademicTerm); // ดึงอันเดียว
 router.put('/academicterms',updateTerm) // แก้ไข
