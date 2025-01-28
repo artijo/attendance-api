@@ -13,7 +13,7 @@ export const createStudent = async (req, res) => { // สร้างราย�
                     lName:body.lName,
                     email:body.email,
                     tel:body.tel,
-                    cityzenId:body.cityzenId,
+                    // cityzenId:body.cityzenId,
                 }
             });
             res.json({message: `สร้าง ${student.fName} ${student.lName} แล้ว`});
@@ -53,7 +53,7 @@ export const createStudentWithFile = async (req, res) => {
                 lName: item.lastName,
                 email: item.email || null,
                 tel: item.tel || null,
-                cityzenId: item.cityzenId || null,
+                // cityzenId: item.cityzenId || null,
             })),
             skipDuplicates: true
         });
@@ -233,7 +233,7 @@ export const updateStudent = async(req, res) => {
                     lName:body.lName,
                     email:body.email,
                     tel:body.tel,
-                    cityzenId:body.cityzenId,
+                    // cityzenId:body.cityzenId,
                 }
             });
             res.json(student);
@@ -257,7 +257,7 @@ export const getStudentwithoutClassroom = async (req, res) => {
                 lName: true,
                 email: true,
                 tel: true,
-                cityzenId: true
+                // cityzenId: true
             },
             orderBy: {
                 stdId: 'asc'
