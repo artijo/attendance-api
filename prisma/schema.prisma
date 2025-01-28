@@ -23,7 +23,7 @@ model Student {
   lName          String
   email          String?                   @unique
   tel            String?                   @unique
-  cityzenId      String?                   @unique
+  // cityzenId      String?                   @unique
   parent         StudentParent[]
   attendance     Attendance[]
   editAttendance EditAttendance[]
@@ -320,6 +320,7 @@ model Activity {
   actStartTime       String?
   actEndTime         String?
   joinLimit          Boolean
+  joinLimitNumber    Int?
   teacher            ActivityTeacher[]
   classroom          ClassroomCanjoinActivity[]
   actParticipate     ActivityParticipate[]
