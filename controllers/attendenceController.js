@@ -344,7 +344,7 @@ export const getAttendenceByDate = async (req, res) => {
                 return newStudent;
             }
             const data = newData();
-            console.log(data[0].attendance);
+            // console.log(data[0].attendance);
             res.json(data);  
         }catch(err){
             console.error(err);
@@ -434,7 +434,7 @@ export const getAttendenceSummaryByClassroom = async (req, res) => {
                     // attendence:attendence
                 }
             })
-            console.log(summaryList);
+            // console.log(summaryList);
             res.json(summaryList);
         }catch(err){
             console.error(err);
@@ -442,5 +442,15 @@ export const getAttendenceSummaryByClassroom = async (req, res) => {
     }else{
         res.status(404).json({msg:"no classroomId"})
     }
-    
 };
+
+export const getAttendenceSummaryByPerson = async (req, res) => {
+    const studentId = req.params.studentId;
+    if(studentId){
+        try{
+
+        }catch(error){
+            console.error(error);
+        }
+    }
+}

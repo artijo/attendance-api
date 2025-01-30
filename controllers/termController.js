@@ -50,10 +50,13 @@ export const createTerm = async (req, res) => {
                     termEnd:termEnd
                 }
             });
-            res.json({msg: "create acadamicyear and term 100%"});
+            res.status(200).json({message:"สร้างเทอมปีการศึกษาสำเร็จ"});
         }catch(error){
             console.error(error);
+            res.status(500).json({message:"Error: เกิดข้อผิดพลาดในการสร้างเทอมปีการศึกษา"});
         };
+    }else{
+        res.status(400).json({message: "กรุณากรอกข้อมูลให้ถูกต้องหรือครบถ้วน"})
     }
     
 };
@@ -78,11 +81,14 @@ export const updateTerm = async (req, res) => {
                     termEnd:termEnd
                 }
             });
-            res.json({msg:"update term 100%"});
+            res.status(200).json({ message:"แก้ไขปีการศึกษาสำเร็จ" });
         }catch(error){
             console.error(error);
+            res.status(500).json({ message:"Error: เกิดข้อผิดพลาดในการแก้ไขเทอมปีการศึกษา" })
         };
-    };
+    }else{
+        res.status(400).json({message: "กรุณากรอกข้อมูลให้ถูกต้องหรือครบถ้วน"})
+    }
 
 };
 
@@ -90,14 +96,15 @@ export const deleteTerm = async (req, res) => {
     const termId = req.params.termId;
     if(termId){
         try{
-            await db.academicTerms.delete({
+            const academicTerm = await db.academicTerms.delete({
                 where:{
                     termId: String(termId)
                 }
             });
-            res.json({msg:"delete term 100%"});
+            res.status(200).json({message : `ลบ ปีการศึกษา${academicTerm.academicYear} เทอม ${academicTerm.semester} สำเร็จ`});
         }catch(error){
             console.error(error);
+            res.status(500).json({ message : "ไม่สามารถลบปีการศึกษาเทอมได้"});
         };
     };
 };
