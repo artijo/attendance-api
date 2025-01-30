@@ -240,7 +240,6 @@ export const createDepartment = async (req, res) => {
         try{
             const department = await db.department.create({
                 data:{
-                    deptCode:body.deptCode,
                     deptName:body.deptName
                 }
             });
@@ -262,7 +261,6 @@ export const updateDepartment = async (req, res) => {
                     deptId: uuid
                 },
                 data:{
-                    deptCode: body.deptCode,
                     deptName: body.deptName
                 }
             });

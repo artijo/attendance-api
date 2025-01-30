@@ -80,7 +80,7 @@ model Teacher {
 
 model Department {
   deptId    String    @id @default(uuid())
-  deptCode  String    @unique
+  // deptCode  String    @unique
   deptName  String
   teacher   Teacher[]
   createdAt DateTime  @default(now())

@@ -165,7 +165,6 @@ async function main() {
         for (const department of departments) {
             const departmentCreate = await db.department.create({
                 data: {
-                    deptCode: department.deptCode,
                     deptName: department.deptName,
                 },
             });
