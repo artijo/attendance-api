@@ -23,3 +23,42 @@ export const handdleErrorDuplicateKeyStudent = (req, res, err) => {
     }
     return res.status(500).json({message: "เกิดข้อผิดพลาดในการสร้างรายชื่อนักเรียน"});
 }
+
+export async function inputTeacherForm(data) {
+    const schema = vine.object({
+        tchCode: vine.string(),
+        fName: vine.string(),
+        lName: vine.string(),
+        email: vine.string().email().nullable(),
+        tel: vine.string().nullable(),
+        password: vine.string().minLength(8).maxLength(32),
+    });
+    return await vine.validate({ schema, data });
+}
+
+export const inputUpdateTeacherForm = async (data) => {
+    if(!data.password){
+        data.password = null;
+    }
+    const schema = vine.object({
+        tchCode: vine.string(),
+        fName: vine.string(),
+        lName: vine.string(),
+        email: vine.string().email().nullable(),
+        tel: vine.string().nullable(),
+        password: vine.string().minLength(8).maxLength(32).nullable(),
+    });
+    return await vine.validate({ schema, data });
+}
+
+export const handdleErrorDuplicateKeyTeacher = (req, res, err) => {
+    if(err.code === 'P2002'){
+        switch(err.meta.target){
+            case 'Teacher_email_key': return res.status(400).json({email: "duplicate"});
+            case 'Teacher_tel_key': return res.status(400).json({tel: "duplicate"});
+            case 'Teacher_tchCode_key': return res.status(400).json({tchCode: "duplicate"});
+            default: return res.status(500).json({message: "เกิดข้อผิดพลาดในการสร้างรายชื่อครู"});
+        }
+    }
+    return res.status(500).json({message: "เกิดข้อผิดพลาดในการสร้างรายชื่อครู"});
+}

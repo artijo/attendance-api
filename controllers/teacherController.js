@@ -1,39 +1,37 @@
 import db from '../prisma/client.js';
-import fs from 'fs';
-//
 import path from 'path';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-//
-
 import {
     hashPassword,
     comparePassword
 } from '../helper/bcrypt.js';
+import { inputTeacherForm, inputUpdateTeacherForm, handdleErrorDuplicateKeyTeacher } from '../validator.js';
 
 import {
     createExcelSubjectAttendence
 } from '../helper/excel.js'
 
 export const createTeacher = async (req, res) => {
-    const body = req.body;
-    const password = await hashPassword(body.password) ;// รหัสผ่่านที่ผ่านการเข้ารหัสแล้วเรียบร้อยแล้ว
+    let body = req.body;
     if(body){
         try{
+            body = await inputTeacherForm(body);
+            const password = await hashPassword(body.password) ;// รหัสผ่่านที่ผ่านการเข้ารหัสแล้วเรียบร้อยแล้ว
             const teacher = await db.teacher.create({
                 data:{
                     fName:body.fName,
                     lName:body.lName,
                     password:password,
-                    email:body.email,
-                    tel:body.tel,
+                    email:body.email == '' ? null : body.email,
+                    tel:body.tel == '' ? null : body.tel,
                     tchCode:body.tchCode
                 }
             });
             res.json(teacher);
         }catch(err){
-            console.log(err);
+            handdleErrorDuplicateKeyTeacher(req, res, err);
         }
     };
 };
@@ -55,19 +53,20 @@ export const getAllTeacher = async (req, res) => {
 }
 
 export const updateTeacher = async (req, res) => {
-    const body = req.body;
+    let body = req.body;
     const {uuid} = req.params;
     if(body){
         try{
+            body = await inputUpdateTeacherForm(body);
             let updateData = {
                 fName: body.fName,
                 lName: body.lName,
-                email: body.email,
-                tel: body.tel,
+                email: body.email == '' ? null : body.email,
+                tel: body.tel == '' ? null : body.tel,
                 tchCode: body.tchCode
             };
             
-            if (body.password) {
+            if (body.password || body.password === '') {
                 const hashedPassword = await hashPassword(body.password);
                 updateData.password = hashedPassword;
             }
@@ -80,7 +79,7 @@ export const updateTeacher = async (req, res) => {
             });
             res.json(teacher);
         }catch(err){
-            console.log(err);
+            handdleErrorDuplicateKeyTeacher(req, res, err);
         }
     };
 }
