@@ -1,10 +1,11 @@
 import db from '../prisma/client.js';
+import { inputStudentForm, handdleErrorDuplicateKeyStudent } from '../validator.js';
 
 export const createStudent = async (req, res) => { // สร้างรายชื่อนักเรียนรายบุคคล
     let body = req.body;
-    if (body.cityzenId === "") body.cityzenId = null;
     if(body){
         try{
+            body = await inputStudentForm(body);
             const student = await db.student.create({
                 data:{
                     stdId:body.stdId,
@@ -18,9 +19,9 @@ export const createStudent = async (req, res) => { // สร้างราย�
             });
             res.json({message: `สร้าง ${student.fName} ${student.lName} แล้ว`});
         }catch(err){
-            console.error(err);
+            handdleErrorDuplicateKeyStudent(req, res, err);
         }
-    };
+    }
 };
 
 export const createStudentWithFile = async (req, res) => {
@@ -208,9 +209,13 @@ export const deleteStudent = async (req, res) => {
     const uuid = req.params.uuid;
     if(uuid){
         try{
-            await db.student.delete({
+            //soft delete
+            const student = await db.student.update({
                 where:{
                     stdId:uuid
+                },
+                data:{
+                    deletedAt:new Date()
                 }
             });
         }catch(err){
@@ -220,9 +225,10 @@ export const deleteStudent = async (req, res) => {
 };
 
 export const updateStudent = async(req, res) => {
-    const body = req.body;
+    let body = req.body;
     if(body);{
         try{
+            body = await inputStudentForm(body);
             const student = await db.student.update({
                 where:{
                     stdId: String(body.stdId)
@@ -231,14 +237,15 @@ export const updateStudent = async(req, res) => {
                     title:body.title,
                     fName:body.fName,
                     lName:body.lName,
-                    email:body.email,
-                    tel:body.tel,
+                    email:body.email == "" ? null : body.email,
+                    tel:body.tel == "" ? null : body.tel,
                     // cityzenId:body.cityzenId,
                 }
             });
             res.json(student);
         }catch(error){
             console.error(error);
+            handdleErrorDuplicateKeyStudent(req, res, error);
         };
     };
 };
