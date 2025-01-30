@@ -299,6 +299,7 @@ export const getAttendenceByDate = async (req, res) => {
                         select:{    
                             fName:true,
                             lName:true,
+                            stdId:true,
                             attendance:true
                         }
                     }
@@ -349,4 +350,97 @@ export const getAttendenceByDate = async (req, res) => {
             console.error(err);
         };
     }
+};
+
+export const getAttendenceSummaryByClassroom = async (req, res) => {
+    const classroomId = req.params.classroomId;
+    // console.log(classroomId);
+
+    if(classroomId){
+        try{
+
+            const timetables = await db.timetable.findMany({
+                where:{
+                    classId:classroomId
+                },
+                include:{
+                    studyTime:true
+                }
+            })
+
+            let studyCount = 0;
+            for(let timetableIndex = 0; timetableIndex < timetables.length; timetableIndex++){
+                // console.log(timetables[timetableIndex].studyTime.length);
+                studyCount += timetables[timetableIndex].studyTime.length;
+            }
+            // console.log(studyCount);
+            
+            const studyTimeIdArray = timetables.map((timetable) => timetable.studyTime.map((studyTime) => studyTime.studyTimeId)).flat();
+            // console.log(studyTimeIdArray);
+            const student = await db.classroomMember.findMany({
+                where:{
+                    classId:classroomId,
+                    student:{
+                        attendance:{
+                            every:{
+                                studingTimeId:{
+                                    in:studyTimeIdArray
+                                }
+                            }
+                        }
+                    }
+                },
+                select:{
+                    student:{
+                        select:{
+                            stdId:true,
+                            title:true,
+                            fName:true,
+                            lName:true,
+                            attendance:true
+                        }
+                    },
+                    stdNo:true
+                },
+                orderBy:{
+                    stdNo:'asc'
+                }
+            })
+            const summaryList = student.map((std) => {
+                const attendenceCount = std.student.attendance.filter((att) => att.attStatus === 'PRESENT').length;
+                const attendenceLateCount = std.student.attendance.filter((att) => att.attStatus === 'LATE').length;
+                const attendenceLeaveCount = std.student.attendance.filter((att) => att.attStatus === 'LEAVE').length;
+                const attendenceActivity = std.student.attendance.filter((att) => att.attStatus === 'ACTIVITY').length;
+                const attendenceAbsentCount = studyCount - attendenceCount - attendenceLateCount - attendenceLeaveCount;
+
+                function calculateAttendenceCount(){
+                    let percent = ((attendenceCount+attendenceLeaveCount) / studyCount) * 100;   
+                    return percent.toFixed(1);
+                }
+                const attendencePercent = calculateAttendenceCount();
+                return {
+                    stdId:std.student.stdId,
+                    stdNo:std.stdNo,
+                    title:std.student.title,
+                    fName:std.student.fName,
+                    lName:std.student.lName,
+                    attendenceCount:attendenceCount,
+                    attendenceLateCount:attendenceLateCount,
+                    attendenceLeaveCount:attendenceLeaveCount,
+                    attendenceAbsentCount:attendenceAbsentCount,
+                    attendenceActivity:attendenceActivity,
+                    attendencePercent:attendencePercent,
+                    canExam:attendencePercent >= 80 ? "-" : "มส."
+                    // attendence:attendence
+                }
+            })
+            console.log(summaryList);
+            res.json(summaryList);
+        }catch(err){
+            console.error(err);
+        };
+    }else{
+        res.status(404).json({msg:"no classroomId"})
+    }
+    
 };
