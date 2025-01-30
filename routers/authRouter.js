@@ -1,6 +1,14 @@
 import { Router } from "express";
-
-import { login, checkAuth, getTokenformRefreshToken } from "../controllers/adminAuthController.js";
+import { 
+    login, 
+    checkAuth, 
+    getTokenformRefreshToken 
+} from "../controllers/adminAuthController.js";
+import { 
+    login as teacherLogin, 
+    checkAuth as teacherCheckAuth, 
+    getTokenformRefreshToken as teacherGetTokenFromRefreshToken 
+} from "../controllers/teacherAuthController.js";
 
 const router = Router();
 
@@ -8,5 +16,10 @@ const router = Router();
 router.post('/a/login', login);
 router.get('/a/check', checkAuth);
 router.post('/a/refresh', getTokenformRefreshToken);
+
+// Teacher Authentication
+router.post('/t/login', teacherLogin);
+router.get('/t/check', teacherCheckAuth);
+router.post('/t/refresh', teacherGetTokenFromRefreshToken);
 
 export default router;
