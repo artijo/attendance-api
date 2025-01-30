@@ -44,7 +44,7 @@ dotenv.config();
 // use routes
 app.use('/auth', authRouter);
 app.use('/s',studentRouter); //studentRoute s= student
-app.use('/t', teacherRouter); // teacherRoute t= teacher
+app.use('/t', isAuth, teacherRouter); // teacherRoute t= teacher
 app.use('/a', isAuth, adminRouter);
 
 app.listen(PORT, () => {
