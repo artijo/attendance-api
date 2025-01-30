@@ -13,6 +13,6 @@ export function isAuth(req, res, next) {
         req.user = decoded;
         next();
     }catch(err){
-        console.error(err);
+        return res.status(401).json({ message: 'Token expired' });
     }
 }
