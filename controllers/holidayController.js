@@ -50,10 +50,10 @@ export const getHolidayList = async (req, res) => {
                     }
                 ]
             });
-            res.json(holiday);
+            res.status(200).json(holiday);
         } catch (err) {
             console.error(err);
-            res.json(err);
+            res.status(500).json(err);
         };
     };
 };
@@ -67,12 +67,14 @@ export const deleteHoliday = async (req, res) => {
                     holidayId: holidayId
                 }
             });
-            res.json(holiday);
+            res.status(200).json({message: `ลบ ${holiday.holidayName} สำเร็จ`});
         } catch (err) {
             console.error(err);
-            res.json(err);
+            res.status(500).json(err);
         };
-    };
+    }else{
+        res.status(400).json({message:"ไม่มีวันหยุดนี้อยู่ในระบบ"})
+    }
 };
 
 export const getOneHoliday = async (req, res) => {
@@ -109,12 +111,14 @@ export const updateHoliday = async (req, res) => {
                     type: body.type
                 }
             });
-            res.json(holiday);
+            res.status(200).json({message: `แก้ไขวันหยุดสำเร็จ`});
         } catch (err) {
             console.error(err);
-            res.json(err);
+            res.status(500).json(err);
         };
-    };
+    }else{
+        res.status(400).json({message: "กรุณาใส่ข้อมูลให้ครบถ้วน"})
+    }
 };
 
 export const getHolidayListAuto = async (req, res) => {
@@ -129,7 +133,6 @@ export const getHolidayListAuto = async (req, res) => {
 
 export const createHoliday = async (req, res) => {
     const body = req.body;
-    
     if (body) {
         try {
             for(const holiday of body.holidayList){
@@ -149,10 +152,12 @@ export const createHoliday = async (req, res) => {
                     }
                 })
             }
-            res.json({msg: "Create Holiday Success"});
+            res.status(200).json({message: "สร้างรายการวันหยุดสำเร็จ"});
         } catch (err) {
             console.error(err);
-            res.json(err);
+            res.status(500).json(err);
         };
-    };
+    }else{
+        res.status(400).json({message: "กรุณากรอกข้อมูลให้ครบถ้วน"})
+    }
 };
