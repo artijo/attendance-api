@@ -221,7 +221,7 @@ export const getAttendenceBySubject = async (req, res) => {
                                 studyTimeId:studTime.studyTimeId,
                                 attId:item.student.attendance.find((att) => att.studingTimeId === studTime.studyTimeId).attId,
                                 attStatus:item.student.attendance.find((att) => att.studingTimeId === studTime.studyTimeId).attStatus,
-                                studingTimeDate:studTime.studingTimeDate
+                                studingTimeDate:studTime.studingTimeDate,
                             }
                         }else{
                             return {

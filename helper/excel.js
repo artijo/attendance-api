@@ -3,7 +3,6 @@
 import reader from 'xlsx';
 import db from '../prisma/client.js';
 
-
 //อ่านไฟล์ excel
 function readExcel(fileName){
     // test file ที่เตรียมไว้
@@ -26,6 +25,10 @@ function readExcel(fileName){
     return data
 }
 
+
+
+
+
 //export
 export async function createExcelSubjectAttendence(objectInfo, subjectName) { // สร้างไฟล์ excel ที่เกี่ยวกับการเข้าเรียนของแต่ละวิชาโดยแสดงรายชื่อนักเรียนทั้งหมด
     
@@ -43,7 +46,7 @@ export async function createExcelSubjectAttendence(objectInfo, subjectName) { //
     
 
         let i = 1;
-        const attendanceByPeriods = row.attendance.reduce((acc,attendance) => {
+        const attendanceByPeriods = row.attendance.reduce(() => {
             const key = `คาบที่ ${i}`
             acc[key] = statusAttendenceToThai(attendance.attStatus)
             i++
