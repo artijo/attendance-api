@@ -1,22 +1,32 @@
 import { PrismaClient } from '@prisma/client';
 import db from './client.js';
-import students from './jsonSeed/student.json' assert { type: 'json' };
-import parents from './jsonSeed/parent.json' assert { type: 'json' };
-import departments from './jsonSeed/department.json' assert { type: 'json' };
-import classroomType from './jsonSeed/classroomType.json' assert { type: 'json' };
-import classrooms from './jsonSeed/classroom.json' assert { type: 'json' };
-import academicterm from './jsonSeed/academicterm.json' assert { type: 'json' };
-import activityTypes from './jsonSeed/activityType.json' assert { type: 'json' };
-
-import {
-    hashPassword,
-} from '../helper/bcrypt.js';
+import { hashPassword } from '../helper/bcrypt.js';
 import { DateTime } from 'luxon';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const prisma = new PrismaClient();
 
+async function loadJsonFile(filename) {
+    const filePath = path.join(__dirname, 'jsonSeed', filename);
+    const data = await fs.readFile(filePath, 'utf8');
+    return JSON.parse(data);
+}
+
+
 async function main() {
     try {
+
+        const students = await loadJsonFile('student.json');
+        const parents = await loadJsonFile('parent.json');
+        const departments = await loadJsonFile('department.json');
+        const classroomType = await loadJsonFile('classroomType.json');
+        const classrooms = await loadJsonFile('classroom.json');
+        const academicterm = await loadJsonFile('academicterm.json');
+        const activityTypes = await loadJsonFile('activityType.json');
 
         //Create admin 
 
