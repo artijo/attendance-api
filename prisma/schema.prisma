@@ -128,7 +128,7 @@ model Subject {
 
 model SubjectType {
   subTypeId       String    @id @default(uuid())
-  subTypeCode     String    @unique
+  // subTypeCode     String    @unique
   subTypeNameThai String
   subTypeNameEng  String?
   subject         Subject[]

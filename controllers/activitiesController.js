@@ -70,7 +70,7 @@ export const getActivityType = async (req, res) => {
 }
 
 export const createActivity = async (req, res) => {
-    const { actName, actDate, actEndTime, joinLimit, actStartTime, actLocation, actDesc, actTypeId, actDateEnd, teacher, actParticipate } = req.body;
+    const { actName, actDate, actEndTime, joinLimit, actStartTime, actLocation, actDesc, actTypeId, actDateEnd, teacher, actParticipate, joinLimitNumber } = req.body;
     try {
         const activity = await db.activity.create({
             data: {
@@ -83,7 +83,8 @@ export const createActivity = async (req, res) => {
                 actDesc,
                 actTypeId,
                 actStatus: "PROCESSING",
-                joinLimit
+                joinLimit,
+                joinLimitNumber: parseInt(joinLimitNumber)
             }
         });
         if (teacher) {
@@ -130,7 +131,7 @@ export const createActivity = async (req, res) => {
 
 export const editActivity = async (req, res) => {
     const uuid = req.params.uuid;
-    const { actName, actDate, actEndTime, joinLimit, actStartTime, actLocation, actDesc, actTypeId, actDateEnd, teacher, actParticipate } = req.body;
+    const { actName, actDate, actEndTime, joinLimit, actStartTime, actLocation, actDesc, actTypeId, actDateEnd, teacher, actParticipate, joinLimitNumber } = req.body;
     try {
         const activity = await db.activity.update({
             where: {
@@ -145,7 +146,8 @@ export const editActivity = async (req, res) => {
                 actLocation,
                 actDesc,
                 actTypeId,
-                joinLimit
+                joinLimit,
+                joinLimitNumber: parseInt(joinLimitNumber)
             }
         });
         if (teacher) {
