@@ -264,15 +264,22 @@ export const getAttendenceByDate = async (req, res) => {
                 },
             });
 
+            console.log(timetables);
+
             const stuidingTime = await db.studingTime.findMany({
                 where: {
                     AND:[
-                        {timetableId: {
-                            in: timetables.map((timetable) => timetable.timetableId)
-                        }},
-                        {studingTimeDate:{
-                            gte:DateTime.fromISO(`${date}T00:00:00Z`, { zone: 'UTC' }),
-                        }}
+                        {
+                            timetableId: {
+                                in: timetables.map((timetable) => timetable.timetableId)
+                            }
+                        },
+                        {
+                            studingTimeDate:  {
+                                in:timetables.map((timetable) => DateTime.fromISO(`${date}T${timetable.timeStart}Z`, { zone: 'UTC' }))
+                            }
+                                // gte:DateTime.fromISO(`${date}T00:00:00Z`, { zone: 'UTC' }),
+                        }
                     ]
                 },
                 include:{

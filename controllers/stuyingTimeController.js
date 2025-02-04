@@ -135,10 +135,33 @@ export const deleteStudingTime = async (req, res) => {
                 }
             });
             const timetableId = timetables.map((timetable) => timetable.timetableId);
-            await db.studingTime.deleteMany({
+            const studingTimeIds = await db.studingTime.findMany({
                 where: {
                     timetableId: {
                         in: [...timetableId]
+                    }
+                },
+                select: {
+                    studyTimeId: true
+                }
+            });
+
+            await db.attendance.deleteMany({
+                where: {
+                    studingTimeId: {
+                        in: [...studingTimeIds.map((studingTime) => studingTime.studyTimeId)]
+                    }
+                }
+            });
+
+
+            await db.studingTime.deleteMany({
+                where: {
+                    // timetableId: {
+                    //     in: [...timetableId]
+                    // }
+                    studyTimeId:{
+                        in: [...studingTimeIds.map((studingTime) => studingTime.studyTimeId)]
                     }
                 }
             });
