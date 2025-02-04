@@ -8,7 +8,7 @@ export const createStudingTime = async (req, res) => {
     const termId = body.termId;
     const holidayList = body.holidayList.map((holiday) => holiday.startDate);
     const classroomids = body.classroomids;
-    console.log(classroomids);
+    // console.log(classroomids);
     // console.log(termId);
     // Ex..term-2024-1
     // console.log(holidayList);
@@ -63,9 +63,10 @@ export const createStudingTime = async (req, res) => {
                 };
             }
         }
-        res.json({msg:"Create Studing Calendar Success"});
+        res.status(200).json({message:"สร้างปฎิทินการเรียนแล้วเรียบร้อย"});
     }catch(err){
         console.error(err);
+        res.status(500).json({message:"เกิดข้อผิดพลาดในการสร้างปฎิทินการเรียน"});
     };
 };
 
