@@ -218,10 +218,10 @@ async function main() {
         }
 
         const subjectTypes = [
-            { subTypeCode: "GEN", subTypeNameThai: "ทั่วไป", subTypeNameEng: "General" },
-            { subTypeCode: "MATH", subTypeNameThai: "คณิตศาสตร์", subTypeNameEng: "Mathematics" },
-            { subTypeCode: "SCI", subTypeNameThai: "วิทยาศาสตร์", subTypeNameEng: "Science" },
-            { subTypeCode: "ENG", subTypeNameThai: "ภาษาอังกฤษ", subTypeNameEng: "English" },
+            { subTypeNameThai: "ทั่วไป", subTypeNameEng: "General" },
+            { subTypeNameThai: "คณิตศาสตร์", subTypeNameEng: "Mathematics" },
+            { subTypeNameThai: "วิทยาศาสตร์", subTypeNameEng: "Science" },
+            {  subTypeNameThai: "ภาษาอังกฤษ", subTypeNameEng: "English" },
           ];
 
         const subjectTypeIds = [];

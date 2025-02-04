@@ -6,7 +6,6 @@ export const createSubjectType = async (req, res) => {
         try{
             const createSubjectType = await db.subjectType.create({
                 data:{
-                    subTypeCode:body.subTypeCode,
                     subTypeNameThai:body.subTypeNameThai,
                     subTypeNameEng:body.subTypeNameEng
                 }
@@ -59,7 +58,6 @@ export const editSubjectType = async (req, res) => {
                     subTypeId:uuid
                 },
                 data:{
-                    subTypeCode:body.subTypeCode,
                     subTypeNameThai:body.subTypeNameThai,
                     subTypeNameEng:body.subTypeNameEng
                 }
