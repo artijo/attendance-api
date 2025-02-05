@@ -163,7 +163,13 @@ export const getSubject = async (req, res) => {
                 },
                 include:{
                     subjectType:true,
-                    teacher:true
+                    teacher:true,
+                    timetable: {
+                        include: {
+                            classroom: true,
+                            studyTime: true
+                        }
+                    }
                 }
             })
             res.json(subject);
@@ -184,5 +190,30 @@ export const getAllSubject = async (req, res) => {
         res.json(subject);
     }catch(err){
         console.error(err);
+    };
+}
+
+export const getSubjectByTeacher = async (req, res) => {
+    if(req.user){
+        try{
+            const subject = await db.subject.findMany({
+                where:{
+                    tchId: req.user.id
+                },
+                include:{
+                    subjectType:true,
+                    teacher:true,
+                    timetable: {
+                        include: {
+                            classroom: true,
+                            studyTime: true
+                        }
+                    }
+                }
+            });
+            res.json(subject);
+        }catch(err){
+            console.error(err);
+        };
     };
 }

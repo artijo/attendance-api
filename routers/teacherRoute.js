@@ -3,10 +3,12 @@ import {
     getStudentAllAttendenceExcelOneSubject,
 
 } from "../controllers/teacherController.js";
+import { getSubjectByTeacher, getSubject } from "../controllers/subjectController.js";
 
 const router = Router();
 
-
+router.get('/subjects', getSubjectByTeacher); // get subject by teacher
+router.get('/subject/:UUID', getSubject); // get subject by UUID
 
 
 
