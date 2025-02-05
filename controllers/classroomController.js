@@ -125,7 +125,8 @@ export const getClassroom = async (req,res) => {
                 }
             },
         });
-        return res.json(classroom)
+        // console.log(classroom);
+        return res.status(200).json(classroom)
     }catch(error){
         console.error(error);
     };
