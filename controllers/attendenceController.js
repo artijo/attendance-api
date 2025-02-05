@@ -504,7 +504,7 @@ export const saveAttendenceByTeacher = async (req, res) => {
                     }
                 })
             });
-            res.json(attendance);
+            return res.json({message : 'success'});
         }catch(err){
             console.error(err);
             res.json({message : 1})
