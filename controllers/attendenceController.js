@@ -174,7 +174,6 @@ export const getAttendenceBySubject = async (req, res) => {
                         subId:subjectId,
                         classId:classroomId
                     }
-                    
                 },
                 orderBy: [
                     {dayOfWeek : 'asc'},
@@ -189,7 +188,6 @@ export const getAttendenceBySubject = async (req, res) => {
                     stdId:true,
                     stdNo:true,
                     student:{
-                    
                         select:{    
                             fName:true,
                             lName:true,
@@ -212,23 +210,40 @@ export const getAttendenceBySubject = async (req, res) => {
                 }
             });
 
+            const term = await db.classrooms.findFirst({
+                where:{
+                    classId:classroomId
+                },
+                select:{
+                    term:true
+                }
+            })
+            let months = [];
+            const startDateTime = DateTime.fromJSDate(term.term.termStart, { zone: 'UTC' });
+            const endDateTime = DateTime.fromJSDate(term.term.termEnd, { zone: 'UTC' });
+            for(let m = startDateTime.month; m <= endDateTime.month; m++){
+                months.push(m);
+            }
             const newData = () => {
                 const newStudent = student.map((item) => {
                     const attendence = item.student.attendance.map((item) => item.studingTimeId);
                     const Attendence = stuidingTime.map((studTime) => {
+                        const month = DateTime.fromJSDate(studTime.studingTimeDate).month;
                         if(attendence.includes(studTime.studyTimeId)){
                             return {
                                 studyTimeId:studTime.studyTimeId,
                                 attId:item.student.attendance.find((att) => att.studingTimeId === studTime.studyTimeId).attId,
                                 attStatus:item.student.attendance.find((att) => att.studingTimeId === studTime.studyTimeId).attStatus,
                                 studingTimeDate:studTime.studingTimeDate,
+                                month: month
                             }
                         }else{
                             return {
                                 studyTimeId:studTime.studyTimeId,
                                 attId:null,
                                 attStatus:null,
-                                studingTimeDate:studTime.studingTimeDate
+                                studingTimeDate:studTime.studingTimeDate,
+                                month: month
                             };
                         };
                     });
@@ -240,9 +255,11 @@ export const getAttendenceBySubject = async (req, res) => {
                         attendance:Attendence
                     };
                 });
+                
                 return newStudent;
             }
-            res.json(newData());
+            res.status(200).json({data:newData(),month:months});
+
         }catch(err){
             console.error(err);
         };
@@ -263,8 +280,6 @@ export const getAttendenceByDate = async (req, res) => {
                     }
                 },
             });
-
-
             const stuidingTime = await db.studingTime.findMany({
                 where: {
                     AND:[
@@ -314,6 +329,7 @@ export const getAttendenceByDate = async (req, res) => {
                     stdNo:'asc'
                 }
             });
+            
 
             const newData = () => {
                 const newStudent = student.map((item) => {
@@ -360,8 +376,6 @@ export const getAttendenceByDate = async (req, res) => {
 
 export const getAttendenceSummaryByClassroom = async (req, res) => {
     const classroomId = req.params.classroomId;
-    // console.log(classroomId);
-
     if(classroomId){
         try{
 
