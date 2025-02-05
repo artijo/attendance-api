@@ -474,3 +474,54 @@ export const getAttendenceSummaryByPerson = async (req, res) => {
         }
     }
 }
+
+export const saveAttendenceByTeacher = async (req, res) => {
+    const body = req.body;
+    const dtNow = DateTime.now();
+    if(body){
+        try{
+            const AttMethodId = await db.attendanceMethod.findFirst({
+                where:{
+                    attMethodName: "เช็คชื่อด้วยคุณครู"
+                },
+                select:{
+                    attMethodId:true
+                }
+            });
+
+            req.body?.map(async (item) => {
+                const attendance = await db.attendance.create({
+                    data:{
+                        student: {
+                            connect:{
+                                stdId:item.stdId
+                            }
+                        },
+                        studingTime: {
+                            connect: {
+                                studyTimeId: item.studingTimeId
+                            }
+                        },
+                        attMethod: {
+                            connect:{
+                                attMethodId: AttMethodId.attMethodId
+                            }
+                        },
+                        attTimestamp:dtNow,
+                        attStatus:item.attStatus,
+                        operatedBy: "Teacher",
+                        teacher: {
+                            connect:{
+                                tchId: req.user.id
+                            }
+                        },
+                    }
+                })
+            });
+            return res.json({message : 'success'});
+        }catch(err){
+            console.error(err);
+            res.json({message : 1})
+        };
+    }
+}

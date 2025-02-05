@@ -173,6 +173,45 @@ export const deleteStudingTime = async (req, res) => {
     };
 };
 
+export const getStuydingTimeById = async (req, res) => {
+    const studingTimeId = req.params.UUID;
+    try{
+        const studingTime = await db.studingTime.findUnique({
+            where: {
+                studyTimeId: studingTimeId
+            },
+            include: {
+                timetable: {
+                    include: {
+                        classroom: {
+                            include: {
+                                classroomMembers: {
+                                    include: {
+                                        student: true
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                },
+                attendance: {
+                    include: {
+                        student: true,
+                        attMethod: true
+                    }
+                }
+            }
+        });
+        res.json(studingTime);
+    }catch(err){
+        console.error(err);
+        return res.status(500).json({message:"เกิดข้อผิดพลาดในการดึงข้อมูลการเรียน"});
+    };
+
+};
+
+
 // export const createStuingCalendar = async (req, res) => {
 //     const { semester, termStart, termEnd, holiday } = req.body;
 //     try{

@@ -442,11 +442,11 @@ model Admin {
 }
 
 enum EnumAttendanceStatus {
-  PRESENT
-  ABSENT
-  LATE
-  ACTIVITY
-  LEAVE
+  PRESENT // มาเรียน
+  ABSENT // ขาดเรียน
+  LATE // มาสาย
+  ACTIVITY // กิจกรรม
+  LEAVE // ลา
 }
 
 enum EnumLeaveStatus {
