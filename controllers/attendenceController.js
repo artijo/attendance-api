@@ -490,35 +490,88 @@ export const saveAttendenceByTeacher = async (req, res) => {
             });
 
             req.body?.map(async (item) => {
-                const attendance = await db.attendance.create({
-                    data:{
-                        student: {
-                            connect:{
-                                stdId:item.stdId
-                            }
-                        },
-                        studingTime: {
-                            connect: {
-                                studyTimeId: item.studingTimeId
-                            }
-                        },
-                        attMethod: {
-                            connect:{
-                                attMethodId: AttMethodId.attMethodId
-                            }
-                        },
-                        attTimestamp:dtNow,
-                        attStatus:item.attStatus,
-                        operatedBy: "Teacher",
-                        teacher: {
-                            connect:{
-                                tchId: req.user.id
-                            }
-                        },
-                        note:item.note
+                // const attendance = await db.attendance.create({
+                //     data:{
+                //         student: {
+                //             connect:{
+                //                 stdId:item.stdId
+                //             }
+                //         },
+                //         studingTime: {
+                //             connect: {
+                //                 studyTimeId: item.studingTimeId
+                //             }
+                //         },
+                //         attMethod: {
+                //             connect:{
+                //                 attMethodId: AttMethodId.attMethodId
+                //             }
+                //         },
+                //         attTimestamp:dtNow,
+                //         attStatus:item.attStatus,
+                //         operatedBy: "Teacher",
+                //         teacher: {
+                //             connect:{
+                //                 tchId: req.user.id
+                //             }
+                //         },
+                //         note:item.note
+                //     }
+                // })
+
+                const existingAttendance = await db.attendance.findFirst({
+                    where: {
+                        AND: [
+                            { student: { stdId: item.stdId } },
+                            { studingTime: { studyTimeId: item.studingTimeId } }
+                        ]
                     }
-                })
-                console.log(attendance);
+                });
+                
+                let attendance;
+                
+                if (existingAttendance) {
+                    console.log("update attendance");
+                    // ถ้ามีข้อมูลอยู่แล้ว ให้อัปเดต
+                    // console.log(existingAttendance);
+                    attendance = await db.attendance.update({
+                        where: { attId: existingAttendance.attId },
+                        data: {
+                            attTimestamp: dtNow,
+                            attStatus: item.attStatus,
+                            operatedBy: "Teacher",
+                            note: item.note,
+                            teacher: {
+                                connect: { tchId: req.user.id }
+                            }
+                        }
+                    });
+                } else {
+                    // ถ้าไม่มีข้อมูล ให้สร้างใหม่
+                    console.log("create new attendance");
+                    attendance = await db.attendance.create({
+                        data: {
+                            student: {
+                                connect: { stdId: item.stdId }
+                            },
+                            studingTime: {
+                                connect: { studyTimeId: item.studingTimeId }
+                            },
+                            attMethod: {
+                                connect: { attMethodId: AttMethodId.attMethodId }
+                            },
+                            attTimestamp: dtNow,
+                            attStatus: item.attStatus,
+                            operatedBy: "Teacher",
+                            teacher: {
+                                connect: { tchId: req.user.id }
+                            },
+                            note: item.note
+                        }
+                    });
+                }
+                
+                // console.log(attendance);
             });
             return res.json({message : 'success'});
         }catch(err){
