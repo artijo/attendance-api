@@ -501,8 +501,10 @@ export const saveAttendenceByTeacher = async (req, res) => {
                                 tchId: req.user.id
                             }
                         },
+                        note:item.note
                     }
                 })
+                console.log(attendance);
             });
             return res.json({message : 'success'});
         }catch(err){
