@@ -381,22 +381,17 @@ export const getAttendenceSummaryByClassroom = async (req, res) => {
 
             const timetables = await db.timetable.findMany({
                 where:{
-                    classId:classroomId
+                    classId:classroomId,
                 },
                 include:{
                     studyTime:true
                 }
             })
-
             let studyCount = 0;
             for(let timetableIndex = 0; timetableIndex < timetables.length; timetableIndex++){
-                // console.log(timetables[timetableIndex].studyTime.length);
                 studyCount += timetables[timetableIndex].studyTime.length;
             }
-            // console.log(studyCount);
-            
             const studyTimeIdArray = timetables.map((timetable) => timetable.studyTime.map((studyTime) => studyTime.studyTimeId)).flat();
-            // console.log(studyTimeIdArray);
             const student = await db.classroomMember.findMany({
                 where:{
                     classId:classroomId,
@@ -451,10 +446,165 @@ export const getAttendenceSummaryByClassroom = async (req, res) => {
                     attendenceActivity:attendenceActivity,
                     attendencePercent:attendencePercent,
                     canExam:attendencePercent >= 80 ? "-" : "มส."
-                    // attendence:attendence
                 }
             })
             // console.log(summaryList);
+            res.json(summaryList);
+        }catch(err){
+            console.error(err);
+        };
+    }else{
+        res.status(404).json({msg:"no classroomId"})
+    }
+};
+
+
+export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
+    const classroomId = req.params.classroomId;
+    const subjectId = req.params.subjectId;
+    if(classroomId){
+        try{
+            const timetables = await db.timetable.findMany({
+                where:{
+                    classId:classroomId,
+                    subId:subjectId                    
+                },
+                include:{
+                    studyTime:true
+                },
+            
+            })
+            let studyCount = 0;
+            for(let timetableIndex = 0; timetableIndex < timetables.length; timetableIndex++){
+                studyCount += timetables[timetableIndex].studyTime.length;
+            }
+            const studyTimeIdArray = timetables.map((timetable) => timetable.studyTime.map((studyTime) => studyTime.studyTimeId)).flat();
+            
+            // studyTimeIdArray.forEach(async (item) => {
+            //     const asd = await db.studingTime.findFirst({
+            //         where:{
+            //             studyTimeId:item
+            //         },
+            //         include:{
+            //             timetable:{
+            //                 include:{
+            //                     subject:true
+            //                 }
+            //             }
+            //         }
+            //     })
+            //     console.log(asd.timetable.subject.subNameEng)
+            // })
+
+
+            const oldStudent = await db.classroomMember.findMany({
+                where:{
+                    classId:classroomId,
+                    student:{
+                        attendance:{
+                            some:{
+                                studingTimeId:{in:studyTimeIdArray}
+                            }
+                        }
+                    }
+                },
+                // where: {
+                //     classId: classroomId,
+                //     student: {
+                //       attendance: {
+                //         some: {
+                //           studingTimeId: {
+                //             in: studyTimeIdArray,
+                //           },
+                //         },
+                //       },
+                //     },
+                //   }
+                select:{
+                    student:{
+                        select:{
+                            stdId:true,
+                            title:true,
+                            fName:true,
+                            lName:true,
+                            // attendance:true
+                            attendance:{
+                                select:{
+                                    attStatus:true,
+                                    studingTimeId:true,
+                                    studingTime:{
+                                        select:{
+                                            timetable:{
+                                                select:{
+                                                    subject:{
+                                                        select:{
+                                                            subNameThai:true
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    stdNo:true
+                },
+                orderBy:{
+                    stdNo:'asc',
+                }
+            })
+
+            const student = oldStudent.map((std, index) => {
+                const attendance = std.student.attendance.filter((att) => studyTimeIdArray.includes(att.studingTimeId));
+                return (
+                    {
+                        stdNo:std.stdNo,
+                        student: {
+                            stdId:std.student.stdId,
+                            title:std.student.title,
+                            fName:std.student.fName,
+                            lName:std.student.lName,
+                            attendance: attendance
+                        }
+                    }
+                )
+            })
+            // console.log(student.student);
+            const summaryList = student.map((std) => {
+                // for(const wow of std.student.attendance){
+                //     console.log(wow.studingTime.timetable.subject.subNameThai)
+                // }
+
+                const attendenceCount = std.student.attendance.filter((att) => att.attStatus === 'PRESENT').length;
+                const attendenceLateCount = std.student.attendance.filter((att) => att.attStatus === 'LATE').length;
+                const attendenceLeaveCount = std.student.attendance.filter((att) => att.attStatus === 'LEAVE').length;
+                const attendenceActivity = std.student.attendance.filter((att) => att.attStatus === 'ACTIVITY').length;
+                const attendenceAbsentCount = studyCount - attendenceCount - attendenceLateCount - attendenceLeaveCount;
+
+                function calculateAttendenceCount(){
+                    let percent = ((attendenceCount+attendenceLeaveCount) / studyCount) * 100;   
+                    return percent.toFixed(1);
+                }
+                const attendencePercent = calculateAttendenceCount();
+                return {
+                    stdId:std.student.stdId,
+                    stdNo:std.stdNo,
+                    title:std.student.title,
+                    fName:std.student.fName,
+                    lName:std.student.lName,
+                    attendenceCount:attendenceCount,
+                    attendenceLateCount:attendenceLateCount,
+                    attendenceLeaveCount:attendenceLeaveCount,
+                    attendenceAbsentCount:attendenceAbsentCount,
+                    attendenceActivity:attendenceActivity,
+                    attendencePercent:attendencePercent,
+                    canExam:attendencePercent >= 80 ? "-" : "มส."
+                }
+            })
+            // console.log(summaryList);
+            console.log(summaryList);
             res.json(summaryList);
         }catch(err){
             console.error(err);
