@@ -368,3 +368,45 @@ export const getClassroomFilterByAcademicYearAndLevel = async (req, res) => {
         console.error(err)
     };
 };
+
+export const getTeacherAdvisorClassroom = async (req, res) => {
+    const user = req.user;
+    if(!user) res.status(500).json({message: "มีข้อผิดพลาดบางอย่างภายใน server โดยไม่ทราบสาเหตุ"});
+    try{
+        const advisorList = await db.teacher.findMany({
+            where: {
+                tchId: user.id
+            },
+        });
+        const classroomsIds = advisorList.map((advisor) => advisor.classId);
+        const orderByClassrooms = await db.classrooms.findMany({
+            where :{
+                classId:{
+                    in:classroomsIds
+                }
+            },
+            include:{
+                classroomMembers:{
+                    include:{
+                        student:true,
+                    }
+                },
+                term:true,
+                classroomType:true,
+                leader:true
+            },
+            orderBy:[
+                {term:{
+                    termStart: 'desc'
+                }},
+                {classroomMembers:{
+                    
+                }}
+            ]
+        })
+        console.log(orderByClassrooms);
+        res.status(200).json(orderByClassrooms);
+    }catch(error){
+        res.status(500).json({message: error});
+    }
+}
