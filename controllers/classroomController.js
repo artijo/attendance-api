@@ -371,13 +371,15 @@ export const getClassroomFilterByAcademicYearAndLevel = async (req, res) => {
 
 export const getTeacherAdvisorClassroom = async (req, res) => {
     const user = req.user;
-    if(!user) res.status(500).json({message: "มีข้อผิดพลาดบางอย่างภายใน server โดยไม่ทราบสาเหตุ"});
+    // if(!user) res.status(500).json({message: "มีข้อผิดพลาดบางอย่างภายใน server โดยไม่ทราบสาเหตุ"});
+    console.log(user)
     try{
         const advisorList = await db.teacher.findMany({
             where: {
                 tchId: user.id
             },
         });
+        // console.log(advisorList);
         const classroomsIds = advisorList.map((advisor) => advisor.classId);
         const orderByClassrooms = await db.classrooms.findMany({
             where :{
@@ -398,15 +400,13 @@ export const getTeacherAdvisorClassroom = async (req, res) => {
             orderBy:[
                 {term:{
                     termStart: 'desc'
-                }},
-                {classroomMembers:{
-                    
                 }}
             ]
         })
-        console.log(orderByClassrooms);
+        // console.log(orderByClassrooms);
         res.status(200).json(orderByClassrooms);
     }catch(error){
         res.status(500).json({message: error});
+        console.log(error);
     }
 }

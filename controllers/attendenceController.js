@@ -480,22 +480,6 @@ export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
             }
             const studyTimeIdArray = timetables.map((timetable) => timetable.studyTime.map((studyTime) => studyTime.studyTimeId)).flat();
             
-            // studyTimeIdArray.forEach(async (item) => {
-            //     const asd = await db.studingTime.findFirst({
-            //         where:{
-            //             studyTimeId:item
-            //         },
-            //         include:{
-            //             timetable:{
-            //                 include:{
-            //                     subject:true
-            //                 }
-            //             }
-            //         }
-            //     })
-            //     console.log(asd.timetable.subject.subNameEng)
-            // })
-
 
             const oldStudent = await db.classroomMember.findMany({
                 where:{
@@ -508,18 +492,6 @@ export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
                         }
                     }
                 },
-                // where: {
-                //     classId: classroomId,
-                //     student: {
-                //       attendance: {
-                //         some: {
-                //           studingTimeId: {
-                //             in: studyTimeIdArray,
-                //           },
-                //         },
-                //       },
-                //     },
-                //   }
                 select:{
                     student:{
                         select:{
@@ -527,7 +499,6 @@ export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
                             title:true,
                             fName:true,
                             lName:true,
-                            // attendance:true
                             attendance:{
                                 select:{
                                     attStatus:true,
@@ -728,5 +699,122 @@ export const saveAttendenceByTeacher = async (req, res) => {
             console.error(err);
             res.json({message : 1})
         };
+    }
+}
+
+export const abstactAttendenceBySubject = async (req, res) => {
+    const classroomId = req.params.classId;
+    const studentId = req.params.stdId;
+    // console.log("classId:"+classroomId);
+    // console.log("studentId:"+studentId);
+    try{
+        const timetables = await db.timetable.findMany({
+            where:{
+                classId: classroomId
+            }
+        });
+        const subjectId = [...new Set(timetables.map((timetable) => timetable.subId))];
+        const student = await db.classroomMember.findFirst({
+            where:{
+                classId: classroomId,
+                stdId: studentId
+            },
+            include:{
+                student:true
+            }
+        })
+
+        async function abstact(){
+            let abstact = { studentInfo:student };
+            for(const subject of subjectId){
+                abstact = { ...abstact, 
+                    [subject] : {
+                        attendenceCount:0,
+                        attendenceLateCount:0,
+                        attendenceLeaveCount:0,
+                        attendenceAbsentCount:0,
+                        attendenceActivity:0,
+                        attendencePercent:0,
+                        canExam:"-"
+                    }
+                };
+            };
+            
+            const abstactKeyObject = Object.keys(abstact);
+            for(let i = 1; i < abstactKeyObject.length ; i++){
+                const timetables = await db.timetable.findMany({
+                    where : {
+                        classId:classroomId,
+                        subId: abstactKeyObject[i]
+                    }
+                })
+                console.log(timetables);
+                const studyTimes = await db.studingTime.findMany({ // เอาไว้ค้นหา attendence
+                    where : {
+                        timetableId: {
+                            in:timetables.map((timetable) => timetable.timetableId)
+                        },
+                        
+                    },
+                });
+                
+                if(!studyTimes.length > 0) {
+                    abstact = {...abstact, 
+                        [abstactKeyObject[i]] : {
+                            attendenceCount:null,
+                            attendenceLateCount:null,
+                            attendenceLeaveCount:null,
+                            attendenceAbsentCount:null,
+                            attendenceActivity:null,
+                            attendencePercent:null,
+                            canExam:"-"
+                        }
+
+                    }
+                }else if(studyTimes.length > 0){
+                    let studyCount = studyTimes.length;
+                    const attendance = await db.attendance.findMany({
+                        where: {
+                            stdId:studentId,
+                            studingTimeId:{
+                                in:studyTimes.map((styTime) => styTime.studyTimeId)
+                            }
+                        }
+                    })
+                    
+                    const attendenceCount = attendance.filter((att) => att.attStatus === 'PRESENT').length;
+                    const attendenceLateCount = attendance.filter((att) => att.attStatus === 'LATE').length;
+                    const attendenceLeaveCount = attendance.filter((att) => att.attStatus === 'LEAVE').length;
+                    const attendenceActivity = attendance.filter((att) => att.attStatus === 'ACTIVITY').length;
+                    const attendenceAbsentCount = studyCount - attendenceCount - attendenceLateCount - attendenceLeaveCount;
+
+                    function calculateAttendenceCount(){
+                        let percent = ((attendenceCount+attendenceLeaveCount) / studyCount) * 100;   
+                        return percent.toFixed(1);
+                    }
+
+                    const attendencePercent = calculateAttendenceCount();
+                    const canExam = attendencePercent >= 80 ? "-" : "มส.";
+
+                    abstact = {...abstact, 
+                        [abstactKeyObject[i]] : {
+                            attendenceCount:attendenceCount,
+                            attendenceLateCount:attendenceLateCount,
+                            attendenceLeaveCount:attendenceLeaveCount,
+                            attendenceActivity:attendenceActivity,
+                            attendenceAbsentCount:attendenceAbsentCount,
+                            attendencePercent:attendencePercent,
+                            canExam:canExam
+                        }
+                    }
+                }
+            }
+            return abstact;
+        }
+        res.status(200).json(await abstact());
+        
+    }catch(error) {
+        console.error(error);
+        res.status(500).json({message: error});
     }
 }
