@@ -1,16 +1,16 @@
 [
     {
-        "termId": "term-2024-1",
-        "academicYear": 2024,
+        "termId": "term-2025-1",
+        "academicYear": 2025,
         "semester": 1,
-        "termStart": "2024-05-15T00:00:00.000Z",
-        "termEnd": "2024-09-30T00:00:00.000Z"
+        "termStart": "2025-01-01T00:00:00.000Z",
+        "termEnd": "2025-02-25T00:00:00.000Z"
     },
     {
-        "termId": "term-2024-2",
-        "academicYear": 2024,
+        "termId": "term-2025-2",
+        "academicYear": 2025,
         "semester": 2,
-        "termStart": "2024-11-01T00:00:00.000Z",
-        "termEnd": "2025-03-15T00:00:00.000Z"
+        "termStart": "2025-04-01T00:00:00.000Z",
+        "termEnd": "2025-05-25T00:00:00.000Z"
     }
 ]

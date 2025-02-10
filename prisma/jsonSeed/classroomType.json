@@ -1,15 +1,18 @@
 [
     {
-        "cNameTH": "วิทย์-คณิต",
-        "cNameEng" : "sci-math"
+        "classTypeId" : "sci-math",
+        "classTypeNameThai": "วิทย์-คณิต",
+        "classTypeNameEng" : "sci-math"
+
     },
     {
-        "cNameTH": "ศิลป์",
-        "cNameEng": "Art"
+        "classTypeId" : "Art",
+        "classTypeNameThai": "ศิลป์",
+        "classTypeNameEng": "Art"
     },
     {
-        "cNameTH": "ไม่ระบุ",
-        "cNameEng": "Unspecified",
-        "id" :"1"
+        "classTypeId" : "Unspecified",
+        "classTypeNameThai": "ไม่ระบุ",
+        "classTypeNameEng": "Unspecified"
     }
 ]

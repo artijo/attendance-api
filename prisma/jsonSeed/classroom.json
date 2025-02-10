@@ -1,15 +1,72 @@
 [
     {
-        "classLevel" : 6,
-        "classRoom" : 1,
-        "cType" : "sci-math",
-        "termId" : "term-2024-1"
+        "classId": "class6-1-term-2025-1",
+        "classLevel": 6,
+        "classRoom": 1,
+        "classTypeId": "sci-math",
+        "termId": "term-2025-1"
     },
     {
-        "classLevel" : 6,
-        "classRoom" : 2,
-        "cType" : "Art",
-        "termId" : "term-2024-1"
+        "classId": "class6-2-term-2025-1",
+        "classLevel": 6,
+        "classRoom": 2,
+        "classTypeId": "sci-math",
+        "termId": "term-2025-1"
+    },
+    {
+        "classId": "class6-3-term-2025-1",
+        "classLevel": 6,
+        "classRoom": 3,
+        "classTypeId": "sci-math",
+        "termId": "term-2025-1"
+    },
+    {
+        "classId": "class6-4-term-2025-1",
+        "classLevel": 6,
+        "classRoom": 4,
+        "classTypeId": "sci-math",
+        "termId": "term-2025-1"
+    },
+    {
+        "classId": "class6-5-term-2025-1",
+        "classLevel": 6,
+        "classRoom": 5,
+        "classTypeId": "sci-math",
+        "termId": "term-2025-1"
+    },
+    {
+        "classId": "class6-6-term-2025-1",
+        "classLevel": 6,
+        "classRoom": 6,
+        "classTypeId": "sci-math",
+        "termId": "term-2025-1"
+    },
+    {
+        "classId": "class6-7-term-2025-1",
+        "classLevel": 6,
+        "classRoom": 7,
+        "classTypeId": "sci-math",
+        "termId": "term-2025-1"
+    },
+    {
+        "classId": "class6-8-term-2025-1",
+        "classLevel": 6,
+        "classRoom": 8,
+        "classTypeId": "sci-math",
+        "termId": "term-2025-1"
+    },
+    {
+        "classId": "class6-9-term-2025-1",
+        "classLevel": 6,
+        "classRoom": 9,
+        "classTypeId": "sci-math",
+        "termId": "term-2025-1"
+    },
+    {
+        "classId": "class6-10-term-2025-1",
+        "classLevel": 6,
+        "classRoom": 10,
+        "classTypeId": "sci-math",
+        "termId": "term-2025-1"
     }
 ]
-

@@ -1,0 +1,9 @@
+[
+    {
+        "ldrId" : "ldrId-1",
+        "fName" : "Lee",
+        "lName" : "Tony",
+        "email" : "tony.lee@kkumail.com",
+        "password" : "securepassword123"
+    }
+]

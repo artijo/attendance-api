@@ -1,10 +1,42 @@
 [
     {
-        "deptCode" : "sc",
+        "deptId" : "sc",
         "deptName" : "science"
     },
     {
-        "deptCode": "ma",
+        "deptId": "ma",
         "deptName": "math"
+    },
+    {
+        "deptId": "eng",
+        "deptName": "english"
+    },
+    {
+        "deptId": "hist",
+        "deptName": "history"
+    },
+    {
+        "deptId": "geo",
+        "deptName": "geography"
+    },
+    {
+        "deptId": "bio",
+        "deptName": "biology"
+    },
+    {
+        "deptId": "chem",
+        "deptName": "chemistry"
+    },
+    {
+        "deptId": "phys",
+        "deptName": "physics"
+    },
+    {
+        "deptId": "art",
+        "deptName": "art"
+    },
+    {
+        "deptId": "music",
+        "deptName": "music"
     }
 ]

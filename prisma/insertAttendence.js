@@ -29,6 +29,10 @@ async function getStudent(classroomId){
     return studentIdArray;
 }
 
+//this is for test our systems
+
+
+// ถ้าจะใช้ให้เพิ่ม timetable ก่อนค่อย insertAttndence
 async function insertAttendence() {
     const classroomId = "ceeb4319-c4bf-4dce-8299-daa237c95472";
     const attMethodId = "27756861-4d56-4d0a-8bcf-ec57b9f5beec";
@@ -51,7 +55,6 @@ async function insertAttendence() {
                     attTimestamp:new Date(),
                     attStatus:"PRESENT",
                     attMethodId:attMethodId,
-
                 }
             });
         }

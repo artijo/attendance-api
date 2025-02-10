@@ -5,9 +5,9 @@ const saltRounds = 10;
 const myPlaintextPassword = 's0/\/\P4$$w0rD';  // for test
 const someOtherPlaintextPassword = 'not_bacon';// for test
 
-export const hashPassword = (password) => { // hash Password
+export const hashPassword = async (password) => { // hash Password
     try{
-        const passwordGotHash =  bcrypt.hash(password, saltRounds);
+        const passwordGotHash = await bcrypt.hash(password, saltRounds);
         return passwordGotHash
     }catch(err){
         console.error(err);

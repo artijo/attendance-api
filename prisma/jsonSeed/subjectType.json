@@ -1,0 +1,53 @@
+[
+    {
+        "subTypeId": "sci-type",
+        "subTypeNameThai": "วิทย์ศาตร์",
+        "subTypeNameEng": "science"
+    },
+    {
+        "subTypeId": "ma",
+        "subTypeNameThai": "คณิตศาสตร์",
+        "subTypeNameEng": "Math"
+    },
+    {
+        "subTypeId": "eng",
+        "subTypeNameThai": "อังกฤษ",
+        "subTypeNameEng": "english"
+    },
+    {
+        "subTypeId": "hist",
+        "subTypeNameThai": "ประวัติศาสตร์",
+        "subTypeNameEng": "history"
+    },
+    {
+        "subTypeId": "geo",
+        "subTypeNameThai": "ภูมิศาสตร์",
+        "subTypeNameEng": "geography"
+    },
+    {
+        "subTypeId": "bio",
+        "subTypeNameThai": "ชีววิทยา",
+        "subTypeNameEng": "biology"
+    },
+    {
+        "subTypeId": "chem",
+        "subTypeNameThai": "เคมี",
+        "subTypeNameEng": "chemistry"
+    },
+    {
+        "subTypeId": "phys",
+        "subTypeNameThai": "ฟิสิกส์",
+        "subTypeNameEng": "physics"
+    },
+    {
+        "subTypeId": "art",
+        "subTypeNameThai": "ศิลปะ",
+        "subTypeNameEng": "art"
+    },
+    {
+        "subTypeId": "music",
+        "subTypeNameThai": "ดนตรี",
+        "subTypeNameEng": "music"
+    }
+]
+

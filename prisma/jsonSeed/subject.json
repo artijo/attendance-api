@@ -1,0 +1,182 @@
+[
+    {
+        "subId": "sub001",
+        "subCode": "SCI101",
+        "subNameThai": "วิทยาศาสตร์พื้นฐาน",
+        "subNameEng": "Basic Science",
+        "subCredit": 3,
+        "tchId": "Teacher011",
+        "subTypeId": "sci-type"
+    },
+    {
+        "subId": "sub002",
+        "subCode": "MATH101",
+        "subNameThai": "คณิตศาสตร์พื้นฐาน",
+        "subNameEng": "Basic Math",
+        "subCredit": 3,
+        "tchId": "Teacher012",
+        "subTypeId": "ma"
+    },
+    {
+        "subId": "sub003",
+        "subCode": "SCI102",
+        "subNameThai": "วิทยาศาสตร์ขั้นสูง",
+        "subNameEng": "Advanced Science",
+        "subCredit": 3,
+        "tchId": "Teacher013",
+        "subTypeId": "sci-type"
+    },
+    {
+        "subId": "sub004",
+        "subCode": "HIST101",
+        "subNameThai": "ประวัติศาสตร์โลก",
+        "subNameEng": "World History",
+        "subCredit": 3,
+        "tchId": "Teacher014",
+        "subTypeId": "hist"
+    },
+    {
+        "subId": "sub005",
+        "subCode": "GEO101",
+        "subNameThai": "ภูมิศาสตร์พื้นฐาน",
+        "subNameEng": "Basic Geography",
+        "subCredit": 3,
+        "tchId": "Teacher015",
+        "subTypeId": "geo"
+    },
+    {
+        "subId": "sub006",
+        "subCode": "BIO101",
+        "subNameThai": "ชีววิทยาพื้นฐาน",
+        "subNameEng": "Basic Biology",
+        "subCredit": 3,
+        "tchId": "Teacher016",
+        "subTypeId": "bio"
+    },
+    {
+        "subId": "sub007",
+        "subCode": "CHEM101",
+        "subNameThai": "เคมีพื้นฐาน",
+        "subNameEng": "Basic Chemistry",
+        "subCredit": 3,
+        "tchId": "Teacher017",
+        "subTypeId": "chem"
+    },
+    {
+        "subId": "sub008",
+        "subCode": "PHYS101",
+        "subNameThai": "ฟิสิกส์พื้นฐาน",
+        "subNameEng": "Basic Physics",
+        "subCredit": 3,
+        "tchId": "Teacher018",
+        "subTypeId": "phys"
+    },
+    {
+        "subId": "sub009",
+        "subCode": "ART101",
+        "subNameThai": "ศิลปะพื้นฐาน",
+        "subNameEng": "Basic Art",
+        "subCredit": 3,
+        "tchId": "Teacher019",
+        "subTypeId": "art"
+    },
+    {
+        "subId": "sub010",
+        "subCode": "MUSIC101",
+        "subNameThai": "ดนตรีพื้นฐาน",
+        "subNameEng": "Basic Music",
+        "subCredit": 3,
+        "tchId": "Teacher020",
+        "subTypeId": "music"
+    },
+    {
+        "subId": "sub011",
+        "subCode": "MATH102",
+        "subNameThai": "คณิตศาสตร์ขั้นสูง",
+        "subNameEng": "Advanced Math",
+        "subCredit": 3,
+        "tchId": "Teacher021",
+        "subTypeId": "ma"
+    },
+    {
+        "subId": "sub012",
+        "subCode": "MATH103",
+        "subNameThai": "คณิตศาสตร์ประยุกต์",
+        "subNameEng": "Applied Math",
+        "subCredit": 3,
+        "tchId": "Teacher022",
+        "subTypeId": "ma"
+    },
+    {
+        "subId": "sub013",
+        "subCode": "SCI103",
+        "subNameThai": "วิทยาศาสตร์ประยุกต์",
+        "subNameEng": "Applied Science",
+        "subCredit": 3,
+        "tchId": "Teacher023",
+        "subTypeId": "sci-type"
+    },
+    {
+        "subId": "sub014",
+        "subCode": "HIST102",
+        "subNameThai": "ประวัติศาสตร์ไทย",
+        "subNameEng": "Thai History",
+        "subCredit": 3,
+        "tchId": "Teacher024",
+        "subTypeId": "hist"
+    },
+    {
+        "subId": "sub015",
+        "subCode": "GEO102",
+        "subNameThai": "ภูมิศาสตร์ประยุกต์",
+        "subNameEng": "Applied Geography",
+        "subCredit": 3,
+        "tchId": "Teacher025",
+        "subTypeId": "geo"
+    },
+    {
+        "subId": "sub016",
+        "subCode": "BIO102",
+        "subNameThai": "ชีววิทยาประยุกต์",
+        "subNameEng": "Applied Biology",
+        "subCredit": 3,
+        "tchId": "Teacher026",
+        "subTypeId": "bio"
+    },
+    {
+        "subId": "sub017",
+        "subCode": "CHEM102",
+        "subNameThai": "เคมีประยุกต์",
+        "subNameEng": "Applied Chemistry",
+        "subCredit": 3,
+        "tchId": "Teacher027",
+        "subTypeId": "chem"
+    },
+    {
+        "subId": "sub018",
+        "subCode": "PHYS102",
+        "subNameThai": "ฟิสิกส์ประยุกต์",
+        "subNameEng": "Applied Physics",
+        "subCredit": 3,
+        "tchId": "Teacher028",
+        "subTypeId": "phys"
+    },
+    {
+        "subId": "sub019",
+        "subCode": "ART102",
+        "subNameThai": "ศิลปะประยุกต์",
+        "subNameEng": "Applied Art",
+        "subCredit": 3,
+        "tchId": "Teacher029",
+        "subTypeId": "art"
+    },
+    {
+        "subId": "sub020",
+        "subCode": "MUSIC102",
+        "subNameThai": "ดนตรีประยุกต์",
+        "subNameEng": "Applied Music",
+        "subCredit": 3,
+        "tchId": "Teacher030",
+        "subTypeId": "music"
+    }
+]
