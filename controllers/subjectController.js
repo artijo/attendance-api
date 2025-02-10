@@ -167,7 +167,11 @@ export const getSubject = async (req, res) => {
                     timetable: {
                         include: {
                             classroom: true,
-                            studyTime: true
+                            studyTime: {
+                                include: {
+                                    attendance: true
+                                }
+                            }
                         }
                     }
                 }
