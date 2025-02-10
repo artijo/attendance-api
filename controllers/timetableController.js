@@ -305,3 +305,87 @@ export const getTimeTable = async (req, res) => { // ใช้สำหรับ
     }
     
 };
+
+
+export const getTeacherTimetable = async (req, res) => {
+    const subjectId = req.params.subjectId;
+    if(!subjectId) return res.status(401).json({message: "กรุณากรอกข้อมูลให้ครบถ้วน"});
+    //วันนี้
+    const dateTimeNow = DateTime.now();
+    const date = dateTimeNow.toString().split("T")[0];
+    /////////
+    try{
+        // function เปรียบเทียบวันเวลา
+
+        function isSchoolOpen(dateStr) {
+            const startDate = DateTime.fromJSDate(dateStr.termStart, {zone: 'UTC'}); // วันที่เริ่มเปิดเทอม
+            const endDate = DateTime.fromJSDate(dateStr.termEnd, {zone: 'UTC'});   // วันที่ปิดเทอม
+            const checkDate = DateTime.fromISO(date, {zone: 'UTC'});      // วันที่ที่ต้องการตรวจสอบ
+            
+            if(checkDate >= startDate && checkDate <= endDate){
+                return true;
+            }else{
+                return false;
+            };
+        };
+
+        // หาว่าวันปัจจุบัน 
+        const termLists = await db.academicTerms.findMany({});
+        let termId;
+        for(const term of termLists) {
+            if(isSchoolOpen(term)){
+                termId = term.termId;
+            }
+        };
+
+        const classrooms = await db.classrooms.findMany({
+            where: {
+                termId: termId
+            }
+        })
+
+        const timetables = await db.timetable.findMany({
+            where: {
+                AND:[
+                    {
+                        classId:{
+                            in:classrooms.map((item) => item.classId)
+                        }
+                    },
+                    {subId:subjectId}
+                ]
+            },
+            include:{
+                classroom:true,
+                subject:true
+            },
+            orderBy:{
+                classroom:{
+                    classRoom:'asc'
+                }
+            }
+        })
+
+        const day = {
+            1:[
+                ...timetables.filter((timetable) => timetable.dayOfWeek === 1)
+            ],
+            2:[
+                ...timetables.filter((timetable) => timetable.dayOfWeek === 2)
+            ],
+            3:[
+                ...timetables.filter((timetable) => timetable.dayOfWeek === 3)
+            ],
+            4:[
+                ...timetables.filter((timetable) => timetable.dayOfWeek === 4)
+            ],
+            5:[
+                ...timetables.filter((timetable) => timetable.dayOfWeek === 5)
+            ]
+        }
+
+        res.status(200).json(day);
+    }catch(error) {
+        console.error(error)
+    }
+}

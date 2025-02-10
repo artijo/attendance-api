@@ -7,12 +7,14 @@ import { getSubjectByTeacher, getSubject } from "../controllers/subjectControlle
 import { getStuydingTimeById } from "../controllers/stuyingTimeController.js";
 import { abstactAttendenceBySubject, saveAttendenceByTeacher } from "../controllers/attendenceController.js";
 import { getTeacherAdvisorClassroom } from "../controllers/classroomController.js";
+import { getTeacherTimetable } from "../controllers/timetableController.js";
 
 const router = Router();
 
 router.get('/subjects', getSubjectByTeacher); // get subject by teacher
 router.get('/subject/:UUID', getSubject); // get subject by UUID
 router.get('/studyTime/:UUID', getStuydingTimeById); // get study time by UUID
+router.get('/timetable/teacher/:subjectId', getTeacherTimetable);
 router.post('/attendance/bulk', saveAttendenceByTeacher); // save attendence
 
 router.get('/classrooms', getTeacherAdvisorClassroom); //get list room study
