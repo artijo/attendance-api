@@ -1,0 +1,184 @@
+{
+    "schedules": [
+      {
+        "classId": "class6-1-term-2025-1",
+        "schedule": [
+          {
+            "dayOfWeek": 1,
+            "periods": [
+              {"time": "08:40-09:30", "subId": "sub001"},
+              {"time": "09:30-10:20", "subId": "sub002"},
+              {"time": "10:20-11:10", "subId": "sub003"},
+              {"time": "11:10-12:00", "subId": "sub004"},
+              {"time": "12:00-13:00", "break": "พักเที่ยง"},
+              {"time": "13:00-13:50", "subId": "sub005"},
+              {"time": "13:50-14:40", "subId": "sub006"},
+              {"time": "14:40-15:30", "subId": "sub007"}
+            ]
+          }
+        ]
+      },
+      {
+        "classId": "class6-2-term-2025-1",
+        "schedule": [
+          {
+            "dayOfWeek": 1,
+            "periods": [
+              {"time": "08:40-09:30", "subId": "sub002"},
+              {"time": "09:30-10:20", "subId": "sub003"},
+              {"time": "10:20-11:10", "subId": "sub004"},
+              {"time": "11:10-12:00", "subId": "sub005"},
+              {"time": "12:00-13:00", "break": "พักเที่ยง"},
+              {"time": "13:00-13:50", "subId": "sub006"},
+              {"time": "13:50-14:40", "subId": "sub007"},
+              {"time": "14:40-15:30", "subId": "sub008"}
+            ]
+          }
+        ]
+      },
+      {
+        "classId": "class6-3-term-2025-1",
+        "schedule": [
+          {
+            "dayOfWeek": 1,
+            "periods": [
+              {"time": "08:40-09:30", "subId": "sub003"},
+              {"time": "09:30-10:20", "subId": "sub004"},
+              {"time": "10:20-11:10", "subId": "sub005"},
+              {"time": "11:10-12:00", "subId": "sub006"},
+              {"time": "12:00-13:00", "break": "พักเที่ยง"},
+              {"time": "13:00-13:50", "subId": "sub007"},
+              {"time": "13:50-14:40", "subId": "sub008"},
+              {"time": "14:40-15:30", "subId": "sub009"}
+            ]
+          }
+        ]
+      },
+      {
+        "classId": "class6-4-term-2025-1",
+        "schedule": [
+          {
+            "dayOfWeek": 1,
+            "periods": [
+              {"time": "08:40-09:30", "subId": "sub004"},
+              {"time": "09:30-10:20", "subId": "sub005"},
+              {"time": "10:20-11:10", "subId": "sub006"},
+              {"time": "11:10-12:00", "subId": "sub007"},
+              {"time": "12:00-13:00", "break": "พักเที่ยง"},
+              {"time": "13:00-13:50", "subId": "sub008"},
+              {"time": "13:50-14:40", "subId": "sub009"},
+              {"time": "14:40-15:30", "subId": "sub010"}
+            ]
+          }
+        ]
+      },
+      {
+        "classId": "class6-5-term-2025-1",
+        "schedule": [
+          {
+            "dayOfWeek": 1,
+            "periods": [
+              {"time": "08:40-09:30", "subId": "sub005"},
+              {"time": "09:30-10:20", "subId": "sub006"},
+              {"time": "10:20-11:10", "subId": "sub007"},
+              {"time": "11:10-12:00", "subId": "sub008"},
+              {"time": "12:00-13:00", "break": "พักเที่ยง"},
+              {"time": "13:00-13:50", "subId": "sub009"},
+              {"time": "13:50-14:40", "subId": "sub010"},
+              {"time": "14:40-15:30", "subId": "sub011"}
+            ]
+          }
+        ]
+      },
+      {
+        "classId": "class6-6-term-2025-1",
+        "schedule": [
+          {
+            "dayOfWeek": 1,
+            "periods": [
+              {"time": "08:40-09:30", "subId": "sub006"},
+              {"time": "09:30-10:20", "subId": "sub007"},
+              {"time": "10:20-11:10", "subId": "sub008"},
+              {"time": "11:10-12:00", "subId": "sub009"},
+              {"time": "12:00-13:00", "break": "พักเที่ยง"},
+              {"time": "13:00-13:50", "subId": "sub010"},
+              {"time": "13:50-14:40", "subId": "sub011"},
+              {"time": "14:40-15:30", "subId": "sub012"}
+            ]
+          }
+        ]
+      },
+      {
+        "classId": "class6-7-term-2025-1",
+        "schedule": [
+          {
+            "dayOfWeek": 1,
+            "periods": [
+              {"time": "08:40-09:30", "subId": "sub007"},
+              {"time": "09:30-10:20", "subId": "sub008"},
+              {"time": "10:20-11:10", "subId": "sub009"},
+              {"time": "11:10-12:00", "subId": "sub010"},
+              {"time": "12:00-13:00", "break": "พักเที่ยง"},
+              {"time": "13:00-13:50", "subId": "sub011"},
+              {"time": "13:50-14:40", "subId": "sub012"},
+              {"time": "14:40-15:30", "subId": "sub013"}
+            ]
+          }
+        ]
+      },
+      {
+        "classId": "class6-8-term-2025-1",
+        "schedule": [
+          {
+            "dayOfWeek": 1,
+            "periods": [
+              {"time": "08:40-09:30", "subId": "sub008"},
+              {"time": "09:30-10:20", "subId": "sub009"},
+              {"time": "10:20-11:10", "subId": "sub010"},
+              {"time": "11:10-12:00", "subId": "sub011"},
+              {"time": "12:00-13:00", "break": "พักเที่ยง"},
+              {"time": "13:00-13:50", "subId": "sub012"},
+              {"time": "13:50-14:40", "subId": "sub013"},
+              {"time": "14:40-15:30", "subId": "sub014"}
+            ]
+          }
+        ]
+      },
+      {
+        "classId": "class6-9-term-2025-1",
+        "schedule": [
+          {
+            "dayOfWeek": 1,
+            "periods": [
+              {"time": "08:40-09:30", "subId": "sub009"},
+              {"time": "09:30-10:20", "subId": "sub010"},
+              {"time": "10:20-11:10", "subId": "sub011"},
+              {"time": "11:10-12:00", "subId": "sub012"},
+              {"time": "12:00-13:00", "break": "พักเที่ยง"},
+              {"time": "13:00-13:50", "subId": "sub013"},
+              {"time": "13:50-14:40", "subId": "sub014"},
+              {"time": "14:40-15:30", "subId": "sub015"}
+            ]
+          }
+        ]
+      },
+      {
+        "classId": "class6-10-term-2025-1",
+        "schedule": [
+          {
+            "dayOfWeek": 1,
+            "periods": [
+              {"time": "08:40-09:30", "subId": "sub010"},
+              {"time": "09:30-10:20", "subId": "sub011"},
+              {"time": "10:20-11:10", "subId": "sub012"},
+              {"time": "11:10-12:00", "subId": "sub013"},
+              {"time": "12:00-13:00", "break": "พักเที่ยง"},
+              {"time": "13:00-13:50", "subId": "sub014"},
+              {"time": "13:50-14:40", "subId": "sub015"},
+              {"time": "14:40-15:30", "subId": "sub016"}
+            ]
+          }
+        ]
+      }
+    ]
+  }
