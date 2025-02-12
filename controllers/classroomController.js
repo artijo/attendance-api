@@ -381,6 +381,7 @@ export const getTeacherAdvisorClassroom = async (req, res) => {
         });
         // console.log(advisorList);
         const classroomsIds = advisorList.map((advisor) => advisor.classId);
+        if(classroomsIds.some((arrVal) => arrVal === null)) return res.json({not_found:"ไม่มีห้องที่เป็นที่ปรึกษา"});
         const orderByClassrooms = await db.classrooms.findMany({
             where :{
                 classId:{
@@ -405,6 +406,8 @@ export const getTeacherAdvisorClassroom = async (req, res) => {
         })
         // console.log(orderByClassrooms);
         res.status(200).json(orderByClassrooms);
+
+        
     }catch(error){
         res.status(500).json({message: error});
         console.log(error);

@@ -308,12 +308,14 @@ export const getTimeTable = async (req, res) => { // ใช้สำหรับ
 
 
 export const getTeacherTimetable = async (req, res) => {
-    const subjectId = req.params.subjectId;
-    if(!subjectId) return res.status(401).json({message: "กรุณากรอกข้อมูลให้ครบถ้วน"});
+    const body = req.body;
+    const subjectArr = body.subject;
+    if(subjectArr.lenght == 0) return res.status(401).json({ message : "ไม่มี subjectArr"});
     //วันนี้
     const dateTimeNow = DateTime.now();
     const date = dateTimeNow.toString().split("T")[0];
-    /////////
+    // console.log(dateTimeNow);
+    ///////
     try{
         // function เปรียบเทียบวันเวลา
 
@@ -338,6 +340,7 @@ export const getTeacherTimetable = async (req, res) => {
             }
         };
 
+        //หาห้องที่อยู่ในเทอมนี้
         const classrooms = await db.classrooms.findMany({
             where: {
                 termId: termId
@@ -352,18 +355,27 @@ export const getTeacherTimetable = async (req, res) => {
                             in:classrooms.map((item) => item.classId)
                         }
                     },
-                    {subId:subjectId}
+                    {
+                        subId:{
+                            in:subjectArr.map((sub) => sub.subId)
+                        }
+                    }
                 ]
             },
             include:{
                 classroom:true,
                 subject:true
             },
-            orderBy:{
-                classroom:{
-                    classRoom:'asc'
+            orderBy:[
+                {
+                    classroom:{
+                        classRoom:'asc'
+                    }
+                },
+                {
+                    timeStart:'asc'
                 }
-            }
+            ]
         })
 
         const day = {

@@ -102,27 +102,27 @@ async function  main() {
         });
 
         //Create timetable 
-        const schedules = timetableList.schedules;
-        for (let i = 0; i < schedules.length; i++) {
-            const { classId, schedule } = schedules[i];
-            for (let j = 0; j < schedule.length; j++) {
-            const { dayOfWeek, periods } = schedule[j];
-            for (let k = 0; k < periods.length; k++) {
-                const period = periods[k];
-                if (period.subId) {
-                await db.timetable.create({
-                    data: {
-                    subId: period.subId,
-                    classId: classId,
-                    timeStart: period.time.split('-')[0] + ':00',
-                    timeEnd: period.time.split('-')[1] + ':00',
-                    dayOfWeek: dayOfWeek,
-                    timeLate: DateTime.fromISO(period.time.split('-')[0] + ':00').plus({ minutes: 15 }).toFormat('HH:mm:ss')
-                    }
-                });
-                }
-            }
-        }
+        // const schedules = timetableList.schedules;
+        // for (let i = 0; i < schedules.length; i++) {
+        //     const { classId, schedule } = schedules[i];
+        //     for (let j = 0; j < schedule.length; j++) {
+        //     const { dayOfWeek, periods } = schedule[j];
+        //     for (let k = 0; k < periods.length; k++) {
+        //         const period = periods[k];
+        //         if (period.subId) {
+        //         await db.timetable.create({
+        //             data: {
+        //             subId: period.subId,
+        //             classId: classId,
+        //             timeStart: period.time.split('-')[0] + ':00',
+        //             timeEnd: period.time.split('-')[1] + ':00',
+        //             dayOfWeek: dayOfWeek,
+        //             timeLate: DateTime.fromISO(period.time.split('-')[0] + ':00').plus({ minutes: 15 }).toFormat('HH:mm:ss')
+        //             }
+        //         });
+        //         }
+        //     }
+        // }
    
 
         // Crate Attendence Method
@@ -133,7 +133,7 @@ async function  main() {
         const activityTypeCreate = await db.activityType.createMany({
             data:activityTypeList
         });
-    }}catch(error){
+    }catch(error){
         throw error;
     }
     
