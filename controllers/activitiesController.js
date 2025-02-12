@@ -214,7 +214,15 @@ export const getActivityByTeacher = async (req, res) => {
                         activityType: true,
                         teacher: true,
                         actParticipate: true,
-                        classroom: true
+                        classroom: {
+                            include: {
+                                classroom: {
+                                    include: {
+                                        term: true
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
