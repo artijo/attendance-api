@@ -8,6 +8,7 @@ import { getStuydingTimeById } from "../controllers/stuyingTimeController.js";
 import { abstactAttendenceBySubject, saveAttendenceByTeacher } from "../controllers/attendenceController.js";
 import { getTeacherAdvisorClassroom } from "../controllers/classroomController.js";
 import { getTeacherTimetable } from "../controllers/timetableController.js";
+import { getActivityByTeacher } from "../controllers/activitiesController.js";
 
 const router = Router();
 
@@ -21,7 +22,7 @@ router.post('/attendance/bulk', saveAttendenceByTeacher); // save attendence
 router.get('/classrooms', getTeacherAdvisorClassroom); //get list room study
 router.get('/classrooms/:classId/:stdId', abstactAttendenceBySubject);
 
-
+router.get('/activities', getActivityByTeacher); // get activity by teacher
 
 router.post('/exportsAttendence',getStudentAllAttendenceExcelOneSubject ); // export excel attendenc
 

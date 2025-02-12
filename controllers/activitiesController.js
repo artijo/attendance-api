@@ -201,3 +201,26 @@ export const editActivity = async (req, res) => {
         console.error(error);
     };
 }
+
+export const getActivityByTeacher = async (req, res) => {
+    try {
+        const activity = await db.activityTeacher.findMany({
+            where: {
+                tchId: req.user.id
+            },
+            include: {
+                activity: {
+                    include: {
+                        activityType: true,
+                        teacher: true,
+                        actParticipate: true,
+                        classroom: true
+                    }
+                }
+            }
+        });
+        return res.json(activity)
+    } catch (error) {
+        console.error(error);
+    };
+}
