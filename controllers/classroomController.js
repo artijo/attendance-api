@@ -81,7 +81,12 @@ export const getAllClassroom = async (req,res) => {
             },
             include: {
                 classroomType: true,
-                term: true
+                term: true,
+                classroomMembers: {
+                    include: {
+                        student: true
+                    }
+                }
             },
             orderBy:[{
                 classLevel:"asc"},
