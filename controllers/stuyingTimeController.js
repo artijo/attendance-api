@@ -9,6 +9,7 @@ export const createStudingTime = async (req, res) => {
     const holidayList = body.holidayList.map((holiday) => holiday.startDate);
     const classroomids = body.classroomids;
     // console.log(classroomids);
+    // console.log(classroomids);
     // console.log(termId);
     // Ex..term-2024-1
     // console.log(holidayList);
@@ -29,7 +30,7 @@ export const createStudingTime = async (req, res) => {
         const timetables = await db.timetable.findMany({
             where: {
                 classId: {
-                    in: [...classroomids]
+                    in: classroomids
                 }
             },
             orderBy: [
@@ -41,8 +42,10 @@ export const createStudingTime = async (req, res) => {
                 timetableId: true,
                 dayOfWeek:true,
                 timeStart:true,
+                classId:true
             }
         });
+        // console.log(timetables);
         const dateTimeStart = academicYearTerm.termStart.toISOString().split("T")[0]; //ex. ['2025-05-15','00:00:00.000Z']
         const dateTimeEnd = academicYearTerm.termEnd.toISOString().split("T")[0]; //ex. ['2025-09-09','00:00:00.000Z']
         const datebetween = daybetween(dateTimeStart, dateTimeEnd).filter((date) => {
