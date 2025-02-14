@@ -9,8 +9,9 @@ export const getAllAcademicTerms = async (req,res) => {
                 {semester:'asc'}
             ]
         });
-        res.json(academicTerms)
+        res.status(200).json(academicTerms)
     }catch(error){
+        res.status(501).json({message : "มีบางอย่างผิดพลาดบน Server"})
         console.error(error);
     };
 }
