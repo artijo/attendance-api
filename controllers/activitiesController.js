@@ -240,3 +240,66 @@ export const getActivityByTeacher = async (req, res) => {
         console.error(error);
     };
 }
+
+export const paticipatedActivity = async (req, res) => {
+    const { actId } = req.params;
+    const { stdId, status, note } = req.body;
+    try {
+        const activityPaticipate = await db.activityParticipate.findFirst({
+            where: {
+                actId: actId,
+                stdId: stdId
+            }
+            }
+        );
+        if (activityPaticipate) {
+            if(status == "ABSENT"){
+                await db.activityParticipate.delete({
+                    where: {
+                        actParticipateId: activityPaticipate.actParticipateId
+                    }
+                });
+                return res.json({ message: 'success' });
+            }else {
+            await db.activityParticipate.update({
+                where: {
+                    actParticipateId: activityPaticipate.actParticipateId
+                },
+                data: {
+                    note
+                }
+            });
+            return res.json({ message: 'success' });
+        }
+        } else {
+            await db.activityParticipate.create({
+                data: {
+                    activity: {
+                        connect: {
+                            actId: actId
+                        }
+                    },
+                    student: {
+                        connect: {
+                            stdId: stdId
+                        }
+                    },
+                    note: note,
+                    operateBy: "TEACHER",
+                    teacher: {
+                        connect: {
+                            tchId: req.user.id
+                        }
+                    },
+                    joinTimestamp: new Date()
+                }
+            });
+            return res.json({ message: 'success' });
+        }
+
+    }catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Internal server error' });
+        };
+
+}
