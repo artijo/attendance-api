@@ -248,7 +248,13 @@ export const paticipatedActivity = async (req, res) => {
         const activityPaticipate = await db.activityParticipate.findFirst({
             where: {
                 actId: actId,
-                stdId: stdId
+                stdId: stdId,
+                // ดึงข้อมูลที่เป็นวันปัจจุบัน
+                joinTimestamp: {
+                    gte: DateTime.now().startOf('day').toUTC().toJSDate(),
+                    lte: DateTime.now().endOf('day').toUTC().toJSDate()
+                }
+
             }
             }
         );
