@@ -5,7 +5,7 @@ import {
 } from "../controllers/teacherController.js";
 import { getSubjectByTeacher, getSubject } from "../controllers/subjectController.js";
 import { getStuydingTimeById } from "../controllers/stuyingTimeController.js";
-import { abstactAttendenceBySubject, getAttendenceSummaryBySubjectIsExam, saveAttendenceByTeacher } from "../controllers/attendenceController.js";
+import { abstactAttendenceBySubject, getAttendenceBySubject, getAttendenceSummaryBySubjectIsExam, saveAttendenceByTeacher } from "../controllers/attendenceController.js";
 import { getTeacherAdvisorClassroom, getAllClassroom, getClassroomByClassAndSubject } from "../controllers/classroomController.js";
 import { getTeacherTimetable } from "../controllers/timetableController.js";
 import { getActivityByTeacher, getActivity, paticipatedActivity } from "../controllers/activitiesController.js";
@@ -25,6 +25,7 @@ router.get('/classrooms/all', getAllClassroom); //get list room study
 router.get('/classrooms/:classId/:stdId', abstactAttendenceBySubject);
 router.get('/classrooms/check/:termId/:subjectId', getClassroomByClassAndSubject);
 router.get('/classrooms/classrooms/checkdetail/:subjectId/:classroomId', getAttendenceSummaryBySubjectIsExam);
+router.get('/attendence/:subjectId/:classroomId', getAttendenceBySubject);
 // getAttendenceSummaryBySubjectIsExam
 // getClassroomByClassAndSubject
 router.get('/terms', getAllAcademicTerms); // get terms 
