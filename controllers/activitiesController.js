@@ -291,7 +291,7 @@ export const paticipatedActivity = async (req, res) => {
                             tchId: req.user.id
                         }
                     },
-                    joinTimestamp: new Date()
+                    joinTimestamp: DateTime.now().toUTC().toJSDate(),
                 }
             });
             return res.json({ message: 'success' });
