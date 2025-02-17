@@ -415,7 +415,8 @@ export const getAttendenceSummaryByClassroom = async (req, res) => {
                             attendance:true
                         }
                     },
-                    stdNo:true
+                    stdNo:true,
+                    behaviourScore:true
                 },
                 orderBy:{
                     stdNo:'asc'
@@ -445,6 +446,7 @@ export const getAttendenceSummaryByClassroom = async (req, res) => {
                     attendenceAbsentCount:attendenceAbsentCount,
                     attendenceActivity:attendenceActivity,
                     attendencePercent:attendencePercent,
+                    behaviourScore: std.behaviourScore,
                     canExam:attendencePercent >= 80 ? "-" : "มส."
                 }
             })
