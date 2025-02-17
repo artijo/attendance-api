@@ -64,7 +64,8 @@ export const getActivity = async (req, res) => {
                                     include: {
                                         student: true
                                     }
-                                }
+                                },
+                                term: true
                             }
                         }
                     }
