@@ -259,6 +259,17 @@ export const paticipatedActivityByteacher = async (req, res) => {
             }
         );
         if (activityPaticipate) {
+            if(activityPaticipate.joinLimitNumber){
+                //count activityparticipate
+                const countActParticipate = await db.activityParticipate.count({
+                    where: {
+                        actId: actId
+                    }
+                });
+                if(countActParticipate >= activityPaticipate.joinLimitNumber){
+                    return res.status(400).json({ message: 'จำนวนนักเรียนเต็มแล้ว' });
+                }
+            }
             if(status == "ABSENT"){
                 await db.activityParticipate.delete({
                     where: {
