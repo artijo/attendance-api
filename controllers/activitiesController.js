@@ -241,7 +241,7 @@ export const getActivityByTeacher = async (req, res) => {
     };
 }
 
-export const paticipatedActivity = async (req, res) => {
+export const paticipatedActivityByteacher = async (req, res) => {
     const { actId } = req.params;
     const { stdId, status, note } = req.body;
     try {

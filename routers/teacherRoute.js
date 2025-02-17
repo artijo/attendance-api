@@ -8,7 +8,7 @@ import { getStuydingTimeById } from "../controllers/stuyingTimeController.js";
 import { abstactAttendenceBySubject, getAttendenceBySubject, getAttendenceSummaryBySubjectIsExam, saveAttendenceByTeacher } from "../controllers/attendenceController.js";
 import { getTeacherAdvisorClassroom, getAllClassroom, getClassroomByClassAndSubject } from "../controllers/classroomController.js";
 import { getTeacherTimetable } from "../controllers/timetableController.js";
-import { getActivityByTeacher, getActivity, paticipatedActivity } from "../controllers/activitiesController.js";
+import { getActivityByTeacher, getActivity, paticipatedActivityByteacher } from "../controllers/activitiesController.js";
 import { getAllAcademicTerms } from "../controllers/termController.js";
 
 const router = Router();
@@ -32,7 +32,7 @@ router.get('/terms', getAllAcademicTerms); // get terms
 
 router.get('/activities', getActivityByTeacher); // get activity by teacher
 router.get('/activity/:uuid', getActivity); // get activity by UUID
-router.post('/activity/:actId/participate', paticipatedActivity); // paticipated activity
+router.post('/activity/:actId/participate', paticipatedActivityByteacher); // paticipated activity
 
 router.post('/exportsAttendence',getStudentAllAttendenceExcelOneSubject ); // export excel attendenc
 
