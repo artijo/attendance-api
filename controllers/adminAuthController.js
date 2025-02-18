@@ -20,7 +20,13 @@ export async function login(req, res) {
         }
         const token = generateToken({ id: user.adminId, username: user.username }, '1h');
         const refreshToken = generateToken({ id: user.adminId, username: user.username }, '7d');
-        res.cookie('token', token, { httpOnly: true });
+        // res.cookie('token', token,{
+        //     httpOnly: true,
+        //     secure: true,
+        //     sameSite: 'None',
+        //     domain: '.art-ohm.space',
+        //     maxAge: 3600 * 1000 // 1 hour, or whatever expiration time you need
+        // });
         return res.json({ token, refreshToken });
     }catch(err){
         console.error(err);
@@ -45,7 +51,13 @@ export async function getTokenformRefreshToken(req, res) {
             return res.status(404).json({ message: 'User not found' });
         }
         const token = generateToken({ id: user.id, username: user.username }, '1h');
-        res.cookie('token', token, { httpOnly: true });
+        // res.cookie('token', token,{
+        //     httpOnly: true,
+        //     secure: true,
+        //     sameSite: 'None',
+        //     domain: '.art-ohm.space',
+        //     maxAge: 3600 * 1000 // 1 hour, or whatever expiration time you need
+        // });
         return res.json({ token });
     }catch(err){
         console.error(err);
@@ -54,7 +66,7 @@ export async function getTokenformRefreshToken(req, res) {
 }
 
 export async function checkAuth(req, res) {
-    const token = req.cookies.token;
+    const token = req.headers['authorization'].split(' ')[1];
     if (!token) {
         return res.status(401).json({ message: 'Token not found' });
     }
