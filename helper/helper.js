@@ -1,4 +1,4 @@
-import { DateTime } from "luxon";
+import { DateTime, Zone } from "luxon";
 
 export function formatTime(stringTime) { // HH:MM:SS ->  [HH, MM, SS]
     const time = stringTime.split(':');
@@ -16,8 +16,8 @@ export function formatDateYYYYMMDD(stringDate) {
 export function daybetween(Start, End) {
     const dates = [];
     if (Start !== "" && End !== "") {
-        const startDate = DateTime.fromISO(Start);
-        const endDate = DateTime.fromISO(End);
+        const startDate = DateTime.fromISO(Start, {zone:'UTC'});
+        const endDate = DateTime.fromISO(End, {zone:'UTC'});
         let currentDate = startDate;
         while (currentDate <= endDate) {
             dates.push(currentDate.toISODate().split("-").join("-")); // เพิ่มวันที่ในรูปแบบ YYYY-MM-DD

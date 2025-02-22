@@ -1,5 +1,6 @@
+import { daybetween } from '../helper/helper.js';
 import db from '../prisma/client.js';
-import { DateTime } from 'luxon';
+import { DateTime, Zone } from 'luxon';
 
 export const getAllActivitiesByType = async (req, res) => {
     try {
@@ -328,5 +329,68 @@ export const paticipatedActivityByteacher = async (req, res) => {
             console.error(error);
             return res.status(500).json({ message: 'Internal server error' });
         };
+}
 
+export const abstactActivity = async (req, res) => {
+    const activityId = req.params.activityId;
+    const classroomId = req.params.classId;
+    //Make it return to format Like below
+    // "Date" : [
+    //     {
+    //         stdId:xxxxxx,
+    //         dsadas
+    //     }
+    // ]
+
+    if(!activityId && !classroomId) return res.status(401).json({message: "Something error on Client side"});
+    const activities = await db.activity.findFirst({
+        where:{
+            actId: activityId
+        }
+    });
+    
+    const classroomMember = await db.classroomMember.findMany({
+        where:{
+            classId: classroomId
+        },
+    });
+    const dayBetween = daybetween(
+        activities.actDate.toISOString().split('T')[0], 
+        activities.actDateEnd.toISOString().split('T')[0]
+    )
+    const abstact = await dayBetween.reduce(async (accPromise, curr) => {
+        const acc = await accPromise;
+        const studentPaticipate = await Promise.all(classroomMember.map(async (member) => {
+            const paticipate = await db.activityParticipate.findFirst({
+                where:{
+                    AND:{
+                        stdId: member.stdId,
+                        actId: activityId,
+                        joinTimestamp:{
+                            lte: DateTime.fromISO(`${curr}T${activities.actEndTime}:00Z`, { zone: 'UTC'}),
+                            gte: DateTime.fromISO(`${curr}T${activities.actStartTime}:00Z`, { zone: 'UTC' })
+                        }
+                    }
+                }
+            });
+            if(paticipate){
+                return { ...paticipate, isJoin: true };
+            }
+            return { stdId: member.stdId, isJoin: false };
+        }));
+        
+        acc[curr] = studentPaticipate.sort((a,b) => a.stdId.localeCompare(b.stdId));
+        return acc;
+    }, Promise.resolve({}));
+
+    return res.status(200).json(abstact);
+    // .sort((a, b) => a.stdId.localeCompare(b))
+    // console.log(abstact);
+    // return res.json(await abstact);
+    
+    
+
+
+    // console.log(classroomId);
+    // console.log(activityId);
 }

@@ -43,8 +43,6 @@ export async function createExcelSubjectAttendence(objectInfo, subjectName) { //
             }
         }
 
-    
-
         let i = 1;
         const attendanceByPeriods = row.attendance.reduce(() => {
             const key = `คาบที่ ${i}`
@@ -52,8 +50,6 @@ export async function createExcelSubjectAttendence(objectInfo, subjectName) { //
             i++
             return acc
         }, {});
-
-    
         return {    
             ชื่อจริง: row.fName,
             นามสกุล: row.lName,
