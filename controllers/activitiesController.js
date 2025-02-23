@@ -386,3 +386,37 @@ export const abstactActivityClassroom = async (req, res) => {
     }, Promise.resolve({}));
     return res.status(200).json(abstact);
 }
+
+export const abstactActivityFilterByRoom = async(req, res) => {
+    const activityId = req.params.activityId;
+    const activitys = await db.activity.findFirst({
+        where: {
+            actId:activityId
+        }
+    });
+    
+    const dateTimeNow = DateTime.fromISO(activitys.actDate.toISOString()).setZone('Asia/Bangkok');
+    const dateActivityStart = dateTimeNow.toString().split("T")[0];
+
+    function isSchoolOpen(dateStr){
+        const startDate = DateTime.fromJSDate(dateStr.termStart, {zone: 'UTC'}); // วันที่เริ่มเปิดเทอม
+        const endDate = DateTime.fromJSDate(dateStr.termEnd, {zone: 'UTC'});   // วันที่ปิดเทอม
+        const checkDate = DateTime.fromISO(dateActivityStart, {zone: 'UTC'});      // วันที่ที่ต้องการตรวจสอบ
+        console.log(startDate);
+        if(checkDate >= startDate && checkDate <= endDate){
+            return true;
+        }else{
+            return false;
+        };
+    }
+
+    const termLists = await db.academicTerms.findMany({});
+    let termId;
+    for(const term of termLists) {
+        if(isSchoolOpen(term)){
+            termId = term.termId;
+        }
+    };
+    console.log(termId);
+    return res.status(200).send("kuy")
+}
