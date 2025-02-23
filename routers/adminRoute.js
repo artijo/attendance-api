@@ -26,7 +26,7 @@ import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject
 import { getAllAcademicTerms, createTerm, deleteTerm, getOneAcademicTerm,updateTerm } from "../controllers/termController.js";
 import { getHolidayListAuto, createHoliday, getHolidayList, deleteHoliday, getOneHoliday, updateHoliday, fullCalendarHoliday } from "../controllers/holidayController.js"
 import { createStudingTime, getFullCalendarStudyTime, deleteStudingTime } from "../controllers/stuyingTimeController.js";
-import { getAllActivitiesByType, getActivity, getActivityType, createActivity, editActivity, abstactActivity } from "../controllers/activitiesController.js";
+import { getAllActivitiesByType, getActivity, getActivityType, createActivity, editActivity, abstactActivityClassroom } from "../controllers/activitiesController.js";
 import {getAttendenceBySubject,getAttendenceByDate,getAttendenceSummaryByClassroom, getAttendenceSummaryBySubjectIsExam} from "../controllers/attendenceController.js";
 const router = Router();
 
@@ -130,7 +130,7 @@ router.get('/activities/:type', getAllActivitiesByType);
 router.get('/activity/:uuid', getActivity);
 router.get('/activityType', getActivityType);
 router.put('/activity/:uuid', editActivity);
-router.get('/activity/abstact/byclassroom/:activityId/:classId',abstactActivity);
+router.get('/activity/abstact/byclassroom/:activityId/:classId',abstactActivityClassroom);
 
 //Attendence
 router.get('/attendence/:subjectId/:classroomId', getAttendenceBySubject);

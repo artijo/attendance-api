@@ -331,44 +331,45 @@ export const paticipatedActivityByteacher = async (req, res) => {
         };
 }
 
-export const abstactActivity = async (req, res) => {
+export const abstactActivityClassroom = async (req, res) => {
     const activityId = req.params.activityId;
     const classroomId = req.params.classId;
-    //Make it return to format Like below
-    // "Date" : [
-    //     {
-    //         stdId:xxxxxx,
-    //         dsadas
-    //     }
-    // ]
 
     if(!activityId && !classroomId) return res.status(401).json({message: "Something error on Client side"});
+    if(classroomId === "all");
     const activities = await db.activity.findFirst({
         where:{
             actId: activityId
         }
     });
-    
     const classroomMember = await db.classroomMember.findMany({
         where:{
             classId: classroomId
         },
     });
+    const actDateStart = DateTime.fromISO(activities.actDate.toISOString(), { zone : 'UTC' }).setZone('Asia/Bangkok');
+    const actDateEnd = DateTime.fromISO(activities.actDateEnd.toISOString(), { zone: 'UTC'}).setZone('Asia/Bangkok');
     const dayBetween = daybetween(
-        activities.actDate.toISOString().split('T')[0], 
-        activities.actDateEnd.toISOString().split('T')[0]
-    )
+        actDateStart.toString().split('T')[0], 
+        actDateEnd.toString().split('T')[0]
+    );
     const abstact = await dayBetween.reduce(async (accPromise, curr) => {
         const acc = await accPromise;
         const studentPaticipate = await Promise.all(classroomMember.map(async (member) => {
+            const lteDate = DateTime.fromISO(`${curr}T${activities.actEndTime}:00Z`)
+                                .setZone('UTC')
+                                .minus({hour:7});
+            const gteDate = DateTime.fromISO(`${curr}T${activities.actStartTime}:00Z`)
+                                .setZone('UTC')
+                                .minus({hour:7});
             const paticipate = await db.activityParticipate.findFirst({
                 where:{
                     AND:{
                         stdId: member.stdId,
                         actId: activityId,
                         joinTimestamp:{
-                            lte: DateTime.fromISO(`${curr}T${activities.actEndTime}:00Z`, { zone: 'UTC'}),
-                            gte: DateTime.fromISO(`${curr}T${activities.actStartTime}:00Z`, { zone: 'UTC' })
+                            lte: lteDate,
+                            gte: gteDate
                         }
                     }
                 }
@@ -378,19 +379,8 @@ export const abstactActivity = async (req, res) => {
             }
             return { stdId: member.stdId, isJoin: false };
         }));
-        
         acc[curr] = studentPaticipate.sort((a,b) => a.stdId.localeCompare(b.stdId));
         return acc;
     }, Promise.resolve({}));
-
     return res.status(200).json(abstact);
-    // .sort((a, b) => a.stdId.localeCompare(b))
-    // console.log(abstact);
-    // return res.json(await abstact);
-    
-    
-
-
-    // console.log(classroomId);
-    // console.log(activityId);
 }
