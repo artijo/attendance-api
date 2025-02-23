@@ -1,6 +1,8 @@
 import { daybetween } from '../helper/helper.js';
 import db from '../prisma/client.js';
-import { DateTime, Zone } from 'luxon';
+import { DateTime } from 'luxon';
+
+const zone = process.env.TIME_ZONE || 'Asia/Bangkok';
 
 export const getAllActivitiesByType = async (req, res) => {
     try {
@@ -94,8 +96,8 @@ export const createActivity = async (req, res) => {
         const activity = await db.activity.create({
             data: {
                 actName,
-                actDate: DateTime.fromISO(actDate).toJSDate(),
-                actDateEnd: DateTime.fromISO(actDateEnd).toJSDate(),
+                actDate: DateTime.fromISO(actDate).toUTC().toISO(),
+                actDateEnd: DateTime.fromISO(actDateEnd).toUTC().toISO(),
                 actStartTime,
                 actEndTime,
                 actLocation,
