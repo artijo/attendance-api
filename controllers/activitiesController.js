@@ -336,7 +336,6 @@ export const paticipatedActivityByteacher = async (req, res) => {
 export const abstactActivityClassroom = async (req, res) => {
     const activityId = req.params.activityId;
     const classroomId = req.params.classId;
-
     if(!activityId && !classroomId) return res.status(401).json({message: "Something error on Client side"});
     if(classroomId === "all");
     const activities = await db.activity.findFirst({
@@ -388,35 +387,101 @@ export const abstactActivityClassroom = async (req, res) => {
 }
 
 export const abstactActivityFilterByRoom = async(req, res) => {
-    const activityId = req.params.activityId;
-    const activitys = await db.activity.findFirst({
-        where: {
-            actId:activityId
-        }
-    });
     
-    const dateTimeNow = DateTime.fromISO(activitys.actDate.toISOString()).setZone('Asia/Bangkok');
-    const dateActivityStart = dateTimeNow.toString().split("T")[0];
-
-    function isSchoolOpen(dateStr){
-        const startDate = DateTime.fromJSDate(dateStr.termStart, {zone: 'UTC'}); // วันที่เริ่มเปิดเทอม
-        const endDate = DateTime.fromJSDate(dateStr.termEnd, {zone: 'UTC'});   // วันที่ปิดเทอม
-        const checkDate = DateTime.fromISO(dateActivityStart, {zone: 'UTC'});      // วันที่ที่ต้องการตรวจสอบ
-        console.log(startDate);
-        if(checkDate >= startDate && checkDate <= endDate){
-            return true;
-        }else{
-            return false;
-        };
-    }
-
-    const termLists = await db.academicTerms.findMany({});
-    let termId;
-    for(const term of termLists) {
-        if(isSchoolOpen(term)){
-            termId = term.termId;
+    const activityId = req.params.activityId;
+    try{
+        const activitys = await db.activity.findFirst({
+            where: {
+                actId:activityId
+            }
+        });
+    
+        //หาว่ากิจกรรมที่ต้องการ insert นั้นอยู่ระหว่างช่วงเทอมไหน
+        const dateTimeNow = DateTime.fromISO(activitys.actDate.toISOString()).setZone('Asia/Bangkok');
+        const dateActivityStart = dateTimeNow.toString().split("T")[0];
+        function isSchoolOpen(dateStr){
+            const startDate = DateTime.fromJSDate(dateStr.termStart, {zone: 'UTC'}); // วันที่เริ่มเปิดเทอม
+            const endDate = DateTime.fromJSDate(dateStr.termEnd, {zone: 'UTC'});   // วันที่ปิดเทอม
+            const checkDate = DateTime.fromISO(dateActivityStart, {zone: 'UTC'});      // วันที่ที่ต้องการตรวจสอบ
+            // console.log(startDate);
+            if(checkDate >= startDate && checkDate <= endDate){
+                return true;
+            }else{
+                return false;
+            };
         }
-    };
-    console.log(termId);
-    return res.status(200).send("kuy")
+    
+        const termLists = await db.academicTerms.findMany({});
+        let termId;
+        for(const term of termLists) {
+            if(isSchoolOpen(term)){
+                termId = term.termId;
+            }
+        };
+    
+        // console.log(termId);
+        ////////////////
+        const actDateStart = DateTime.fromISO(activitys.actDate.toISOString(), { zone : 'UTC' }).setZone('Asia/Bangkok');
+        const actDateEnd = DateTime.fromISO(activitys.actDateEnd.toISOString(), { zone: 'UTC'}).setZone('Asia/Bangkok');
+        const paticipateCount = daybetween(
+            actDateStart.toString().split('T')[0], 
+            actDateEnd.toString().split('T')[0]
+        ).length;
+    
+        const classroomsHasMembers = await db.classrooms.findMany({
+            where:{
+                termId: termId
+            },
+            include:{
+                classroomMembers:{
+                    include:{
+                        student:true
+                    }
+                }
+            },
+            orderBy:[
+                { classLevel : 'asc'},
+                { classRoom: 'asc'}
+            ]
+        });
+        
+        const abstactFilterByClassroom = await  classroomsHasMembers.reduce(async (prev, curr) => {
+            const acc = await prev;
+            const participateMember = Promise.all(curr.classroomMembers.map(async (member) => {
+                const participate = await db.activityParticipate.findMany({
+                    where:{
+                        AND:{
+                            stdId:member.stdId,
+                            actId:activitys.actId,
+                            student:{
+                                classroomMembers:{
+                                    some:{
+                                        classId: curr.classId
+                                    }
+                                }
+                            }
+                        }
+                    },
+                });
+                const objectDraft = {
+                    stdId: member.stdId,
+                    title: member.student.title,
+                    fName: member.student.fName,
+                    lName: member.student.lName,
+                    stdNo: parseInt(member.stdNo),
+                    participateCount :participate.length
+                }
+                return objectDraft;
+            }));
+            const participateMemberSortByStdNo = (await participateMember).sort((a, b) => a.stdNo - b.stdNo);
+            
+            acc[`${curr.classLevel}/${curr.classRoom}`] =  participateMemberSortByStdNo;
+            
+            return acc;
+        },Promise.resolve({}))
+        return res.status(200).send(abstactFilterByClassroom);
+    }catch(error){
+        return res.status(501).send("message: something happening");
+    }
+    
 }
