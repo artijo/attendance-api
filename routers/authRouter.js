@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { 
-    login as adminLogin, 
-    checkAuth as adminCheckAuth, 
-    getTokenformRefreshToken as adminGetTokenFromRefreshToken
+    login, 
+    checkAuth, 
+    getTokenformRefreshToken 
 } from "../controllers/adminAuthController.js";
 import { 
     login as teacherLogin, 
@@ -13,9 +13,9 @@ import {
 const router = Router();
 
 // Admin Authentication
-router.post('/a/login', adminLogin);
-router.get('/a/check', adminCheckAuth);
-router.post('/a/refresh', adminGetTokenFromRefreshToken);
+router.post('/a/login', login);
+router.get('/a/check', checkAuth);
+router.post('/a/refresh', getTokenformRefreshToken);
 
 // Teacher Authentication
 router.post('/t/login', teacherLogin);
