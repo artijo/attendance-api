@@ -14,8 +14,10 @@ import authRouter from './routers/authRouter.js';
 import { isAuth } from './middleware.js';
 
 
+dotenv.config();
 
 const PORT = process.env.PORT || 3000;
+const environment = process.env.ENVIRONTMENT || 'development';
 
 const app = express();
 
@@ -37,9 +39,8 @@ app.use(cors(
 // middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
-
-dotenv.config();
+// app.use(morgan('dev'));
+environment === 'development' ? app.use(morgan('dev')) : app.use(morgan('combined'));
 
 // use routes
 app.use('/auth', authRouter);
