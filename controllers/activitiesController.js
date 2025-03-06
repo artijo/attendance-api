@@ -258,6 +258,12 @@ export const paticipatedActivityByteacher = async (req, res) => {
     const { actId } = req.params;
     const { stdId, status, note } = req.body;
     try {
+        const activity = await db.activity.findFirst({
+            where: {
+                actId: actId
+            }
+        });
+        console.log(activity);
         const activityPaticipate = await db.activityParticipate.findFirst({
             where: {
                 actId: actId,
@@ -271,18 +277,19 @@ export const paticipatedActivityByteacher = async (req, res) => {
             }
             }
         );
-        if (activityPaticipate) {
-            if(activityPaticipate.joinLimitNumber){
-                //count activityparticipate
-                const countActParticipate = await db.activityParticipate.count({
-                    where: {
-                        actId: actId
-                    }
-                });
-                if(countActParticipate >= activityPaticipate.joinLimitNumber){
-                    return res.status(400).json({ message: 'จำนวนนักเรียนเต็มแล้ว' });
+       
+        const activityParticipateCount = await db.activityParticipate.count({
+            where: {
+                actId: actId,
+
+                joinTimestamp: {
+                    gte: DateTime.now().startOf('day').toUTC().toJSDate(),
+                    lte: DateTime.now().endOf('day').toUTC().toJSDate()
                 }
             }
+        });
+
+        if (activityPaticipate) {
             if(status == "ABSENT"){
                 await db.activityParticipate.delete({
                     where: {
@@ -302,6 +309,23 @@ export const paticipatedActivityByteacher = async (req, res) => {
             return res.json({ message: 'success' });
         }
         } else {
+            if(activity.joinLimit && activity.joinLimitNumber > 0){
+                //count activityparticipate
+                const countActParticipate = await db.activityParticipate.count({
+                    where: {
+                        actId: actId,
+    
+                        joinTimestamp: {
+                            gte: DateTime.now().startOf('day').toUTC().toJSDate(),
+                            lte: DateTime.now().endOf('day').toUTC().toJSDate()
+                        }
+                    }
+                });
+                console.log(countActParticipate);
+                if(countActParticipate >= activity.joinLimitNumber){
+                    return res.status(400).json({ message: 'จำนวนนักเรียนเต็มแล้ว' });
+                }
+            }
             await db.activityParticipate.create({
                 data: {
                     activity: {
@@ -326,7 +350,6 @@ export const paticipatedActivityByteacher = async (req, res) => {
             });
             return res.json({ message: 'success' });
         }
-
     }catch (error) {
             console.error(error);
             return res.status(500).json({ message: 'Internal server error' });
