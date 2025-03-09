@@ -13,9 +13,17 @@ export function formatDateYYYYMMDD(stringDate) {
 }
 
 
-// export function CheckDateBetwee(){
-
-// }
+export function CheckDateBetween(startDate, endDate, checkStart, checkEnd){
+    const sDateForamt = DateTime.fromJSDate(startDate).setZone('UTC');
+    const eDateFormat = DateTime.fromJSDate(endDate).setZone('UTC');
+    if(checkStart >= sDateForamt && checkStart <= eDateFormat ){
+        return true
+    }else if(checkEnd >= sDateForamt && checkEnd <= eDateFormat) {
+        return true
+    }else{
+        return false
+    }
+}
 
 
 export function daybetween(Start, End) {
