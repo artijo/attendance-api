@@ -41,8 +41,35 @@ export const createTerm = async (req, res) => {
     const semester = parseInt(body.semester);
     const termStart = DateTime.fromISO(`${body.termStart}T00:00:00Z`, {zone: 'UTC'});
     const termEnd = DateTime.fromISO(`${body.termEnd}T00:00:00Z`, {zone:'UTC'});
-    if(body) {
+
+    function CheckDateBetween(startDate, endDate, checkStart, checkEnd){
+        const sDateForamt = DateTime.fromJSDate(startDate).setZone('UTC');
+        const eDateFormat = DateTime.fromJSDate(endDate).setZone('UTC');
+        if(checkStart >= sDateForamt && checkStart <= eDateFormat ){
+            return true
+        }else if(checkEnd >= sDateForamt && checkEnd <= eDateFormat) {
+            return true
+        }else{
+            return false
+        }
+    }
+
+    if(acadamicyear && semester && termStart && termEnd) {
         try{
+            const minimunDate  = await db.academicTerms.findFirst({
+                orderBy:{
+                    termStart:'asc'
+                }
+            });
+            const maxDate  = await db.academicTerms.findFirst({
+                orderBy:{
+                    termEnd:'desc'
+                }
+            });
+            const isTermExist = CheckDateBetween(minimunDate.termStart, maxDate.termEnd, termStart, termEnd);
+            if(isTermExist){
+                return res.status(400).json({message:"ไม่สามารถสร้างเทอมปีการศึกษาได้เนื่องจากมีระหว่างวันที่มีอยู่ในฐานข้อมูลแล้ว"});
+            }
             await db.academicTerms.create({
                 data:{
                     academicYear:acadamicyear,
