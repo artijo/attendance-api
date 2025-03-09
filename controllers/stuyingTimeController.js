@@ -7,7 +7,8 @@ export const createStudingTime = async (req, res) => {
     const body = req.body;
     const termId = body.termId;
     const holidayList = body.holidayList.map((holiday) => holiday.startDate);
-    const classroomids = body.classroomids;
+    // const classroomids = body.classroomids;
+    // console.log(classroomids);
     // console.log(classroomids);
     // console.log(classroomids);
     // console.log(termId);
@@ -21,16 +22,24 @@ export const createStudingTime = async (req, res) => {
     //     type: 'RATCHAKHAN'
     // } => ['2025-01-01']
     try{
+        // console.log(termId);
+        
         const academicYearTerm = await db.academicTerms.findUnique({
             where: {
                 termId: termId
             },
         });
-      
+        const classroom = await db.classrooms.findMany({
+            where:{
+                termId: termId
+            }
+        });
+        const classroomId = classroom.map((classroom) => classroom.classId);
+
         const timetables = await db.timetable.findMany({
             where: {
                 classId: {
-                    in: classroomids
+                    in: classroomId
                 }
             },
             orderBy: [
@@ -45,7 +54,15 @@ export const createStudingTime = async (req, res) => {
                 classId:true
             }
         });
-        // console.log(timetables);
+        
+        const isStudingTimeExist = await db.studingTime.findFirst({
+            where:{
+                timetableId: {in:timetables.map((timetables) => timetables.timetableId)}
+            }
+        })
+        if(isStudingTimeExist){
+            return res.status(400).json({message:"ไม่สามารถสร้างปฎิทินการเรียนได้เนื่องจากมีปฎิทินการเรียนแล้ว"})
+        }
         const dateTimeStart = academicYearTerm.termStart.toISOString().split("T")[0]; //ex. ['2025-05-15','00:00:00.000Z']
         const dateTimeEnd = academicYearTerm.termEnd.toISOString().split("T")[0]; //ex. ['2025-09-09','00:00:00.000Z']
         const datebetween = daybetween(dateTimeStart, dateTimeEnd).filter((date) => {
@@ -66,10 +83,10 @@ export const createStudingTime = async (req, res) => {
                 };
             }
         }
-        res.status(200).json({message:"สร้างปฎิทินการเรียนแล้วเรียบร้อย"});
+        return res.status(200).json({message:"สร้างปฎิทินการเรียนแล้วเรียบร้อย"});
     }catch(err){
         console.error(err);
-        res.status(500).json({message:"เกิดข้อผิดพลาดในการสร้างปฎิทินการเรียน"});
+        return res.status(500).json({message:"เกิดข้อผิดพลาดในการสร้างปฎิทินการเรียน"});
     };
 };
 

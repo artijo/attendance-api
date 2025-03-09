@@ -88,20 +88,6 @@ router.delete('/subject/type/:uuid', deleteSubejectType);
 router.delete('/studingtime/:classroomId', deleteStudingTime);
 router.post('/studingtime', createStudingTime); // สร้างปฎิทินการเรียนของทุกห้องเรียนในเทอมนั้น
 
-// router.delete('/studingtime', deleteStudingTime);
-
-// router.get('/holiday', getHoliday); // get holiday ราชการ
-// router.post('/holiday', createHoliday); //สร้างวันหยุด 
-// router.put('/holiday', updateHoliday); // test
-// router.delete('/holiday', deleteHoliday);
-
-// router.get('/holidayCalendar', getHolidayCalendar); //ดึงวันหยุดของแต่ละห้อง 
-// router.get('/calendarStudy', getStudyCalendar)
-
-// router.post('/calendar', createStuingCalendar); //สร้างตารางเรียน 
-// router.post('/holidayList', getHolidayCalendarList);
-// calendar(stuingtime management)
-
 
 // Holiday
 router.get('/holiday/:termId', getHolidayList); // Holiday List แต่ละเทอม
