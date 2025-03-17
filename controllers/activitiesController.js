@@ -56,7 +56,8 @@ export const getActivity = async (req, res) => {
                                 }
 
                             }
-                        }
+                        },
+                        teacher: true
                     }
                 },
                 classroom: {
