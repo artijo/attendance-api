@@ -370,6 +370,9 @@ export const abstactActivityClassroom = async (req, res) => {
         where:{
             classId: classroomId
         },
+        include:{
+            student:true
+        }
     });
     const actDateStart = DateTime.fromISO(activities.actDate.toISOString(), { zone : 'UTC' }).setZone('Asia/Bangkok');
     const actDateEnd = DateTime.fromISO(activities.actDateEnd.toISOString(), { zone: 'UTC'}).setZone('Asia/Bangkok');
@@ -396,12 +399,17 @@ export const abstactActivityClassroom = async (req, res) => {
                             gte: gteDate
                         }
                     }
+                },
+                include:{
+                    student:true
                 }
             });
             if(paticipate){
                 return { ...paticipate, isJoin: true };
+            }else{
+                
             }
-            return { stdId: member.stdId, isJoin: false };
+            return { stdId: member.stdId , student:{fName:member.student.fName,lName:member.student.lName,title:member.student.title} ,isJoin: false };
         }));
         acc[curr] = studentPaticipate.sort((a,b) => a.stdId.localeCompare(b.stdId));
         return acc;
