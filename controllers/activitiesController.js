@@ -33,7 +33,24 @@ export const getAllActivitiesByType = async (req, res) => {
 
 export const getActivity = async (req, res) => {
     const uuid = req.params.uuid;
+    const { date } = req.query;
+        
     try {
+        let actParticipateFilter = {};
+        
+        // If date is provided in query, filter actParticipate by date
+        if (date) {
+            const filterDate = DateTime.fromISO(date);
+            actParticipateFilter = {
+                where: {
+                    joinTimestamp: {
+                        gte: filterDate.startOf('day').toUTC().toJSDate(),
+                        lte: filterDate.endOf('day').toUTC().toJSDate()
+                    }
+                }
+            };
+        }
+        
         const activity = await db.activity.findUnique({
             where: {
                 actId: uuid
@@ -46,6 +63,7 @@ export const getActivity = async (req, res) => {
                     }
                 },
                 actParticipate: {
+                    ...actParticipateFilter,
                     include: {
                         student: {
                             include: {
@@ -54,9 +72,9 @@ export const getActivity = async (req, res) => {
                                         classroom: true
                                     }
                                 }
-
                             }
-                        }
+                        },
+                        teacher: true
                     }
                 },
                 classroom: {
@@ -78,6 +96,7 @@ export const getActivity = async (req, res) => {
         return res.json(activity)
     } catch (error) {
         console.error(error);
+        return res.status(500).json({ error: "Failed to fetch activity data" });
     };
 }
 
@@ -256,35 +275,37 @@ export const getActivityByTeacher = async (req, res) => {
 
 export const paticipatedActivityByteacher = async (req, res) => {
     const { actId } = req.params;
-    const { stdId, status, note } = req.body;
+    const { stdId, status, note, date } = req.body;
     try {
         const activity = await db.activity.findFirst({
             where: {
                 actId: actId
             }
         });
-        console.log(activity);
+        
+        // Use the provided date or current date
+        let targetDate = DateTime.now();
+        if (date) {
+            targetDate = DateTime.fromISO(date);
+        }
+        
         const activityPaticipate = await db.activityParticipate.findFirst({
             where: {
                 actId: actId,
                 stdId: stdId,
-                // ดึงข้อมูลที่เป็นวันปัจจุบัน
                 joinTimestamp: {
-                    gte: DateTime.now().startOf('day').toUTC().toJSDate(),
-                    lte: DateTime.now().endOf('day').toUTC().toJSDate()
+                    gte: targetDate.startOf('day').toUTC().toJSDate(),
+                    lte: targetDate.endOf('day').toUTC().toJSDate()
                 }
-
             }
-            }
-        );
+        });
        
         const activityParticipateCount = await db.activityParticipate.count({
             where: {
                 actId: actId,
-
                 joinTimestamp: {
-                    gte: DateTime.now().startOf('day').toUTC().toJSDate(),
-                    lte: DateTime.now().endOf('day').toUTC().toJSDate()
+                    gte: targetDate.startOf('day').toUTC().toJSDate(),
+                    lte: targetDate.endOf('day').toUTC().toJSDate()
                 }
             }
         });
@@ -297,27 +318,26 @@ export const paticipatedActivityByteacher = async (req, res) => {
                     }
                 });
                 return res.json({ message: 'success' });
-            }else {
-            await db.activityParticipate.update({
-                where: {
-                    actParticipateId: activityPaticipate.actParticipateId
-                },
-                data: {
-                    note
-                }
-            });
-            return res.json({ message: 'success' });
-        }
+            } else {
+                await db.activityParticipate.update({
+                    where: {
+                        actParticipateId: activityPaticipate.actParticipateId
+                    },
+                    data: {
+                        note
+                    }
+                });
+                return res.json({ message: 'success' });
+            }
         } else {
             if(activity.joinLimit && activity.joinLimitNumber > 0){
                 //count activityparticipate
                 const countActParticipate = await db.activityParticipate.count({
                     where: {
                         actId: actId,
-    
                         joinTimestamp: {
-                            gte: DateTime.now().startOf('day').toUTC().toJSDate(),
-                            lte: DateTime.now().endOf('day').toUTC().toJSDate()
+                            gte: targetDate.startOf('day').toUTC().toJSDate(),
+                            lte: targetDate.endOf('day').toUTC().toJSDate()
                         }
                     }
                 });
@@ -326,6 +346,8 @@ export const paticipatedActivityByteacher = async (req, res) => {
                     return res.status(400).json({ message: 'จำนวนนักเรียนเต็มแล้ว' });
                 }
             }
+            
+            // Create with the target date instead of current date if date is provided
             await db.activityParticipate.create({
                 data: {
                     activity: {
@@ -345,15 +367,15 @@ export const paticipatedActivityByteacher = async (req, res) => {
                             tchId: req.user.id
                         }
                     },
-                    joinTimestamp: DateTime.now().toUTC().toJSDate(),
+                    joinTimestamp: targetDate.toUTC().toJSDate(),
                 }
             });
             return res.json({ message: 'success' });
         }
-    }catch (error) {
-            console.error(error);
-            return res.status(500).json({ message: 'Internal server error' });
-        };
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal server error' });
+    };
 }
 
 export const abstactActivityClassroom = async (req, res) => {
