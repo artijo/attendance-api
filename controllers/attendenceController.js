@@ -722,12 +722,14 @@ export const abstactAttendenceBySubject = async (req, res) => {
                 stdId: studentId
             },
             include:{
-                student:true
+                student:true,
+                // classroom:true
             }
         })
-
+        // console.log(student);
         async function abstact(){
             let abstact = { studentInfo:student };
+            // console.log(abstact);
             for(const subject of subjectId){
                 abstact = { ...abstact, 
                     [subject] : {
