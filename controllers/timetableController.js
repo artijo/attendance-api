@@ -2,59 +2,61 @@ import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
 
 export const createTimetable = async (req, res) => {
-    const { day, timestart, timeend, timelate, classroom, subject } = req.body;
-    if (day && timestart && timeend && timelate && classroom && subject) {
+    const { subject, timelate , periodtime, classroom, day } = req.body;
+    // console.log(req.body);
+    if (subject && timelate && periodtime && classroom && day) {
         try {
-            const existingTimetable = await db.timetable.findFirst({
-                where: {
-                    AND:{
-                        classId: classroom,
-                        dayOfWeek: day,
-                        timeStart: timestart,
-                        timeEnd: timeend,
-                        timeLate: timelate,
-                    }
+            console.log(periodtime);
+            const timelateDatetime = DateTime.fromISO(periodtime.startDatabaseFormat).setZone('Asia/Bangkok').plus({minutes:timelate});
+            const timelateDatabaseFormat = timelateDatetime.toFormat('HH:mm:ss');
+            await db.timetable.create({
+                data:{
+                    subId: subject.subId,
+                    classId: classroom.classId,
+                    timeStart: periodtime.startDatabaseFormat,
+                    timeEnd:periodtime.endDatabaseFormat,
+                    timeLate: timelateDatabaseFormat,
+                    dayOfWeek: Number(day)
                 }
-                
-            });
-            let timetable;
-            if (existingTimetable !== null) {
-                timetable = await db.timetable.update({
-                    where: {
-                        timetableId: existingTimetable.timetableId
-                    },
-                    data: {
-                        subject: {
-                            connect: { subId: subject.subId }
-                        }
-                    }
-                });
-            } else {
-                timetable = await db.timetable.create({
-                    data: {
-                        dayOfWeek: day,
-                        timeStart: timestart,
-                        timeEnd: timeend,
-                        timeLate: timelate,
-                        classroom: {
-                            connect: { classId: classroom }
-                        },
-                        subject: {
-                            connect: { subId: subject.subId }
-                        }
-                    }
-                });
-            }
-            res.json(timetable);
+            })
+            res.status(200).json({ message: "สร้างสำเร็จ"})
         } catch (err) {
             console.error(err);
-            res.status(500).json({ error: "An error occurred while creating the timetable." });
+            res.status(500).json({ message: "เกิดข้อผิดพลาดในขณะสร้างคาบตารางเรียน" });
         }
     } else {
-        res.status(400).json({ error: "Invalid input data." });
+        res.status(400).json({ message: "ข้อมูลไม่ถูกต้อง" });
     }
 };
 
+export const editTimetable = async (req, res) => {
+    const { timetable, subject, periodtime, timelate  } = req.body;
+    if (timetable && subject && periodtime && timelate) {
+        try {
+            const timelateDatetime = DateTime.fromISO(periodtime.startDatabaseFormat).setZone('Asia/Bangkok').plus({minutes:timelate});
+            const timelateDatabaseFormat = timelateDatetime.toFormat('HH:mm:ss');
+            await db.timetable.update({
+                where:{
+                    timetableId:timetable.timetableId
+                },
+                data:{
+                    subId:subject.subId,
+                    classId:timetable.classId,
+                    timeStart: periodtime.startDatabaseFormat,
+                    timeEnd:periodtime.endDatabaseFormat,
+                    timeLate: timelateDatabaseFormat,
+                    dayOfWeek:Number(timetable.dayOfWeek)
+                }
+            })
+            res.status(200).json({ message: "แก้ไขสำเร็จ"})
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: "เกิดข้อผิดพลาดในขณะสร้างคาบตารางเรียน" });
+        }
+    } else {
+        res.status(400).json({ message: "ข้อมูลไม่ถูกต้อง" });
+    }
+};
 
 export const getTimeTableByRoom = async (req, res) => {
     const classid = req.query.classroomid;

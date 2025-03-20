@@ -191,7 +191,8 @@ export const getAttendenceBySubject = async (req, res) => {
                         select:{    
                             fName:true,
                             lName:true,
-                            attendance:true
+                            attendance:true,
+                            title:true
                         }
                     }
                 },
@@ -250,6 +251,7 @@ export const getAttendenceBySubject = async (req, res) => {
                     return {
                         stdId:item.stdId,
                         stdNo:item.stdNo,
+                        title:item.student.title,
                         fName:item.student.fName,
                         lName:item.student.lName,
                         attendance:Attendence
