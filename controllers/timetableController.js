@@ -47,7 +47,8 @@ export const createTimetable = async (req, res) => {
 
             const holidayListDate = holiday.map((holiday) => {
                 const timezoneformat = DateTime.fromJSDate(holiday.startHolidayDate).setZone('Asia/Bangkok');
-                const holidayDay = timezoneformat.day;
+                const holidayDay = timezoneformat.toISODate();
+                // console.log(holidayDay);
                 return holidayDay;
             });
 
@@ -57,8 +58,8 @@ export const createTimetable = async (req, res) => {
                 return checkSatAndSun != 6 && checkSatAndSun != 7;
                 // console.log(checkSatAndSun); 
             }).filter((date) => {
-                const checkSatAndSun = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok').day;
-                return !holidayListDate.includes(checkSatAndSun);
+                // const checkSatAndSun = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok').day;
+                return !holidayListDate.includes(date);
             });
             //  // เรียก daybetween เพื่อดูระหว่างวันไหนของเทอม และ filter วันเสาร์อาทิตย์ออกหลังจากนั้น filter วันหยุดต่อ
             for(const date of termDateBetween) {

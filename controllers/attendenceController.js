@@ -823,3 +823,8 @@ export const abstactAttendenceBySubject = async (req, res) => {
         res.status(500).json({message: error});
     }
 }
+
+
+export const abstactAttendenceBySubjectAndStudent = async (req, res) => {
+    
+}

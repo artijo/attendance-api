@@ -44,12 +44,12 @@ export const fullCalendarHoliday = async (req, res) => {
 };
 
 export const getHolidayList = async (req, res) => {
-    const termId = req.params.termId;
+    const termId = req.params.termId;   
     if (termId) {
         try {
             const holiday = await db.holiday.findMany({
                 where: {
-                    termId: req.params.termId
+                    termId: termId
                 },
                 orderBy:[
                     {

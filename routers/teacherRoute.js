@@ -10,6 +10,7 @@ import { getTeacherAdvisorClassroom, getAllClassroom, getClassroomByClassAndSubj
 import { getTeacherTimetable } from "../controllers/timetableController.js";
 import { getActivityByTeacher, getActivity, paticipatedActivityByteacher } from "../controllers/activitiesController.js";
 import { getAllAcademicTerms } from "../controllers/termController.js";
+import { getHolidayList } from "../controllers/holidayController.js";
 
 const router = Router();
 
@@ -28,12 +29,14 @@ router.get('/classrooms/classrooms/checkdetail/:subjectId/:classroomId', getAtte
 router.get('/attendence/:subjectId/:classroomId', getAttendenceBySubject);
 // getAttendenceSummaryBySubjectIsExam
 // getClassroomByClassAndSubject
+
 router.get('/terms', getAllAcademicTerms); // get terms 
+
 
 router.get('/activities', getActivityByTeacher); // get activity by teacher
 router.get('/activity/:uuid', getActivity); // get activity by UUID
 router.post('/activity/:actId/participate', paticipatedActivityByteacher); // paticipated activity
 
-router.post('/exportsAttendence',getStudentAllAttendenceExcelOneSubject ); // export excel attendenc
+router.get('/holiday/:termId', getHolidayList);
 
 export default router;
