@@ -27,7 +27,7 @@ export async function login(req, res) {
         //     domain: '.art-ohm.space',
         //     maxAge: 3600 * 1000 // 1 hour, or whatever expiration time you need
         // });
-        return res.json({ token, refreshToken });
+        return res.json({ token, refreshToken, user });
     }catch(err){
         console.error(err);
     }
