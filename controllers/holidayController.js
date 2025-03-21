@@ -98,6 +98,7 @@ export const getOneHoliday = async (req, res) => {
 export const updateHoliday = async (req, res) => {
     const holidayId = req.params.holidayId;
     const body = req.body;
+    const holidaydateChangeTimezone = DateTime.fromISO(`${body.startHolidayDate}T00:00:00`).setZone('Asia/Bangkok');
     if (body) {
         try {
             const holiday = await db.holiday.update({
@@ -106,8 +107,8 @@ export const updateHoliday = async (req, res) => {
                 },
                 data: {
                     holidayName: body.holidayName,
-                    startHolidayDate: body.startHolidayDate,
-                    endHolidayDate: body.startHolidayDate,
+                    startHolidayDate: holidaydateChangeTimezone,
+                    endHolidayDate: holidaydateChangeTimezone,
                     type: body.type
                 }
             });
@@ -136,8 +137,8 @@ export const createHoliday = async (req, res) => {
     if (body) {
         try {
             for(const holiday of body.holidayList){
-                const startDate = DateTime.fromISO(holiday.startDate+"T00:00:00Z", { zone: 'UTC' });
-                const endDate = DateTime.fromISO(holiday.endDate+"T00:00:00Z", { zone: 'UTC' });
+                const startDate = DateTime.fromISO(holiday.startDate+"T00:00:00").setZone('Asia/Bangkok');
+                const endDate = DateTime.fromISO(holiday.endDate+"T00:00:00").setZone('Asia/Bangkok');
                 await db.holiday.create({
                     data:{
                         holidayName:holiday.holidayname,
@@ -154,7 +155,7 @@ export const createHoliday = async (req, res) => {
             }
             res.status(200).json({message: "สร้างรายการวันหยุดสำเร็จ"});
         } catch (err) {
-            console.error(err);
+            // console.error(err);
             res.status(500).json(err);
         };
     }else{
