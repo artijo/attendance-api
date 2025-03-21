@@ -63,18 +63,19 @@ export const createTimetable = async (req, res) => {
             //  // เรียก daybetween เพื่อดูระหว่างวันไหนของเทอม และ filter วันเสาร์อาทิตย์ออกหลังจากนั้น filter วันหยุดต่อ
             for(const date of termDateBetween) {
                 const dateformat = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok');
-                await db.studingTime.create({
-                    data:{
-                        timetable:{
-                            connect:{
-                                timetableId:timetable.timetableId
-                            }
-                        },
-                        studingTimeDate:dateformat
-                    }
-                });
+                if(Number(dateformat.weekday) === Number(day)) {
+                    await db.studingTime.create({
+                        data:{
+                            timetable:{
+                                connect:{
+                                    timetableId:timetable.timetableId
+                                }
+                            },
+                            studingTimeDate:dateformat
+                        }
+                    });
+                }
             };
-            
 
             return res.status(200).json({ message: "สร้างสำเร็จ"})
         } catch (err) {

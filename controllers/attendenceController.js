@@ -220,8 +220,8 @@ export const getAttendenceBySubject = async (req, res) => {
                 }
             })
             let months = [];
-            const startDateTime = DateTime.fromJSDate(term.term.termStart, { zone: 'UTC' });
-            const endDateTime = DateTime.fromJSDate(term.term.termEnd, { zone: 'UTC' });
+            const startDateTime = DateTime.fromJSDate(term.term.termStart).setZone('Asia/Bangkok');
+            const endDateTime = DateTime.fromJSDate(term.term.termEnd).setZone('Asia/Bangkok');
             for(let m = startDateTime.month; m <= endDateTime.month; m++){
                 months.push(m);
             }
@@ -273,15 +273,16 @@ export const getAttendenceByDate = async (req, res) => {
     const classroomId = req.params.classroomId;
     if(date && classroomId) {
         try{
-            const weekdayOnDateInput = DateTime.fromISO(`${date}T00:00:00Z`, { zone: 'UTC' }).weekday;
+            const weekdayOnDateInput = DateTime.fromISO(`${date}T00:00:00`).setZone('Asia/Bangkok').weekday;
             const timetables = await db.timetable.findMany({
                 where:{
-                    AND:{
-                        classId:classroomId,
-                        dayOfWeek:weekdayOnDateInput
-                    }
+                    AND:[
+                        {classId:classroomId},
+                        {dayOfWeek:weekdayOnDateInput}
+                    ]
                 },
             });
+            // console.log(timetables);
             const stuidingTime = await db.studingTime.findMany({
                 where: {
                     AND:[
@@ -292,9 +293,8 @@ export const getAttendenceByDate = async (req, res) => {
                         },
                         {
                             studingTimeDate:  {
-                                in:timetables.map((timetable) => DateTime.fromISO(`${date}T${timetable.timeStart}Z`, { zone: 'UTC' }))
+                                in:timetables.map((timetable) => DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok'))
                             }
-                                // gte:DateTime.fromISO(`${date}T00:00:00Z`, { zone: 'UTC' }),
                         }
                     ]
                 },
@@ -452,7 +452,6 @@ export const getAttendenceSummaryByClassroom = async (req, res) => {
                     canExam:attendencePercent >= 80 ? "-" : "มส."
                 }
             })
-            // console.log(summaryList);
             res.json(summaryList);
         }catch(err){
             console.error(err);
