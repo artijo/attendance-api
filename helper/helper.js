@@ -29,8 +29,8 @@ export function CheckDateBetween(startDate, endDate, checkStart, checkEnd){
 export function daybetween(Start, End) {
     const dates = [];
     if (Start !== "" && End !== "") {
-        const startDate = DateTime.fromISO(Start, {zone:'UTC'});
-        const endDate = DateTime.fromISO(End, {zone:'UTC'});
+        const startDate = DateTime.fromISO(Start).setZone('Asia/Bangkok');
+        const endDate = DateTime.fromISO(End).setZone('Asia/Bangkok');
         let currentDate = startDate;
         while (currentDate <= endDate) {
             dates.push(currentDate.toISODate().split("-").join("-")); // เพิ่มวันที่ในรูปแบบ YYYY-MM-DD

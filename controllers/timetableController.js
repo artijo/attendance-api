@@ -3,13 +3,12 @@ import { DateTime } from 'luxon';
 
 export const createTimetable = async (req, res) => {
     const { subject, timelate , periodtime, classroom, day } = req.body;
-    // console.log(req.body);
     if (subject && timelate && periodtime && classroom && day) {
         try {
-            console.log(periodtime);
+            // console.log(periodtime);
             const timelateDatetime = DateTime.fromISO(periodtime.startDatabaseFormat).setZone('Asia/Bangkok').plus({minutes:timelate});
             const timelateDatabaseFormat = timelateDatetime.toFormat('HH:mm:ss');
-            await db.timetable.create({
+            const timetable = await db.timetable.create({
                 data:{
                     subId: subject.subId,
                     classId: classroom.classId,
@@ -19,6 +18,9 @@ export const createTimetable = async (req, res) => {
                     dayOfWeek: Number(day)
                 }
             })
+            
+            console.log(classroom);
+
             res.status(200).json({ message: "สร้างสำเร็จ"})
         } catch (err) {
             console.error(err);
