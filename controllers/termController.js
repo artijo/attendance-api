@@ -85,7 +85,7 @@ export const updateTerm = async (req, res) => {
     const acadamicyear = parseInt(body.academicYear) - 543;
     const semester = parseInt(body.semester);
     const termStart = DateTime.fromISO(`${body.termStart}T00:00:00`).setZone('Asia/Bangkok');
-    const termEnd = DateTime.fromISO(`${body.termEnd}T00:00:00Z`).setZone('Asia/Bangkok');
+    const termEnd = DateTime.fromISO(`${body.termEnd}T00:00:00`).setZone('Asia/Bangkok');
     if(body){
         try{
             await db.academicTerms.update({

@@ -1,3 +1,4 @@
+import { daybetween } from '../helper/helper.js';
 import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
 
@@ -6,6 +7,7 @@ export const createTimetable = async (req, res) => {
     if (subject && timelate && periodtime && classroom && day) {
         try {
             // console.log(periodtime);
+            //สร้างตารางเรียน
             const timelateDatetime = DateTime.fromISO(periodtime.startDatabaseFormat).setZone('Asia/Bangkok').plus({minutes:timelate});
             const timelateDatabaseFormat = timelateDatetime.toFormat('HH:mm:ss');
             const timetable = await db.timetable.create({
@@ -17,9 +19,44 @@ export const createTimetable = async (req, res) => {
                     timeLate: timelateDatabaseFormat,
                     dayOfWeek: Number(day)
                 }
-            })
+            });
+
+            const holiday = await db.holiday.findMany({
+                where:{
+                    termId: classroom.term.termId
+                }
+            });
+
+            const holidayListDate = holiday.map((holiday) => {
+                const timezoneformat = DateTime.fromJSDate(holiday.startHolidayDate).setZone('Asia/Bangkok');
+                const holidayDay = timezoneformat.day;
+                return holidayDay;
+            });
+
+            const termDateBetween = daybetween(classroom.term.termStart, classroom.term.termEnd).filter((date) => {
+                const checkSatAndSun = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok').weekday;
+                // console.log(checkSatAndSun);
+                return checkSatAndSun != 6 && checkSatAndSun != 7;
+                // console.log(checkSatAndSun); 
+            }).filter((date) => {
+                const checkSatAndSun = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok').day;
+                return !holidayListDate.includes(checkSatAndSun);
+            });
+            //  // เรียก daybetween เพื่อดูระหว่างวันไหนของเทอม และ filter วันเสาร์อาทิตย์ออกหลังจากนั้น filter วันหยุดต่อ
+            for(const date of termDateBetween) {
+                const dateformat = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok');
+                await db.studingTime.create({
+                    data:{
+                        timetable:{
+                            connect:{
+                                timetableId:timetable.timetableId
+                            }
+                        },
+                        studingTimeDate:dateformat
+                    }
+                });
+            };
             
-            console.log(classroom);
 
             res.status(200).json({ message: "สร้างสำเร็จ"})
         } catch (err) {

@@ -23,13 +23,20 @@ export const fullCalendarHoliday = async (req, res) => {
                 }
             ]
         });
-        const fullCalendarHoliday = holiday.map((holiday) => ({
-            title: holiday.holidayName,
-            start: holiday.startHolidayDate,
-            end: holiday.endHolidayDate,
-            allDay: true,
-            color: holiday.type === 'RATCHAKHAN' ? 'red' : 'blue'
-        }));
+        const fullCalendarHoliday = holiday.map((holiday) => {
+            const startHolidayDateFormat = DateTime.fromJSDate(holiday.startHolidayDate).setZone('Asia/Bangkok');
+            const endHolidayDateFormat = DateTime.fromJSDate(holiday.endHolidayDate).setZone('Asia/Bangkok');
+            console.log(startHolidayDateFormat);
+            console.log(endHolidayDateFormat);
+            const object = {
+                title: holiday.holidayName,
+                start: startHolidayDateFormat,
+                end: endHolidayDateFormat,
+                allDay: true,
+                color: holiday.type === 'RATCHAKHAN' ? 'red' : 'blue'
+            }
+            return object;
+        });
         res.json(fullCalendarHoliday);
     }catch(err){
         console.error(err);

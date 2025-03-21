@@ -127,7 +127,7 @@ export const getFullCalendarStudyTime = async (req, res) => {
             }
         });
         const fullCalendarEventFormat = studyTimes.map((studytime) => {
-            const startDateTime = DateTime.fromISO(studytime.studingTimeDate.toISOString(), { zone: 'UTC' });
+            const startDateTime = DateTime.fromISO(studytime.studingTimeDate.toISOString()).setZone('Asia/Bangkok');
             const endDateTime = startDateTime.plus({ minutes: 50 });
             return {
                 title: `${studytime.timetable.subject.subCode}-${studytime.timetable.subject.subNameThai}`,
