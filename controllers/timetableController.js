@@ -1,4 +1,4 @@
-import { daybetween } from '../helper/helper.js';
+import { daybetween, formatDayOfWeeks } from '../helper/helper.js';
 import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
 
@@ -6,8 +6,26 @@ export const createTimetable = async (req, res) => {
     const { subject, timelate , periodtime, classroom, day } = req.body;
     if (subject && timelate && periodtime && classroom && day) {
         try {
-            // console.log(periodtime);
-            //สร้างตารางเรียน
+            const subjectOnTimetable = await db.timetable.findMany({
+                where: {
+                    AND:[
+                        {
+                            subId:subject.subId
+                        },
+                        {
+                            classroom:{
+                                termId:classroom.termId
+                            }    
+                        }
+                    ]
+                },
+                include:{
+                    subject:true,
+                    classroom:true,
+                }
+            });
+            const isSubjectExistThisPeriod = subjectOnTimetable.find(({timeStart, timeEnd, dayOfWeek, subId}) => String(timeStart) === periodtime.startDatabaseFormat && String(timeEnd) === periodtime.endDatabaseFormat && dayOfWeek === Number(day));              
+            if(isSubjectExistThisPeriod != undefined) return res.status(400).json({ message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${isSubjectExistThisPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(isSubjectExistThisPeriod.dayOfWeek)} คาบเวลา ${periodtime.timetableformate} ห้องม.${isSubjectExistThisPeriod.classroom.classLevel}/${isSubjectExistThisPeriod.classroom.classRoom}` });
             const timelateDatetime = DateTime.fromISO(periodtime.startDatabaseFormat).setZone('Asia/Bangkok').plus({minutes:timelate});
             const timelateDatabaseFormat = timelateDatetime.toFormat('HH:mm:ss');
             const timetable = await db.timetable.create({
@@ -58,13 +76,13 @@ export const createTimetable = async (req, res) => {
             };
             
 
-            res.status(200).json({ message: "สร้างสำเร็จ"})
+            return res.status(200).json({ message: "สร้างสำเร็จ"})
         } catch (err) {
             console.error(err);
-            res.status(500).json({ message: "เกิดข้อผิดพลาดในขณะสร้างคาบตารางเรียน" });
+            return res.status(500).json({ message: "เกิดข้อผิดพลาดในขณะสร้างคาบตารางเรียน" });
         }
     } else {
-        res.status(400).json({ message: "ข้อมูลไม่ถูกต้อง" });
+        return res.status(400).json({ message: "ข้อมูลไม่ถูกต้อง" });
     }
 };
 
@@ -87,13 +105,13 @@ export const editTimetable = async (req, res) => {
                     dayOfWeek:Number(timetable.dayOfWeek)
                 }
             })
-            res.status(200).json({ message: "แก้ไขสำเร็จ"})
+            return res.status(200).json({ message: "แก้ไขสำเร็จ"})
         } catch (err) {
             console.error(err);
-            res.status(500).json({ message: "เกิดข้อผิดพลาดในขณะสร้างคาบตารางเรียน" });
+            return res.status(500).json({ message: "เกิดข้อผิดพลาดในขณะสร้างคาบตารางเรียน" });
         }
     } else {
-        res.status(400).json({ message: "ข้อมูลไม่ถูกต้อง" });
+        return res.status(400).json({ message: "ข้อมูลไม่ถูกต้อง" });
     }
 };
 

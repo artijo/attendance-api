@@ -12,6 +12,14 @@ export function formatDateYYYYMMDD(stringDate) {
     return `${year}-${month}-${day}`;
 }
 
+export function formatDayOfWeeks(dayOfWeek) {
+    const dayOfWeeksThai = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์"];
+    for (let i = 0; i <= dayOfWeeksThai.length; i++) {
+      if ((dayOfWeek-1) === i) {
+        return dayOfWeeksThai[i];
+      }
+    }
+}
 
 export function CheckDateBetween(startDate, endDate, checkStart, checkEnd){
     const sDateForamt = DateTime.fromJSDate(startDate).setZone('UTC');
