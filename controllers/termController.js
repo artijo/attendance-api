@@ -1,6 +1,6 @@
 import { DateTime, Zone } from 'luxon';
 import db from '../prisma/client.js';
-import { CheckDateBetween } from '../helper/helper.js';
+import { CheckDateBetween, daybetween } from '../helper/helper.js';
 
 export const getAllAcademicTerms = async (req,res) => {
     try{
@@ -15,6 +15,52 @@ export const getAllAcademicTerms = async (req,res) => {
         res.status(501).json({message : "มีบางอย่างผิดพลาดบน Server"})
         console.error(error);
     };
+}
+
+export const getTermDateBetweenFilterHolidays = async (req, res) => {
+    const termId = req.params.termId;
+    if(termId) {
+        try{
+            const term = await db.academicTerms.findUnique({
+                where:{
+                    termId: termId
+                }
+            });
+            // console.log(term);
+            const holidays = await db.holiday.findMany({
+                where: {
+                    termId: termId
+                },
+                orderBy:{
+                    startHolidayDate:'asc'
+                }
+            });
+            const holidayListDate = holidays.map((holiday) => {
+                const timezoneformat = DateTime.fromJSDate(holiday.startHolidayDate).setZone('Asia/Bangkok');
+                const holidayDay = timezoneformat.toISODate();
+                // console.log(holidayDay);
+                return holidayDay;
+            });
+            const termStart = DateTime.fromJSDate(term.termStart).setZone('Asia/Bangkok').toISO();
+            const termEnd = DateTime.fromJSDate(term.termEnd).setZone('Asia/Bangkok').toISO();
+            const termDateBetween = daybetween(termStart, termEnd).filter((date) => {
+                const checkSatAndSun = DateTime.fromISO(`${date}T17:00:00`).setZone('Asia/Bangkok').weekday;
+                // console.log(checkSatAndSun);
+                return checkSatAndSun != 6 && checkSatAndSun != 7;
+                // console.log(checkSatAndSun); 
+            }).filter((date) => {
+                // const checkSatAndSun = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok').day;
+                return !holidayListDate.includes(date);
+            });
+
+            return res.status(200).send(termDateBetween);
+        }catch(err){
+            console.error(err);
+            return res.status(500).send({message: "เกิดข้อผิดพลาดบางอย่างที่ server"})
+        }
+    }else{
+        return res.status(400).send({message: "bad requset"})
+    }
 }
 
 export const getOneAcademicTerm = async (req, res) => {

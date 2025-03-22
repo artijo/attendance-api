@@ -5,11 +5,11 @@ import {
 } from "../controllers/teacherController.js";
 import { getSubjectByTeacher, getSubject } from "../controllers/subjectController.js";
 import { getStuydingTimeById } from "../controllers/stuyingTimeController.js";
-import { abstactAttendenceBySubject, getAttendenceBySubject, getAttendenceSummaryBySubjectIsExam, saveAttendenceByTeacher } from "../controllers/attendenceController.js";
+import { abstactAttendenceBySubject, getAttendenceByDateAndStudnet, getAttendenceBySubject, getAttendenceSummaryBySubjectIsExam, saveAttendenceByTeacher } from "../controllers/attendenceController.js";
 import { getTeacherAdvisorClassroom, getAllClassroom, getClassroomByClassAndSubject } from "../controllers/classroomController.js";
 import { getTeacherTimetable } from "../controllers/timetableController.js";
 import { getActivityByTeacher, getActivity, paticipatedActivityByteacher } from "../controllers/activitiesController.js";
-import { getAllAcademicTerms } from "../controllers/termController.js";
+import { getAllAcademicTerms, getTermDateBetweenFilterHolidays } from "../controllers/termController.js";
 import { getHolidayList } from "../controllers/holidayController.js";
 
 const router = Router();
@@ -27,10 +27,13 @@ router.get('/classrooms/:classId/:stdId', abstactAttendenceBySubject);
 router.get('/classrooms/check/:termId/:subjectId', getClassroomByClassAndSubject);
 router.get('/classrooms/classrooms/checkdetail/:subjectId/:classroomId', getAttendenceSummaryBySubjectIsExam);
 router.get('/attendence/:subjectId/:classroomId', getAttendenceBySubject);
+router.post('/attendence/byday',getAttendenceByDateAndStudnet)
 // getAttendenceSummaryBySubjectIsExam
 // getClassroomByClassAndSubject
 
 router.get('/terms', getAllAcademicTerms); // get terms 
+router.get('/term/:termId', getTermDateBetweenFilterHolidays);
+
 
 
 router.get('/activities', getActivityByTeacher); // get activity by teacher

@@ -23,7 +23,7 @@ import { featchDataForSeachbar } from "../controllers/adminController.js";
 import { getTimeTableByRoom, deleteTimetable, createTimetable, getSubjectTimetable, editTimetable } from "../controllers/timetableController.js";
 import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject, createSubjectType, deleteSubejectType, editSubjectType} from "../controllers/subjectController.js";
 // import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday ,updateHoliday} from "../controllers/stuyingTimeController.js";
-import { getAllAcademicTerms, createTerm, deleteTerm, getOneAcademicTerm,updateTerm } from "../controllers/termController.js";
+import { getAllAcademicTerms, createTerm, deleteTerm, getOneAcademicTerm,updateTerm, getTermDateBetweenFilterHolidays } from "../controllers/termController.js";
 import { getHolidayListAuto, createHoliday, getHolidayList, deleteHoliday, getOneHoliday, updateHoliday, fullCalendarHoliday } from "../controllers/holidayController.js"
 import { getFullCalendarStudyTime} from "../controllers/stuyingTimeController.js";
 import { getAllActivitiesByType, getActivity, getActivityType, createActivity, editActivity, abstactActivityClassroom, abstactActivityFilterByRoom } from "../controllers/activitiesController.js";
@@ -97,6 +97,7 @@ router.delete('/holiday/:holidayId', deleteHoliday); // ลบวันหยุ
 
 // AcademicYear And Term
 
+router.get('/term/:termId', getTermDateBetweenFilterHolidays);
 router.get('/academicterms', getAllAcademicTerms); // List เทอมและ ปีการศึกษา
 router.get('/academicterms/:termId', getOneAcademicTerm); // ดึงอันเดียว
 router.put('/academicterms',updateTerm) // แก้ไข

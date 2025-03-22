@@ -268,6 +268,101 @@ export const getAttendenceBySubject = async (req, res) => {
     };
 };
 
+export const getAttendenceByDateAndStudnet = async (req, res) => {
+    const { date, classroom, student } = req.body;
+    // console.log(classroom);
+    // console.log(student);
+    if(date && classroom && student) {
+        try{
+            const getStudent = await db.student.findFirst({
+                where:{
+                    AND:[
+                        {stdId:student.stdId},
+                        {classroomMembers:{
+                            every:{
+                                classId:classroom.classId
+                            }
+                        }}
+                    ]
+                },
+                include:{
+                    attendance:true,
+                    classroomMembers:true
+                }
+            });
+            const weekday = DateTime.fromISO(`${date}T00:00:00`).setZone('Asia/Bangkok').weekday;
+            const timetable = await db.timetable.findMany({
+                where:{
+                    AND:[
+                        {classId:classroom.classId},
+                        {dayOfWeek: weekday}
+                    ]
+                }
+            });
+
+            // console.log(timetable);
+            const listOfTimetableId = timetable.map((timetable) => timetable.timetableId);
+            const listOfTimetableDate = timetable.map((timetable) => DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok'));
+            const studyTime = await db.studingTime.findMany({
+                where: {
+                    AND: [
+                        { timetableId: { in: listOfTimetableId } },
+                        { studingTimeDate: { in: listOfTimetableDate } } 
+                    ]
+                },
+                include: {
+                    timetable: {
+                        include: {
+                            subject: true
+                        }
+                    }
+                },
+                orderBy: {
+                    studingTimeDate: 'asc' 
+                }
+            });
+            
+            const isAttendece = getStudent.attendance.map((item) => item.studingTimeId);
+            const abstactAttendece = studyTime.map((studTime) => {
+                if(isAttendece.includes(studTime.studyTimeId)){
+                    return {
+                        studyTimeId:studTime.studyTimeId,
+                        subjectName:studTime.timetable.subject.subNameThai,
+                        subjectCode:studTime.timetable.subject.subCode,
+                        attId:student.attendance.find((att) => att.studingTimeId === studTime.studyTimeId).attId,
+                        attStatus:student.attendance.find((att) => att.studingTimeId === studTime.studyTimeId).attStatus,
+                        studingTimeDate:studTime.studingTimeDate
+                    }
+                }else{
+                    return {
+                        studyTimeId:studTime.studyTimeId,
+                        subjectName:studTime.timetable.subject.subNameThai,
+                        subjectCode:studTime.timetable.subject.subCode,
+                        attId:null,
+                        attStatus:null,
+                        studingTimeDate:studTime.studingTimeDate
+                    };
+                };
+            });
+            // console.log(getStudent.classroomMembers[0].stdNo);
+            const newStudent = {
+                stdNo:getStudent.classroomMembers[0].stdNo,
+                stdId:getStudent.stdId,
+                title:getStudent.title,
+                fName:getStudent.fName,
+                lName:getStudent.lName,
+                email:getStudent.email,
+                attendance: abstactAttendece
+            }
+            res.status(200).send(newStudent);
+        }catch(err){
+            console.error(err);
+        };
+    }else{
+        return res.status(400).send({message:"bad requset"});
+    };
+}
+
 export const getAttendenceByDate = async (req, res) => {
     const date = req.params.date;
     const classroomId = req.params.classroomId;
@@ -282,7 +377,7 @@ export const getAttendenceByDate = async (req, res) => {
                     ]
                 },
             });
-            // console.log(timetables);
+            
             const stuidingTime = await db.studingTime.findMany({
                 where: {
                     AND:[
@@ -310,7 +405,6 @@ export const getAttendenceByDate = async (req, res) => {
                 }
             });
             if(stuidingTime.length == 0) return res.json([]);
-
             const student = await db.classroomMember.findMany({
                 where:{
                     classId:classroomId
@@ -331,8 +425,6 @@ export const getAttendenceByDate = async (req, res) => {
                     stdNo:'asc'
                 }
             });
-            
-
             const newData = () => {
                 const newStudent = student.map((item) => {
                     const attendence = item.student.attendance.map((item) => item.studingTimeId);
