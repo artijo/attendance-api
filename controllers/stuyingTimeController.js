@@ -74,7 +74,8 @@ export const getStuydingTimeById = async (req, res) => {
                                 }
                             }
 
-                        }
+                        },
+                        subject: true
                     }
                 },
                 attendance: {
