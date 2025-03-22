@@ -319,12 +319,13 @@ export const paticipatedActivityByteacher = async (req, res) => {
                 });
                 return res.json({ message: 'success' });
             } else {
+                // console.log(DateTime.now().toUTC().toJSDate());
                 await db.activityParticipate.update({
                     where: {
                         actParticipateId: activityPaticipate.actParticipateId
                     },
                     data: {
-                        note
+                        note,
                     }
                 });
                 return res.json({ message: 'success' });
@@ -346,7 +347,6 @@ export const paticipatedActivityByteacher = async (req, res) => {
                     return res.status(400).json({ message: 'จำนวนนักเรียนเต็มแล้ว' });
                 }
             }
-            
             // Create with the target date instead of current date if date is provided
             await db.activityParticipate.create({
                 data: {
@@ -367,7 +367,7 @@ export const paticipatedActivityByteacher = async (req, res) => {
                             tchId: req.user.id
                         }
                     },
-                    joinTimestamp: targetDate.toUTC().toJSDate(),
+                    joinTimestamp: DateTime.now().toUTC().toJSDate()
                 }
             });
             return res.json({ message: 'success' });
