@@ -102,10 +102,16 @@ export const createTerm = async (req, res) => {
                     termEnd:'desc'
                 }
             });
-            const isTermExist = CheckDateBetween(minimunDate.termStart, maxDate.termEnd, termStart, termEnd);
-            if(isTermExist){
-                return res.status(400).json({message:"ไม่สามารถสร้างเทอมปีการศึกษาได้เนื่องจากมีระหว่างวันที่มีอยู่ในฐานข้อมูลแล้ว"});
+            if(minimunDate && maxDate){
+                const isTermExist = CheckDateBetween(minimunDate.termStart, maxDate.termEnd, termStart, termEnd);
+                if(isTermExist){
+                    return res.status(400).json({message:"ไม่สามารถสร้างเทอมปีการศึกษาได้เนื่องจากมีระหว่างวันที่มีอยู่ในฐานข้อมูลแล้ว"});
+                }
             }
+            // const isTermExist = CheckDateBetween(minimunDate.termStart, maxDate.termEnd, termStart, termEnd);
+            // if(isTermExist){
+            //     return res.status(400).json({message:"ไม่สามารถสร้างเทอมปีการศึกษาได้เนื่องจากมีระหว่างวันที่มีอยู่ในฐานข้อมูลแล้ว"});
+            // }
             await db.academicTerms.create({
                 data:{
                     academicYear:acadamicyear,
