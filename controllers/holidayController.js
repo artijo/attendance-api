@@ -26,8 +26,8 @@ export const fullCalendarHoliday = async (req, res) => {
         const fullCalendarHoliday = holiday.map((holiday) => {
             const startHolidayDateFormat = DateTime.fromJSDate(holiday.startHolidayDate).setZone('Asia/Bangkok');
             const endHolidayDateFormat = DateTime.fromJSDate(holiday.endHolidayDate).setZone('Asia/Bangkok');
-            console.log(startHolidayDateFormat);
-            console.log(endHolidayDateFormat);
+            // console.log(startHolidayDateFormat);
+            // console.log(endHolidayDateFormat);
             const object = {
                 title: holiday.holidayName,
                 start: startHolidayDateFormat,
@@ -141,28 +141,90 @@ export const getHolidayListAuto = async (req, res) => {
 
 export const createHoliday = async (req, res) => {
     const body = req.body;
+    const termId = body.termId;
+    const holidayList = body.holidayList;
     if (body) {
         try {
-            for(const holiday of body.holidayList){
-                const startDate = DateTime.fromISO(holiday.startDate+"T00:00:00").setZone('Asia/Bangkok');
-                const endDate = DateTime.fromISO(holiday.endDate+"T00:00:00").setZone('Asia/Bangkok');
-                await db.holiday.create({
-                    data:{
-                        holidayName:holiday.holidayname,
-                        startHolidayDate:startDate,
-                        endHolidayDate:endDate,
-                        type:holiday.type,
-                        term:{
-                            connect:{
-                                termId:body.termId
-                            }
+            // console.log(holidayList);
+            const studyTime = await db.studingTime.findMany({
+                where:{
+                    timetable:{
+                        classroom:{
+                            termId:termId
                         }
                     }
-                })
+                },
+                include: {
+                    attendance:true
+                }
+            });
+
+            const getStudyTimeHaveAttendence = studyTime.map((studytime) => {
+                const studytimedate = DateTime.fromJSDate(studytime.studingTimeDate).setZone('Asia/Bangkok').toFormat('yyyy-MM-dd');
+                if(studytime.attendance.length > 0){
+                    return studytimedate
+                }else{
+                    return;
+                }
+            });
+
+            // console.log(getStudyTimeHaveAttendence);
+
+            const holidayDateList = holidayList.filter((holiday) => {
+                const date = DateTime.fromISO(holiday.startDate+"T00:00:00").setZone('Asia/Bangkok').toFormat('yyyy-MM-dd');
+                return !getStudyTimeHaveAttendence.includes(date);
+            });
+
+            if(holidayDateList.length > 0) {
+                const datetimeholidayDatelist =holidayDateList.map((datelist) => {
+                    const dateObject = {
+                        dateStart: DateTime.fromISO(datelist.startDate+"T00:00:00").setZone('Asia/Bangkok'),
+                        dateEnd: DateTime.fromISO(datelist.endDate+"T23:59:00").setZone('Asia/Bangkok')
+                    }
+                    return dateObject;
+                });
+                for(const date of datetimeholidayDatelist){
+                    const studingTime = await db.studingTime.findMany({
+                        where:{
+                            studingTimeDate:{
+                                gte:new Date(date.dateStart),
+                                lte:new Date(date.dateEnd),
+                            }
+                        }
+                    });
+                    if(studingTime.length > 0){
+                        for(const studytime of studingTime){
+                            const deleteStudytime = await db.studingTime.delete({
+                                where:{
+                                    studyTimeId:studytime.studyTimeId
+                                }
+                            });
+                        };
+                    }
+                };
+                for (const holiday of holidayDateList) {
+                    const startDate = DateTime.fromISO(holiday.startDate + "T00:00:00").setZone('Asia/Bangkok');
+                    const endDate = DateTime.fromISO(holiday.endDate + "T00:00:00").setZone('Asia/Bangkok');
+                    const createholiday = await db.holiday.create({
+                        data: {
+                            holidayName: holiday.holidayname,
+                            startHolidayDate: startDate,
+                            endHolidayDate: endDate,
+                            type: holiday.type,
+                            term: {
+                                connect: {
+                                    termId: termId
+                                }
+                            }
+                        }
+                    });
+                }
+                res.status(200).json({message: "สร้างรายการวันหยุดสำเร็จ"});
+            }else{
+                return res.status(400).send({message:"ไม่สามารถสร้างวันหยุดได้เนื่องจากมีวันหยุดบางอันตรงกับวันที่เรียนและวันที่เรียนมีการเช็คชื่่อเข้าเรียนแล้ว"})
             }
-            res.status(200).json({message: "สร้างรายการวันหยุดสำเร็จ"});
         } catch (err) {
-            // console.error(err);
+            console.error(err);
             res.status(500).json(err);
         };
     }else{

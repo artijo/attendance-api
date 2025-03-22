@@ -34,9 +34,9 @@ async function getStudent(classroomId){
 
 // ถ้าจะใช้ให้เพิ่ม timetable ก่อนค่อย insertAttndence
 async function insertAttendence() {
-    const classroomId = "ceeb4319-c4bf-4dce-8299-daa237c95472";
-    const attMethodId = "27756861-4d56-4d0a-8bcf-ec57b9f5beec";
-    const teacherId = "442db621-1ffd-4fc9-a279-d5ab2d48a509";
+    const classroomId = "class6-1-term-2025-1";
+    const attMethodId = "d0462fc4-a51d-49f0-98fc-d0fcc50f07b0";
+    const teacherId = "Teacher001";
     const leaderId = "c126288a-6d73-4b4b-b4de-e179d196b8f5";
     const studentIdArray = await getStudent(classroomId);
     const studyTimeIdArray = await getStudingTime(classroomId);
@@ -49,7 +49,7 @@ async function insertAttendence() {
                     note:"test",
                     operatedBy: "Admin test",
                     tchId: teacherId,
-                    leaderId: leaderId,
+                    leaderId: null,
                     stdId:studentIdArray[studentindex],
                     studingTimeId:studyTimeIdArray[studytimeindex],
                     attTimestamp:new Date(),
