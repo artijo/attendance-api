@@ -12,12 +12,12 @@ import { inputTeacherForm, inputUpdateTeacherForm, handdleErrorDuplicateKeyTeach
 import {
     createExcelSubjectAttendence
 } from '../helper/excel.js'
+import { console } from 'inspector';
 
 export const createTeacher = async (req, res) => {
     let body = req.body;
     if(body){
         try{
-            body = await inputTeacherForm(body);
             const password = await hashPassword(body.password) ;// รหัสผ่่านที่ผ่านการเข้ารหัสแล้วเรียบร้อยแล้ว
             const teacher = await db.teacher.create({
                 data:{
@@ -26,12 +26,17 @@ export const createTeacher = async (req, res) => {
                     password:password,
                     email:body.email == '' ? null : body.email,
                     tel:body.tel == '' ? null : body.tel,
-                    tchCode:body.tchCode
+                    department : {
+                        connect:{
+                            deptId:body.deptId
+                        }
+                    },
                 }
             });
             res.json(teacher);
         }catch(err){
-            handdleErrorDuplicateKeyTeacher(req, res, err);
+            return res.status(500).json({message: "เกิดข้อผิดพลาดในการสร้างรายชื่อครู"});
+        
         }
     };
 };
@@ -54,16 +59,20 @@ export const getAllTeacher = async (req, res) => {
 
 export const updateTeacher = async (req, res) => {
     let body = req.body;
+    console.log(body);
     const {uuid} = req.params;
     if(body){
         try{
-            body = await inputUpdateTeacherForm(body);
             let updateData = {
                 fName: body.fName,
                 lName: body.lName,
                 email: body.email == '' ? null : body.email,
                 tel: body.tel == '' ? null : body.tel,
-                tchCode: body.tchCode
+                department: {
+                    connect: {
+                        deptId: body.deptId
+                    }
+                }
             };
             
             if (body.password || body.password === '') {
@@ -79,7 +88,7 @@ export const updateTeacher = async (req, res) => {
             });
             res.json(teacher);
         }catch(err){
-            handdleErrorDuplicateKeyTeacher(req, res, err);
+            return res.status(500).json({message: "เกิดข้อผิดพลาดในการแก้ไขข้อมูลครู"});
         }
     };
 }

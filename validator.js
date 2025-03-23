@@ -26,7 +26,6 @@ export const handdleErrorDuplicateKeyStudent = (req, res, err) => {
 
 export async function inputTeacherForm(data) {
     const schema = vine.object({
-        tchCode: vine.string(),
         fName: vine.string(),
         lName: vine.string(),
         email: vine.string().email().nullable(),
@@ -41,7 +40,6 @@ export const inputUpdateTeacherForm = async (data) => {
         data.password = null;
     }
     const schema = vine.object({
-        tchCode: vine.string(),
         fName: vine.string(),
         lName: vine.string(),
         email: vine.string().email().nullable(),
@@ -54,7 +52,6 @@ export const inputUpdateTeacherForm = async (data) => {
 export const handdleErrorDuplicateKeyTeacher = (req, res, err) => {
     if(err.code === 'P2002'){
         switch(err.meta.target){
-            case 'Teacher_email_key': return res.status(400).json({email: "duplicate"});
             case 'Teacher_tel_key': return res.status(400).json({tel: "duplicate"});
             case 'Teacher_tchCode_key': return res.status(400).json({tchCode: "duplicate"});
             default: return res.status(500).json({message: "เกิดข้อผิดพลาดในการสร้างรายชื่อครู"});

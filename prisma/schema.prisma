@@ -56,7 +56,6 @@ model Leader {
 
 model Teacher {
   tchId              String                    @id @default(uuid())
-  tchCode            String                    @unique
   fName              String
   lName              String
   email              String?                   @unique
