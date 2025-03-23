@@ -12,8 +12,8 @@ import { inputTeacherForm, inputUpdateTeacherForm, handdleErrorDuplicateKeyTeach
 import {
     createExcelSubjectAttendence
 } from '../helper/excel.js'
-import { console } from 'inspector';
-
+import jwt from 'jsonwebtoken';
+import { sendEmail } from '../libs/resend.js';
 export const createTeacher = async (req, res) => {
     let body = req.body;
     if(body){

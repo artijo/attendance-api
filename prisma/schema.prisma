@@ -60,7 +60,7 @@ model Teacher {
   lName              String
   email              String?                   @unique
   tel                String?                   @unique
-  password           String
+  password           String?
   deptId             String?
   department         Department?                @relation(fields: [deptId], references: [deptId])
   subject            Subject[]

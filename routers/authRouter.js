@@ -7,7 +7,9 @@ import {
 import { 
     login as teacherLogin, 
     checkAuth as teacherCheckAuth, 
-    getTokenformRefreshToken as teacherGetTokenFromRefreshToken 
+    getTokenformRefreshToken as teacherGetTokenFromRefreshToken ,
+    newLogin as teacherNewLogin,
+    newPassword as teacherNewPassword
 } from "../controllers/teacherAuthController.js";
 
 const router = Router();
@@ -21,5 +23,7 @@ router.post('/a/refresh', getTokenformRefreshToken);
 router.post('/t/login', teacherLogin);
 router.get('/t/check', teacherCheckAuth);
 router.post('/t/refresh', teacherGetTokenFromRefreshToken);
+router.post('/t/new-login', teacherNewLogin);
+router.post('/t/set-password', teacherNewPassword);
 
 export default router;
