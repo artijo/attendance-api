@@ -74,7 +74,17 @@ export const updateClassroom = async (req,res) => {
 };
 
 export const getAllClassroom = async (req,res) => {
+    const {noMembers} = req.query;
     try{
+        if(noMembers){
+            const classroom = await db.classrooms.findMany({
+                where: {
+                    deletedAt: null
+                },
+        });
+            return res.json(classroom)
+        }
+
         const classroom = await db.classrooms.findMany({
             where: {
                 deletedAt: null
