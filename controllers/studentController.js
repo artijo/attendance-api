@@ -5,21 +5,20 @@ export const createStudent = async (req, res) => { // สร้างราย�
     let body = req.body;
     if(body){
         try{
-            body = await inputStudentForm(body);
             const student = await db.student.create({
                 data:{
                     stdId:body.stdId,
                     title:body.title,
                     fName:body.fName,
                     lName:body.lName,
-                    email:body.email,
-                    tel:body.tel,
+                    email:body.email? body.email : null,
+                    tel:body.tel? body.tel : null,
                     // cityzenId:body.cityzenId,
                 }
             });
             res.json({message: `สร้าง ${student.fName} ${student.lName} แล้ว`});
         }catch(err){
-            handdleErrorDuplicateKeyStudent(req, res, err);
+            return res.status(400).json({message: "เกิดข้อผิดพลาดในการสร้างรายชื่อนักเรียน", error: err.message});
         }
     }
 };
