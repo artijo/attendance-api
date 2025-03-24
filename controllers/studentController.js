@@ -171,6 +171,13 @@ export const getAllStudent = async (req, res) => { // ดึงรายชื�
     };
     try{
         const student = await db.student.findMany({
+            include:{
+                classroomMembers:{
+                    include:{
+                        classroom:true
+                    }
+                }
+            }
         });
         // console.log(student);
         return res.json(student)

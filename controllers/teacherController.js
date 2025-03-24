@@ -12,18 +12,18 @@ import { inputTeacherForm, inputUpdateTeacherForm, handdleErrorDuplicateKeyTeach
 import {
     createExcelSubjectAttendence
 } from '../helper/excel.js'
-import jwt from 'jsonwebtoken';
-import { sendEmail } from '../libs/resend.js';
+
 export const createTeacher = async (req, res) => {
     let body = req.body;
-    if(body){
         try{
-            const password = await hashPassword(body.password) ;// รหัสผ่่านที่ผ่านการเข้ารหัสแล้วเรียบร้อยแล้ว
+            if(body.password){
+                var password = await hashPassword(body.password) ;// รหัสผ่่านที่ผ่านการเข้ารหัสแล้วเรียบร้อยแล้ว
+            }
             const teacher = await db.teacher.create({
                 data:{
                     fName:body.fName,
                     lName:body.lName,
-                    password:password,
+                    password:body.password? password : null,
                     email:body.email == '' ? null : body.email,
                     tel:body.tel == '' ? null : body.tel,
                     department : {
@@ -35,9 +35,8 @@ export const createTeacher = async (req, res) => {
             });
             res.json(teacher);
         }catch(err){
+            console.error(err);
             return res.status(500).json({message: "เกิดข้อผิดพลาดในการสร้างรายชื่อครู"});
-        
-        }
     };
 };
 
@@ -47,9 +46,12 @@ export const getAllTeacher = async (req, res) => {
         const teacherLists = await db.teacher.findMany({
             orderBy:[
                 {
-                    fName: 'desc'
+                    fName: 'asc'
                 }
-            ]
+            ],
+            include:{
+                department: true
+            }
         });
         res.json(teacherLists)
     }catch(err){
