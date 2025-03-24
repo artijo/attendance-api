@@ -114,7 +114,7 @@ model Subject {
   subCode     String      @unique
   subNameThai String
   subNameEng  String?
-  subCredit   Int
+  subCredit   Float
   tchId       String
   teacher     Teacher     @relation(fields: [tchId], references: [tchId])
   subTypeId   String

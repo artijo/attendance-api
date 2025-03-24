@@ -98,7 +98,7 @@ export const createSubject = async (req, res) => {
                     subCode:body.subCode,
                     subNameThai:body.subNameThai,
                     subNameEng:body.subNameEng,
-                    subCredit:parseInt(body.subCredit),
+                    subCredit:parseFloat(body.subCredit),
                     tchId:body.tchId,
                     subTypeId:body.subTypeId
                 }
@@ -124,7 +124,7 @@ export const editSubject = async (req, res) => {
                     subCode:body.subCode,
                     subNameEng:body.subNameEng,
                     subNameThai:body.subNameThai,
-                    subCredit:parseInt(body.subCredit),
+                    subCredit:parseFloat(body.subCredit),
                     tchId:body.tchId,
                     subTypeId:body.subTypeId
                 }
