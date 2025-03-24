@@ -111,7 +111,7 @@ model StudentParent {
 
 model Subject {
   subId       String      @id @default(uuid())
-  subCode     String      @unique
+  subCode     String
   subNameThai String
   subNameEng  String?
   subCredit   Float
