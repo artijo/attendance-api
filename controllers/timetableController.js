@@ -2,45 +2,281 @@ import { daybetween, formatDayOfWeeks } from '../helper/helper.js';
 import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
 
+export const createTimetableByAddSubject = async (req, res) => {
+    const { classroom, timetable, schedule } = req.body;
+    // console.log(classroom);
+    if (classroom && timetable && schedule) {
+        try {
+            const findPeriod = await db.timetable.findFirst({
+                where: {
+                    AND: [
+                        { classId: classroom.classId, },
+                        { timeStart: schedule.startDatabaseFormat },
+                        { timeEnd: schedule.endDatabaseFormat },
+                        { dayOfWeek: Number(timetable.dayOfWeek) }
+                    ]
+                }
+            })
+
+            if (findPeriod) {
+                const updateTimetableOnSubject = await db.timetable.update({
+                    where: {
+                        timetableId: findPeriod.timetableId
+                    },
+                    data: {
+                        subId: timetable.subject.subId
+                    }
+                });
+                return res.status(200).json({ message: 'update successful' });
+            } else {
+                const subjectOnTimetable = await db.timetable.findMany({
+                    where: {
+                        AND: [
+                            { subId: timetable.subject.subId },
+                            { classroom: { termId: classroom.termId } }
+                        ]
+                    },
+                    include: {
+                        subject: true,
+                        classroom: true,
+                    }
+                });
+                const subjectExistsInPeriod = subjectOnTimetable.find(({ timeStart, timeEnd, dayOfWeek, subId }) => String(timeStart) === schedule.startDatabaseFormat && String(timeEnd) === schedule.endDatabaseFormat && dayOfWeek === Number(day));
+                if (subjectExistsInPeriod != undefined) return res.status(400).json({ message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${periodtime.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}` });
+                const createTimetable = await db.timetable.create({
+                    data: {
+                        subId: timetable.subject.subId,
+                        classId: classroom.classId,
+                        timeStart: timetable.timeStart,
+                        timeEnd: timetable.timeEnd,
+                        timeLate: timetable.timeLate,
+                        dayOfWeek: Number(timetable.dayOfWeek)
+                    }
+                });
+
+                const holiday = await db.holiday.findMany({
+                    where: {
+                        termId: classroom.term.termId
+                    }
+                });
+    
+                const holidayListDate = holiday.map((holiday) => {
+                    const timezoneformat = DateTime.fromJSDate(holiday.startHolidayDate).setZone('Asia/Bangkok');
+                    const holidayDay = timezoneformat.toISODate();
+                    return holidayDay;
+                });
+    
+                const termDateBetween = daybetween(classroom.term.termStart, classroom.term.termEnd).filter((date) => {
+                    const checkSatAndSun = DateTime.fromISO(`${date}T${createTimetable.timeStart}`).setZone('Asia/Bangkok').weekday;
+                    // console.log(checkSatAndSun);
+                    return checkSatAndSun != 6 && checkSatAndSun != 7;
+                    // console.log(checkSatAndSun); 
+                }).filter((date) => {
+                    // const checkSatAndSun = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok').day;
+                    return !holidayListDate.includes(date);
+                });
+                // console.log(termDateBetween);
+                //  // เรียก daybetween เพื่อดูระหว่างวันไหนของเทอม และ filter วันเสาร์อาทิตย์ออกหลังจากนั้น filter วันหยุดต่อ
+                for (const date of termDateBetween) {
+                    const dateformat = DateTime.fromISO(`${date}T${createTimetable.timeStart}`).setZone('Asia/Bangkok');
+                    if (Number(dateformat.weekday) === Number(timetable.dayOfWeek)) {
+                        await db.studingTime.create({
+                            data: {
+                                timetable: {
+                                    connect: {
+                                        timetableId: createTimetable.timetableId
+                                    }
+                                },
+                                studingTimeDate: dateformat
+                            }
+                        });
+                    }
+                }; 
+                return res.status(200).json({ message: 'create successful' });
+            }
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: "เกิดข้อผิดพลาด" });
+        }
+    } else {
+        return res.status(400).json({ message: "ข้อมูลไม่ถูกต้อง" });
+    }
+
+}
+
+export const createTimetableBySwitchPeriod = async (req, res) => {
+    const { classroom, timetable, schedule } = req.body;
+    if (timetable) {
+        try {
+            const subjectOnTimetable = await db.timetable.findMany({
+                where: {
+                    AND: [
+                        { subId: timetable.subId },
+                        { classroom: { termId: classroom.termId } }
+                    ]
+                },
+                include: {
+                    subject: true,
+                    classroom: true,
+                }
+            });
+            const subjectExistsInPeriod = subjectOnTimetable.find(({ timeStart, timeEnd, dayOfWeek, subId }) => String(timeStart) === schedule.startDatabaseFormat && String(timeEnd) === schedule.endDatabaseFormat && dayOfWeek === Number(timetable.dayOfWeek));
+            if (subjectExistsInPeriod != undefined) return res.status(400).json({ message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${periodtime.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}` });
+            
+            const swtichPeriod = await db.timetable.update({
+                where: {
+                    timetableId: timetable.timetableId
+                },
+                data: {
+                    subId: timetable.subId,
+                    classId: timetable.classId,
+                    timeStart: timetable.timeStart,
+                    timeEnd: timetable.timeEnd,
+                    timeLate: timetable.timeLate,
+                    dayOfWeek: timetable.dayOfWeek
+                }
+            });
+
+            const studingTimeOnPeriod = await db.studingTime.findMany({
+                where:{
+                    timetableId:timetable.timetableId
+                }
+            });
+
+            if(studingTimeOnPeriod.length > 0){
+                studingTimeOnPeriod.forEach(async (studyTime) => {
+                    const newTimeformat =  DateTime.fromISO(`${studyTime.studingTimeDate.toISOString().split('T')[0]}T${timetable.timeStart}`).setZone(process.env.TIME_ZONE);
+                    await db.studingTime.update({
+                        where:{
+                            studyTimeId:studyTime.studyTimeId
+                        },
+                        data:{
+                            studingTimeDate:newTimeformat
+                        }
+                    })
+                })
+            } 
+
+            return res.status(200).json({ message: 'create successful' });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: "เกิดข้อผิดพลาด" })
+        }
+    } else {
+        return res.status(400).json({ message: "ข้อมูลไม่ถูกต้อง" });
+    }
+
+}
+
+export const createTimetableBySwitchSubjectAndSubject = async (req, res) => {
+    const { firstTimetable, secondTimetable } = req.body;
+    if (firstTimetable && secondTimetable) {
+        try {
+
+            async function checkIsSubjectIsExitTime(firstTimetable, secondTimetable) {
+                const subjectOnTimetable = await db.timetable.findMany({
+                    where: {
+                        AND: [
+                            { subId: firstTimetable.subId },
+                            { classroom: { termId: firstTimetable.classroom.termId } }
+                        ]
+                    },
+                    include: {
+                        subject: true,
+                        classroom: true,
+                    }
+                });
+
+                // console.log(subjectExistsInPeriod.dayOfWeek)
+
+                const subjectExistsInPeriod = subjectOnTimetable.find(({ timeStart, timeEnd, dayOfWeek }) => String(timeStart) === secondTimetable.timeStart && String(timeEnd) === secondTimetable.timeEnd && dayOfWeek === Number(secondTimetable.dayOfWeek));
+                // console.log(subjectExistsInPeriod);
+                if(subjectExistsInPeriod != undefined){
+                    // console.log(subjectExistsInPeriod);
+                    return true;
+                }else{
+                    // console.log(subjectExistsInPeriod);
+                    return false;
+                }
+                
+            }
+
+            if(await checkIsSubjectIsExitTime(firstTimetable, secondTimetable) === true){
+                // console.log('if 1')
+                return res.status(400).json({ message: `ไม่สามารถสลับวิชานี้ได้เนื่องจากมีวิชาที่คาบซ่ำกันอยู่` });
+            }
+
+            if(await checkIsSubjectIsExitTime(secondTimetable, firstTimetable) === true){
+                // console.log('if 2')
+                return res.status(400).json({ message: `ไม่สามารถสลับวิชานี้ได้เนื่องจากมีวิชาที่คาบซ่ำกันอยู่` });
+            }
+
+            const swtichSubjectFirstTimetable = await db.timetable.update({
+                where: {
+                    timetableId: firstTimetable.timetableId,
+                },
+                data: {
+                    subId: secondTimetable.subId
+                }
+            });
+
+            const swtichSubjectSecondTimetable = await db.timetable.update({
+                where: {
+                    timetableId: secondTimetable.timetableId,
+                },
+                data: {
+                    subId: firstTimetable.subId
+                }
+            });
+            return res.status(200).json({ message: 'create successful' });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: "เกิดข้อผิดพลาด" })
+        }
+    } else {
+        return res.status(400).json({ message: "ข้อมูลไม่ถูกต้อง" });
+    }
+}
+
 export const createTimetable = async (req, res) => {
-    const { subject, timelate , periodtime, classroom, day } = req.body;
+    const { subject, timelate, periodtime, classroom, day } = req.body;
     if (subject && timelate && periodtime && classroom && day) {
         try {
             const subjectOnTimetable = await db.timetable.findMany({
                 where: {
-                    AND:[
+                    AND: [
                         {
-                            subId:subject.subId
+                            subId: subject.subId
                         },
                         {
-                            classroom:{
-                                termId:classroom.termId
-                            }    
+                            classroom: {
+                                termId: classroom.termId
+                            }
                         }
                     ]
                 },
-                include:{
-                    subject:true,
-                    classroom:true,
+                include: {
+                    subject: true,
+                    classroom: true,
                 }
             });
-            const isSubjectExistThisPeriod = subjectOnTimetable.find(({timeStart, timeEnd, dayOfWeek, subId}) => String(timeStart) === periodtime.startDatabaseFormat && String(timeEnd) === periodtime.endDatabaseFormat && dayOfWeek === Number(day));              
-            if(isSubjectExistThisPeriod != undefined) return res.status(400).json({ message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${isSubjectExistThisPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(isSubjectExistThisPeriod.dayOfWeek)} คาบเวลา ${periodtime.timetableformate} ห้องม.${isSubjectExistThisPeriod.classroom.classLevel}/${isSubjectExistThisPeriod.classroom.classRoom}` });
-            const timelateDatetime = DateTime.fromISO(periodtime.startDatabaseFormat).setZone('Asia/Bangkok').plus({minutes:timelate});
+            const subjectExistsInPeriod = subjectOnTimetable.find(({ timeStart, timeEnd, dayOfWeek, subId }) => String(timeStart) === periodtime.startDatabaseFormat && String(timeEnd) === periodtime.endDatabaseFormat && dayOfWeek === Number(day));
+            if (subjectExistsInPeriod != undefined) return res.status(400).json({ message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${periodtime.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}` });
+            const timelateDatetime = DateTime.fromISO(periodtime.startDatabaseFormat).setZone('Asia/Bangkok').plus({ minutes: timelate });
             const timelateDatabaseFormat = timelateDatetime.toFormat('HH:mm:ss');
             const timetable = await db.timetable.create({
-                data:{
+                data: {
                     subId: subject.subId,
                     classId: classroom.classId,
                     timeStart: periodtime.startDatabaseFormat,
-                    timeEnd:periodtime.endDatabaseFormat,
+                    timeEnd: periodtime.endDatabaseFormat,
                     timeLate: timelateDatabaseFormat,
                     dayOfWeek: Number(day)
                 }
             });
 
             const holiday = await db.holiday.findMany({
-                where:{
+                where: {
                     termId: classroom.term.termId
                 }
             });
@@ -62,23 +298,23 @@ export const createTimetable = async (req, res) => {
                 return !holidayListDate.includes(date);
             });
             //  // เรียก daybetween เพื่อดูระหว่างวันไหนของเทอม และ filter วันเสาร์อาทิตย์ออกหลังจากนั้น filter วันหยุดต่อ
-            for(const date of termDateBetween) {
+            for (const date of termDateBetween) {
                 const dateformat = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok');
-                if(Number(dateformat.weekday) === Number(day)) {
+                if (Number(dateformat.weekday) === Number(day)) {
                     await db.studingTime.create({
-                        data:{
-                            timetable:{
-                                connect:{
-                                    timetableId:timetable.timetableId
+                        data: {
+                            timetable: {
+                                connect: {
+                                    timetableId: timetable.timetableId
                                 }
                             },
-                            studingTimeDate:dateformat
+                            studingTimeDate: dateformat
                         }
                     });
                 }
             };
 
-            return res.status(200).json({ message: "สร้างสำเร็จ"})
+            return res.status(200).json({ message: "สร้างสำเร็จ" })
         } catch (err) {
             console.error(err);
             return res.status(500).json({ message: "เกิดข้อผิดพลาดในขณะสร้างคาบตารางเรียน" });
@@ -89,25 +325,25 @@ export const createTimetable = async (req, res) => {
 };
 
 export const editTimetable = async (req, res) => {
-    const { timetable, subject, periodtime, timelate  } = req.body;
+    const { timetable, subject, periodtime, timelate } = req.body;
     if (timetable && subject && periodtime && timelate) {
         try {
-            const timelateDatetime = DateTime.fromISO(periodtime.startDatabaseFormat).setZone('Asia/Bangkok').plus({minutes:timelate});
+            const timelateDatetime = DateTime.fromISO(periodtime.startDatabaseFormat).setZone('Asia/Bangkok').plus({ minutes: timelate });
             const timelateDatabaseFormat = timelateDatetime.toFormat('HH:mm:ss');
             await db.timetable.update({
-                where:{
-                    timetableId:timetable.timetableId
+                where: {
+                    timetableId: timetable.timetableId
                 },
-                data:{
-                    subId:subject.subId,
-                    classId:timetable.classId,
+                data: {
+                    subId: subject.subId,
+                    classId: timetable.classId,
                     timeStart: periodtime.startDatabaseFormat,
-                    timeEnd:periodtime.endDatabaseFormat,
+                    timeEnd: periodtime.endDatabaseFormat,
                     timeLate: timelateDatabaseFormat,
-                    dayOfWeek:Number(timetable.dayOfWeek)
+                    dayOfWeek: Number(timetable.dayOfWeek)
                 }
             })
-            return res.status(200).json({ message: "แก้ไขสำเร็จ"})
+            return res.status(200).json({ message: "แก้ไขสำเร็จ" })
         } catch (err) {
             console.error(err);
             return res.status(500).json({ message: "เกิดข้อผิดพลาดในขณะสร้างคาบตารางเรียน" });
@@ -119,66 +355,66 @@ export const editTimetable = async (req, res) => {
 
 export const getTimeTableByRoom = async (req, res) => {
     const classid = req.query.classroomid;
-    if(classid) {
-        try{
+    if (classid) {
+        try {
             const timetable = await db.timetable.findMany({
-                where:{
-                    classId : classid
+                where: {
+                    classId: classid
                 },
                 orderBy: [
-                    {dayOfWeek : 'asc'},
-                    {timeStart : 'asc'}
+                    { dayOfWeek: 'asc' },
+                    { timeStart: 'asc' }
                 ],
-                select:{
-                    timetableId:true,
-                    dayOfWeek:true,
-                    timeStart:true,
-                    timeEnd:true,
-                    timeLate:true,
-                    subId:true,
-                    classId:true,
-                    classroom:{
-                        select:{
-                            classId:true,
-                            classLevel:true,
-                            classRoom:true,
-                            term:{
-                                select:{
-                                    semester:true,
-                                    academicYear:true
+                select: {
+                    timetableId: true,
+                    dayOfWeek: true,
+                    timeStart: true,
+                    timeEnd: true,
+                    timeLate: true,
+                    subId: true,
+                    classId: true,
+                    classroom: {
+                        select: {
+                            classId: true,
+                            classLevel: true,
+                            classRoom: true,
+                            term: {
+                                select: {
+                                    semester: true,
+                                    academicYear: true
                                 }
                             },
                             // academicYear:true,
                             // semester:true,
-                            leader:{
-                                select:{
-                                    ldrId:true,
-                                    fName:true,
-                                    lName:true,
+                            leader: {
+                                select: {
+                                    ldrId: true,
+                                    fName: true,
+                                    lName: true,
                                 }
                             },
-                            classroomType:{
-                                select:{
-                                    classTypeId:true,
-                                    classTypeNameEng:true,
-                                    classTypeNameThai:true,
+                            classroomType: {
+                                select: {
+                                    classTypeId: true,
+                                    classTypeNameEng: true,
+                                    classTypeNameThai: true,
                                 }
                             }
 
                         }
                     },
-                    subject:{
-                        select:{
-                            subId:true,
-                            subNameEng:true,
-                            subNameThai:true,
-                            subCode:true,
-                            subCredit:true,
-                            teacher:{
-                                select:{
-                                    tchId:true,
-                                    fName:true,
-                                    lName:true,
+                    subject: {
+                        select: {
+                            subId: true,
+                            subNameEng: true,
+                            subNameThai: true,
+                            subCode: true,
+                            subCredit: true,
+                            teacher: {
+                                select: {
+                                    tchId: true,
+                                    fName: true,
+                                    lName: true,
                                 }
                             }
                         }
@@ -187,68 +423,68 @@ export const getTimeTableByRoom = async (req, res) => {
             });
 
             const dayOfWeek = {
-                "1" : [],
-                "2" : [],
-                "3" : [],
-                "4" : [],
-                "5" : []
+                "1": [],
+                "2": [],
+                "3": [],
+                "4": [],
+                "5": []
             }
-            
+
             const arrayOfDayOfWeek = Object.keys(dayOfWeek);
 
             arrayOfDayOfWeek.forEach(objectKey => {
                 timetable.forEach(subjecttimetable => {
-                    if(Number(objectKey) === Number(subjecttimetable.dayOfWeek)){
+                    if (Number(objectKey) === Number(subjecttimetable.dayOfWeek)) {
                         dayOfWeek[objectKey].push(subjecttimetable)
                     }
                 })
             });
-        
+
             // console.log(timetable);
             res.json(dayOfWeek);
-        }catch(error){
+        } catch (error) {
             console.log(error);
             res.status(500).json({ error: "error qurey timetable." });
         };
-    }else {
+    } else {
         res.status(400).json({ error: "Invalid input data." });
     };
 };
 
-export const deleteTimetable =async (req, res) => {
+export const deleteTimetable = async (req, res) => {
     const timetableId = req.params.timetableId;
-    if(timetableId){    
-        try{
+    if (timetableId) {
+        try {
             const studyingTime = await db.studingTime.findMany({
-                where:{
-                    timetableId:timetableId
+                where: {
+                    timetableId: timetableId
                 }
             });
 
             const studyTimeId = studyingTime.map((item) => item.studyTimeId);
 
             const attendance = await db.attendance.deleteMany({
-                where:{
-                    studingTimeId:{
-                        in:studyTimeId
+                where: {
+                    studingTimeId: {
+                        in: studyTimeId
                     }
                 }
             })
-            
-            const studyingTimeDelete = await db.studingTime.deleteMany({    
-                where:{
-                    timetableId:timetableId
+
+            const studyingTimeDelete = await db.studingTime.deleteMany({
+                where: {
+                    timetableId: timetableId
                 }
             });
 
             const timetable = await db.timetable.delete({
-                where:{
-                    timetableId:timetableId
+                where: {
+                    timetableId: timetableId
                 }
             });
-            
+
             res.json("delete successfully!");
-        }catch(err){
+        } catch (err) {
             console.error(err);
         };
     };
@@ -256,34 +492,34 @@ export const deleteTimetable =async (req, res) => {
 
 export const getSubjectTimetable = async (req, res) => {
     const classroomId = req.params.classroomId;
-    if(classroomId){
-        try{
+    if (classroomId) {
+        try {
             const timetables = await db.timetable.findMany({
-                where:{
-                    classId : classroomId
+                where: {
+                    classId: classroomId
                 },
                 orderBy: [
-                    {dayOfWeek : 'asc'},
-                    {timeStart : 'asc'}
+                    { dayOfWeek: 'asc' },
+                    { timeStart: 'asc' }
                 ],
-                select:{
-                    classroom:{
-                        select:{
-                            classId:true
+                select: {
+                    classroom: {
+                        select: {
+                            classId: true
                         }
                     },
-                    subject:{
-                        select:{
-                            subId:true,
-                            subNameEng:true,
-                            subNameThai:true,
-                            subCode:true,
-                            subCredit:true,
-                            teacher:{
-                                select:{
-                                    tchId:true,
-                                    fName:true,
-                                    lName:true,
+                    subject: {
+                        select: {
+                            subId: true,
+                            subNameEng: true,
+                            subNameThai: true,
+                            subCode: true,
+                            subCredit: true,
+                            teacher: {
+                                select: {
+                                    tchId: true,
+                                    fName: true,
+                                    lName: true,
                                 }
                             }
                         }
@@ -293,8 +529,8 @@ export const getSubjectTimetable = async (req, res) => {
             const listSubject = timetables.map((item) => item.subject);
             const uniqueSubject = listSubject.filter((value, index, self) => self.findIndex((item) => item.subId === value.subId) === index);
             // console.log([...uniqueSubject]);
-            res.json(uniqueSubject);   
-        }catch(err){
+            res.json(uniqueSubject);
+        } catch (err) {
             console.error(err);
         };
     };
@@ -304,17 +540,17 @@ export const getSubjectTimetable = async (req, res) => {
 export const getTimeTable = async (req, res) => { // ใช้สำหรับการส่งข้อมูลตารางเรียนว่าวันนั้นเรียนวิชาอะไรบ้าง
     const classId = req.params.classroomId;
     const dayOfWeek = req.params.dayOfWeek;
-    if(classId && dayOfWeek ) {
-        try{
+    if (classId && dayOfWeek) {
+        try {
             const timetables = await db.timetable.findMany({
-                where:{
-                    AND:{
-                        classId:String(classId),
+                where: {
+                    AND: {
+                        classId: String(classId),
                         dayOfWeek: Number(dayOfWeek),
                     }
                 },
-                orderBy:{
-                    timeStart:'asc'
+                orderBy: {
+                    timeStart: 'asc'
                 },
             });
             const formatTime = (time) => {
@@ -325,31 +561,31 @@ export const getTimeTable = async (req, res) => { // ใช้สำหรับ
             }
 
             let arrayOfTimeToAttendence = [];
-            for(const timetable of timetables) {
+            for (const timetable of timetables) {
                 // console.log(`timetable Id is ${timetable.timetableId} and studinTime is ${formatTime(timetable.timeStart)}`);
                 const st = await db.studingTime.findMany({
                     where: {
                         timetableId: timetable.timetableId,
-                        studingTimeDate : formatTime(timetable.timeStart)
+                        studingTimeDate: formatTime(timetable.timeStart)
                     },
-                    orderBy:{
-                        studingTimeDate:'asc'
+                    orderBy: {
+                        studingTimeDate: 'asc'
                     },
-                    select:{
-                        studyTimeId:true,
-                        attendance:true,
-                        studingTimeDate:true,
-                        timetable:{
-                            select:{
-                                subject:{
-                                    select:{
-                                        subNameEng:true,
-                                        subNameThai:true,
+                    select: {
+                        studyTimeId: true,
+                        attendance: true,
+                        studingTimeDate: true,
+                        timetable: {
+                            select: {
+                                subject: {
+                                    select: {
+                                        subNameEng: true,
+                                        subNameThai: true,
                                     }
                                 },
-                                timeStart:true,
-                                timeLate:true,
-                                timeEnd:true
+                                timeStart: true,
+                                timeLate: true,
+                                timeEnd: true
                             }
                         }
                     }
@@ -358,36 +594,36 @@ export const getTimeTable = async (req, res) => { // ใช้สำหรับ
                 arrayOfTimeToAttendence.push(...st);
             };
             res.json(arrayOfTimeToAttendence);
-        }catch(err) {
+        } catch (err) {
             console.error(err);
         };
-    }else{
+    } else {
         console.log('pls enter params')
     }
-    
+
 };
 
 
 export const getTeacherTimetable = async (req, res) => {
     const body = req.body;
     const subjectArr = body.subject;
-    if(subjectArr.lenght == 0) return res.status(401).json({ message : "ไม่มี subjectArr"});
+    if (subjectArr.lenght == 0) return res.status(401).json({ message: "ไม่มี subjectArr" });
     //วันนี้
     const dateTimeNow = DateTime.now();
     const date = dateTimeNow.toString().split("T")[0];
     // console.log(dateTimeNow);
     ///////
-    try{
+    try {
         // function เปรียบเทียบวันเวลา
 
         function isSchoolOpen(dateStr) {
-            const startDate = DateTime.fromJSDate(dateStr.termStart, {zone: 'UTC'}); // วันที่เริ่มเปิดเทอม
-            const endDate = DateTime.fromJSDate(dateStr.termEnd, {zone: 'UTC'});   // วันที่ปิดเทอม
-            const checkDate = DateTime.fromISO(date, {zone: 'UTC'});      // วันที่ที่ต้องการตรวจสอบ
-            
-            if(checkDate >= startDate && checkDate <= endDate){
+            const startDate = DateTime.fromJSDate(dateStr.termStart, { zone: 'UTC' }); // วันที่เริ่มเปิดเทอม
+            const endDate = DateTime.fromJSDate(dateStr.termEnd, { zone: 'UTC' });   // วันที่ปิดเทอม
+            const checkDate = DateTime.fromISO(date, { zone: 'UTC' });      // วันที่ที่ต้องการตรวจสอบ
+
+            if (checkDate >= startDate && checkDate <= endDate) {
                 return true;
-            }else{
+            } else {
                 return false;
             };
         };
@@ -395,8 +631,8 @@ export const getTeacherTimetable = async (req, res) => {
         // หาว่าวันปัจจุบัน 
         const termLists = await db.academicTerms.findMany({});
         let termId;
-        for(const term of termLists) {
-            if(isSchoolOpen(term)){
+        for (const term of termLists) {
+            if (isSchoolOpen(term)) {
                 termId = term.termId;
             }
         };
@@ -410,55 +646,55 @@ export const getTeacherTimetable = async (req, res) => {
 
         const timetables = await db.timetable.findMany({
             where: {
-                AND:[
+                AND: [
                     {
-                        classId:{
-                            in:classrooms.map((item) => item.classId)
+                        classId: {
+                            in: classrooms.map((item) => item.classId)
                         }
                     },
                     {
-                        subId:{
-                            in:subjectArr.map((sub) => sub.subId)
+                        subId: {
+                            in: subjectArr.map((sub) => sub.subId)
                         }
                     }
                 ]
             },
-            include:{
-                classroom:true,
-                subject:true
+            include: {
+                classroom: true,
+                subject: true
             },
-            orderBy:[
+            orderBy: [
                 {
-                    classroom:{
-                        classRoom:'asc'
+                    classroom: {
+                        classRoom: 'asc'
                     }
                 },
                 {
-                    timeStart:'asc'
+                    timeStart: 'asc'
                 }
             ]
         })
 
         const day = {
-            1:[
+            1: [
                 ...timetables.filter((timetable) => timetable.dayOfWeek === 1)
             ],
-            2:[
+            2: [
                 ...timetables.filter((timetable) => timetable.dayOfWeek === 2)
             ],
-            3:[
+            3: [
                 ...timetables.filter((timetable) => timetable.dayOfWeek === 3)
             ],
-            4:[
+            4: [
                 ...timetables.filter((timetable) => timetable.dayOfWeek === 4)
             ],
-            5:[
+            5: [
                 ...timetables.filter((timetable) => timetable.dayOfWeek === 5)
             ]
         }
 
         res.status(200).json(day);
-    }catch(error) {
+    } catch (error) {
         console.error(error)
     }
 }
