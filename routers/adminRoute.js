@@ -20,7 +20,7 @@ import {
 import { getAllLeaders } from "../controllers/leaderController.js";
 
 import { featchDataForSeachbar } from "../controllers/adminController.js";
-import { getTimeTableByRoom, deleteTimetable, createTimetable, getSubjectTimetable, editTimetable } from "../controllers/timetableController.js";
+import { getTimeTableByRoom, deleteTimetable, createTimetable, getSubjectTimetable, editTimetable, createTimetableByAddSubject, createTimetableBySwitchPeriod, createTimetableBySwitchSubjectAndSubject } from "../controllers/timetableController.js";
 import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject, createSubjectType, deleteSubejectType, editSubjectType} from "../controllers/subjectController.js";
 // import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday ,updateHoliday} from "../controllers/stuyingTimeController.js";
 import { getAllAcademicTerms, createTerm, deleteTerm, getOneAcademicTerm,updateTerm, getTermDateBetweenFilterHolidays } from "../controllers/termController.js";
@@ -74,6 +74,10 @@ router.put('/timetable', editTimetable);
 router.post('/timetable', createTimetable);
 router.delete('/timetable/:timetableId', deleteTimetable);
 router.get('/subjectTimetable/:classroomId', getSubjectTimetable);
+
+router.post('/timetable/bysubject', createTimetableByAddSubject);
+router.post('/timetable/byswitchperiod', createTimetableBySwitchPeriod);
+router.post('/timetable/switchsubjectandsubject', createTimetableBySwitchSubjectAndSubject);
 // router.get('/timetable/bysubId/:subjectId', getTimeTableBySubjectId);
 // subject Management
 router.get('/subject/:UUID', getSubject);
@@ -93,7 +97,6 @@ router.post('/holiday', createHoliday); // สร้างวันหยุด
 router.put('/holiday/:holidayId', updateHoliday);
 router.get('/holiday/one/:holidayId', getOneHoliday);
 router.delete('/holiday/:holidayId', deleteHoliday); // ลบวันหยุด
-
 
 // AcademicYear And Term
 

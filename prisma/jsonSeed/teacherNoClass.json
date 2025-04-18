@@ -1,4 +1,3 @@
-
 [
     {
         "tchId" : "Teacher011",
@@ -6,8 +5,8 @@
         "lName": "Clark",
         "email": "ivy.clark@example.com",
         "tel": "9900112233",
-        "password" : "securepassword108",
-        "deptId" : "ma"
+        "password": "securepassword108",
+        "deptId": "ma"
     },
     {
         "tchId" : "Teacher012",
@@ -15,8 +14,8 @@
         "lName": "Lewis",
         "email": "jack.lewis@example.com",
         "tel": "1011121314",
-        "password" : "securepassword109",
-        "deptId" : "ma"
+        "password": "securepassword109",
+        "deptId": "ma"
     },
     {
         "tchId" : "Teacher013",
@@ -24,8 +23,8 @@
         "lName": "Walker",
         "email": "karen.walker@example.com",
         "tel": "1112131415",
-        "password" : "securepassword110",
-        "deptId" : "sc"
+        "password": "securepassword110",
+        "deptId": "sc"
     },
     {
         "tchId" : "Teacher014",
@@ -33,8 +32,8 @@
         "lName": "Hall",
         "email": "leo.hall@example.com",
         "tel": "1213141516",
-        "password" : "securepassword111",
-        "deptId" : "hist"
+        "password": "securepassword111",
+        "deptId": "hist"
     },
     {
         "tchId" : "Teacher015",
@@ -42,8 +41,8 @@
         "lName": "Allen",
         "email": "mia.allen@example.com",
         "tel": "1314151617",
-        "password" : "securepassword112",
-        "deptId" : "geo"
+        "password": "securepassword112",
+        "deptId": "geo"
     },
     {
         "tchId" : "Teacher016",
@@ -51,8 +50,8 @@
         "lName": "Young",
         "email": "nina.young@example.com",
         "tel": "1415161718",
-        "password" : "securepassword113",
-        "deptId" : "bio"
+        "password": "securepassword113",
+        "deptId": "bio"
     },
     {
         "tchId" : "Teacher017",
@@ -60,8 +59,8 @@
         "lName": "King",
         "email": "oscar.king@example.com",
         "tel": "1516171819",
-        "password" : "securepassword114",
-        "deptId" : "chem"
+        "password": "securepassword114",
+        "deptId": "chem"
     },
     {
         "tchId" : "Teacher018",
@@ -69,8 +68,8 @@
         "lName": "Scott",
         "email": "paul.scott@example.com",
         "tel": "1617181920",
-        "password" : "securepassword115",
-        "deptId" : "phys"
+        "password": "securepassword115",
+        "deptId": "phys"
     },
     {
         "tchId" : "Teacher019",
@@ -78,8 +77,8 @@
         "lName": "Green",
         "email": "quinn.green@example.com",
         "tel": "1718192021",
-        "password" : "securepassword116",
-        "deptId" : "art"
+        "password": "securepassword116",
+        "deptId": "art"
     },
     {
         "tchId" : "Teacher020",
@@ -87,8 +86,8 @@
         "lName": "Baker",
         "email": "rose.baker@example.com",
         "tel": "1819202122",
-        "password" : "securepassword117",
-        "deptId" : "music"
+        "password": "securepassword117",
+        "deptId": "music"
     },
     {
         "tchId" : "Teacher021",
@@ -96,8 +95,8 @@
         "lName": "Adams",
         "email": "sam.adams@example.com",
         "tel": "1920212223",
-        "password" : "securepassword118",
-        "deptId" : "ma"
+        "password": "securepassword118",
+        "deptId": "ma"
     },
     {
         "tchId" : "Teacher022",
@@ -105,8 +104,8 @@
         "lName": "Nelson",
         "email": "tina.nelson@example.com",
         "tel": "2021222324",
-        "password" : "securepassword119",
-        "deptId" : "ma"
+        "password": "securepassword119",
+        "deptId": "ma"
     },
     {
         "tchId" : "Teacher023",
@@ -114,8 +113,8 @@
         "lName": "Carter",
         "email": "uma.carter@example.com",
         "tel": "2122232425",
-        "password" : "securepassword120",
-        "deptId" : "sc"
+        "password": "securepassword120",
+        "deptId": "sc"
     },
     {
         "tchId" : "Teacher024",
@@ -123,8 +122,8 @@
         "lName": "Mitchell",
         "email": "vince.mitchell@example.com",
         "tel": "2223242526",
-        "password" : "securepassword121",
-        "deptId" : "hist"
+        "password": "securepassword121",
+        "deptId": "hist"
     },
     {
         "tchId" : "Teacher025",
@@ -132,8 +131,8 @@
         "lName": "Perez",
         "email": "wendy.perez@example.com",
         "tel": "2324252627",
-        "password" : "securepassword122",
-        "deptId" : "geo"
+        "password": "securepassword122",
+        "deptId": "geo"
     },
     {
         "tchId" : "Teacher026",
@@ -141,8 +140,8 @@
         "lName": "Roberts",
         "email": "xander.roberts@example.com",
         "tel": "2425262728",
-        "password" : "securepassword123",
-        "deptId" : "bio"
+        "password": "securepassword123",
+        "deptId": "bio"
     },
     {
         "tchId" : "Teacher027",
@@ -150,8 +149,8 @@
         "lName": "Turner",
         "email": "yara.turner@example.com",
         "tel": "2526272829",
-        "password" : "securepassword124",
-        "deptId" : "chem"
+        "password": "securepassword124",
+        "deptId": "chem"
     },
     {
         "tchId" : "Teacher028",
@@ -159,8 +158,8 @@
         "lName": "Phillips",
         "email": "zane.phillips@example.com",
         "tel": "2627282930",
-        "password" : "securepassword125",
-        "deptId" : "phys"
+        "password": "securepassword125",
+        "deptId": "phys"
     },
     {
         "tchId" : "Teacher029",
@@ -168,8 +167,8 @@
         "lName": "Campbell",
         "email": "amy.campbell@example.com",
         "tel": "2728293031",
-        "password" : "securepassword126",
-        "deptId" : "art"
+        "password": "securepassword126",
+        "deptId": "art"
     },
     {
         "tchId" : "Teacher030",
@@ -177,7 +176,7 @@
         "lName": "Evans",
         "email": "brian.evans@example.com",
         "tel": "2829303132",
-        "password" : "securepassword127",
-        "deptId" : "music"
+        "password": "securepassword127",
+        "deptId": "music"
     }
 ]
