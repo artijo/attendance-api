@@ -105,7 +105,7 @@ export const createTimetableByAddSubject = async (req, res) => {
 }
 
 export const createTimetableBySwitchPeriod = async (req, res) => {
-    const { classroom, timetable, schedule } = req.body;
+    const { classroom, timetable, schedule, weekday } = req.body;
     if (timetable) {
         try {
             const subjectOnTimetable = await db.timetable.findMany({
@@ -145,8 +145,10 @@ export const createTimetableBySwitchPeriod = async (req, res) => {
 
             if(studingTimeOnPeriod.length > 0){
                 studingTimeOnPeriod.forEach(async (studyTime) => {
-                    const newTimeformat =  DateTime.fromISO(`${studyTime.studingTimeDate.toISOString().split('T')[0]}T${timetable.timeStart}`).setZone(process.env.TIME_ZONE);
-                    await db.studingTime.update({
+                    // .setZone(process.env.TIME_ZONE)
+                    const newTimeformat =  DateTime.fromISO(`${studyTime.studingTimeDate.toISOString().split('T')[0]}T${timetable.timeStart}`).set({weekday:weekday}).setZone(process.env.TIME_ZONE);
+                    // console.log(newTimeformat);
+                    const updateStdyingTime = await db.studingTime.update({
                         where:{
                             studyTimeId:studyTime.studyTimeId
                         },
@@ -154,9 +156,9 @@ export const createTimetableBySwitchPeriod = async (req, res) => {
                             studingTimeDate:newTimeformat
                         }
                     })
+                    // console.log(updateStdyingTime);
                 })
             } 
-
             return res.status(200).json({ message: 'create successful' });
         } catch (error) {
             console.error(error);
