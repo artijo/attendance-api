@@ -2,7 +2,6 @@
 [
     {
         "tchId" : "Teacher011",
-        "tchCode": "TCH011",
         "fName": "Ivy",
         "lName": "Clark",
         "email": "ivy.clark@example.com",
@@ -12,7 +11,6 @@
     },
     {
         "tchId" : "Teacher012",
-        "tchCode": "TCH012",
         "fName": "Jack",
         "lName": "Lewis",
         "email": "jack.lewis@example.com",
@@ -22,7 +20,6 @@
     },
     {
         "tchId" : "Teacher013",
-        "tchCode": "TCH013",
         "fName": "Karen",
         "lName": "Walker",
         "email": "karen.walker@example.com",
@@ -32,7 +29,6 @@
     },
     {
         "tchId" : "Teacher014",
-        "tchCode": "TCH014",
         "fName": "Leo",
         "lName": "Hall",
         "email": "leo.hall@example.com",
@@ -42,7 +38,6 @@
     },
     {
         "tchId" : "Teacher015",
-        "tchCode": "TCH015",
         "fName": "Mia",
         "lName": "Allen",
         "email": "mia.allen@example.com",
@@ -52,7 +47,6 @@
     },
     {
         "tchId" : "Teacher016",
-        "tchCode": "TCH016",
         "fName": "Nina",
         "lName": "Young",
         "email": "nina.young@example.com",
@@ -62,7 +56,6 @@
     },
     {
         "tchId" : "Teacher017",
-        "tchCode": "TCH017",
         "fName": "Oscar",
         "lName": "King",
         "email": "oscar.king@example.com",
@@ -72,7 +65,6 @@
     },
     {
         "tchId" : "Teacher018",
-        "tchCode": "TCH018",
         "fName": "Paul",
         "lName": "Scott",
         "email": "paul.scott@example.com",
@@ -82,7 +74,6 @@
     },
     {
         "tchId" : "Teacher019",
-        "tchCode": "TCH019",
         "fName": "Quinn",
         "lName": "Green",
         "email": "quinn.green@example.com",
@@ -92,7 +83,6 @@
     },
     {
         "tchId" : "Teacher020",
-        "tchCode": "TCH020",
         "fName": "Rose",
         "lName": "Baker",
         "email": "rose.baker@example.com",
@@ -102,7 +92,6 @@
     },
     {
         "tchId" : "Teacher021",
-        "tchCode": "TCH021",
         "fName": "Sam",
         "lName": "Adams",
         "email": "sam.adams@example.com",
@@ -112,7 +101,6 @@
     },
     {
         "tchId" : "Teacher022",
-        "tchCode": "TCH022",
         "fName": "Tina",
         "lName": "Nelson",
         "email": "tina.nelson@example.com",
@@ -122,7 +110,6 @@
     },
     {
         "tchId" : "Teacher023",
-        "tchCode": "TCH023",
         "fName": "Uma",
         "lName": "Carter",
         "email": "uma.carter@example.com",
@@ -132,7 +119,6 @@
     },
     {
         "tchId" : "Teacher024",
-        "tchCode": "TCH024",
         "fName": "Vince",
         "lName": "Mitchell",
         "email": "vince.mitchell@example.com",
@@ -142,7 +128,6 @@
     },
     {
         "tchId" : "Teacher025",
-        "tchCode": "TCH025",
         "fName": "Wendy",
         "lName": "Perez",
         "email": "wendy.perez@example.com",
@@ -152,7 +137,6 @@
     },
     {
         "tchId" : "Teacher026",
-        "tchCode": "TCH026",
         "fName": "Xander",
         "lName": "Roberts",
         "email": "xander.roberts@example.com",
@@ -162,7 +146,6 @@
     },
     {
         "tchId" : "Teacher027",
-        "tchCode": "TCH027",
         "fName": "Yara",
         "lName": "Turner",
         "email": "yara.turner@example.com",
@@ -172,7 +155,6 @@
     },
     {
         "tchId" : "Teacher028",
-        "tchCode": "TCH028",
         "fName": "Zane",
         "lName": "Phillips",
         "email": "zane.phillips@example.com",
@@ -182,7 +164,6 @@
     },
     {
         "tchId" : "Teacher029",
-        "tchCode": "TCH029",
         "fName": "Amy",
         "lName": "Campbell",
         "email": "amy.campbell@example.com",
@@ -192,7 +173,6 @@
     },
     {
         "tchId" : "Teacher030",
-        "tchCode": "TCH030",
         "fName": "Brian",
         "lName": "Evans",
         "email": "brian.evans@example.com",
