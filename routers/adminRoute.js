@@ -20,7 +20,7 @@ import {
 import { getAllLeaders } from "../controllers/leaderController.js";
 
 import { featchDataForSeachbar } from "../controllers/adminController.js";
-import { getTimeTableByRoom, deleteTimetable, createTimetable, getSubjectTimetable, editTimetable, createTimetableByAddSubject, createTimetableBySwitchPeriod, createTimetableBySwitchSubjectAndSubject } from "../controllers/timetableController.js";
+import { getTimeTableByRoom, deleteTimetable, createTimetable, getSubjectTimetable,createTimetableByAddSubject, createTimetableBySwitchPeriod, createTimetableBySwitchSubjectAndSubject, editTimelateTimetable } from "../controllers/timetableController.js";
 import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject, createSubjectType, deleteSubejectType, editSubjectType} from "../controllers/subjectController.js";
 // import { getHoliday, createStuingCalendar,createHoliday, getHolidayCalendar, getStudyCalendar, getHolidayCalendarList, deleteHoliday ,updateHoliday} from "../controllers/stuyingTimeController.js";
 import { getAllAcademicTerms, createTerm, deleteTerm, getOneAcademicTerm,updateTerm, getTermDateBetweenFilterHolidays } from "../controllers/termController.js";
@@ -70,7 +70,7 @@ router.get('/leaders', getAllLeaders); // ดึงข้อมูลทั้�
 router.get('/search', featchDataForSeachbar); 
 // timetable Management
 router.get('/timetableR', getTimeTableByRoom);
-router.put('/timetable', editTimetable);
+router.put('/timetable/editlatetime',editTimelateTimetable)
 router.post('/timetable', createTimetable);
 router.delete('/timetable/:timetableId', deleteTimetable);
 router.get('/subjectTimetable/:classroomId', getSubjectTimetable);
