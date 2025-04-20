@@ -32,7 +32,7 @@ app.use(cookieParser(
 // cors
 app.use(cors(
     {
-        origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:4321' ,'https://manage.att.nps.ac.th', "https://teacher.att.nps.ac.th", "https://student.att.nps.ac.th"],
+        origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:4321' ,'https://manage.att.nps.ac.th', "https://teacher.att.nps.ac.th", "https://student.att.nps.ac.th", "https://nps-attendance-parent.netlify.app"],
         credentials: true
     }
 ));
