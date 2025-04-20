@@ -23,14 +23,14 @@ model Student {
   lName          String
   email          String?                   @unique
   tel            String?                   @unique
+  googleId       String?                   @unique
+  lineId         String?                    @unique
   // cityzenId      String?                   @unique
   parent         StudentParent[]
   attendance     Attendance[]
-  editAttendance EditAttendance[]
   leaveRequest   LeaveRequest[]
   activity       ActivityParticipate[]
   classroomMembers ClassroomMember[]
-  editActivity   EditActivityParticipate[]
   createdAt      DateTime                  @default(now())
   updatedAt      DateTime                  @updatedAt
   deletedAt      DateTime?
@@ -44,11 +44,8 @@ model Leader {
   tel            String?                   @unique
   password       String
   classroom      Classrooms[]
-  
   attendance     Attendance[]
-  editAttendance EditAttendance[]
   activity       ActivityParticipate[]
-  editActivity   EditActivityParticipate[]
   createdAt      DateTime                  @default(now())
   updatedAt      DateTime                  @updatedAt
   deletedAt      DateTime?
@@ -61,17 +58,17 @@ model Teacher {
   email              String?                   @unique
   tel                String?                   @unique
   password           String?
+  googleId           String?                   @unique
+  lineId             String?                   @unique
   deptId             String?
   department         Department?                @relation(fields: [deptId], references: [deptId])
   subject            Subject[]
   classId            String?
   classroom          Classrooms?                @relation(fields: [classId], references: [classId])
   attendance         Attendance[]
-  editAttendance     EditAttendance[]
   leaveRequest       LeaveRequest[]
   activity           ActivityTeacher[]
   actParticipate     ActivityParticipate[]
-  editActParticipate EditActivityParticipate[]
   createdAt          DateTime                  @default(now())
   updatedAt          DateTime                  @updatedAt
   deletedAt          DateTime?
@@ -203,7 +200,6 @@ model StudingTime {
   timetableId     String
   timetable       Timetable                 @relation(fields: [timetableId], references: [timetableId])
   attendance      Attendance[]
-  editAttendance  EditAttendance[]
   leaveRequest    LeaveRequestStudingTime[]
   studingTimeDate DateTime
   createdAt       DateTime                  @default(now())
@@ -239,33 +235,9 @@ model AttendanceMethod {
   attMethodId    String           @id @default(uuid())
   attMethodName  String
   attendance     Attendance[]
-  editAttendance EditAttendance[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   deletedAt      DateTime?
-}
-
-model EditAttendance {
-  attId         String           @id @default(uuid())
-  stdId         String
-  studingTimeId String
-  attTimestamp  DateTime
-  attStatus     EnumAttendanceStatus
-  student       Student          @relation(fields: [stdId], references: [stdId])
-  studingTime   StudingTime      @relation(fields: [studingTimeId], references: [studyTimeId])
-  attMethodId   String
-  attMethod     AttendanceMethod @relation(fields: [attMethodId], references: [attMethodId])
-  latitute      Float?
-  longitute     Float?
-  note          String?
-  operatedBy    String
-  tchId         String?
-  teacher       Teacher?         @relation(fields: [tchId], references: [tchId])
-  leaderId      String?
-  leader        Leader?          @relation(fields: [leaderId], references: [ldrId])
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  deletedAt     DateTime?
 }
 
 model LeaveRequest {
@@ -323,7 +295,6 @@ model Activity {
   teacher            ActivityTeacher[]
   classroom          ClassroomCanjoinActivity[]
   actParticipate     ActivityParticipate[]
-  editActParticipate EditActivityParticipate[]
   createdAt          DateTime                   @default(now())
   updatedAt          DateTime                   @updatedAt
   deletedAt          DateTime?
@@ -361,24 +332,6 @@ model ClassroomCanjoinActivity {
 }
 
 model ActivityParticipate {
-  actParticipateId String   @id @default(uuid())
-  actId            String
-  stdId            String
-  student          Student  @relation(fields: [stdId], references: [stdId])
-  activity         Activity @relation(fields: [actId], references: [actId])
-  note             String?
-  joinTimestamp    DateTime
-  operateBy        String
-  teacherId        String?
-  teacher          Teacher? @relation(fields: [teacherId], references: [tchId])
-  leaderId         String?
-  leader           Leader?  @relation(fields: [leaderId], references: [ldrId])
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  deletedAt        DateTime?
-}
-
-model EditActivityParticipate {
   actParticipateId String   @id @default(uuid())
   actId            String
   stdId            String
