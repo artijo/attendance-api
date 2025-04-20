@@ -5,6 +5,7 @@ import cors from 'cors';
 import cookieParser from "cookie-parser";
 
 // import routes
+import parentRouter from './routers/parentRouter.js';
 import studentRouter from './routers/studentRoute.js';
 import teacherRouter from './routers/teacherRoute.js';
 import adminRouter from './routers/adminRoute.js';
@@ -31,7 +32,7 @@ app.use(cookieParser(
 // cors
 app.use(cors(
     {
-        origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'https://manage.att.nps.ac.th', "https://teacher.att.nps.ac.th", "https://student.att.nps.ac.th"],
+        origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:4321' ,'https://manage.att.nps.ac.th', "https://teacher.att.nps.ac.th", "https://student.att.nps.ac.th"],
         credentials: true
     }
 ));
@@ -47,6 +48,7 @@ app.use('/auth', authRouter);
 app.use('/s',studentRouter); //studentRoute s= student
 app.use('/t', isAuth, teacherRouter); // teacherRoute t= teacher
 app.use('/a', isAuth, adminRouter);
+app.use('/p', parentRouter); // parentRoute p= parent
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
