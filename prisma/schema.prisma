@@ -89,6 +89,7 @@ model Parent {
   name      String
   email     String?         @unique
   tel       String?         @unique
+  lineId    String?         @unique
   student   StudentParent[]
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
