@@ -41,7 +41,15 @@ export async function getallStudentParent(req, res) {
                 prntId: parent.prntId
             },
             include: {
-                student: true,
+                student: {
+                    include: {
+                        classroomMembers: {
+                            include: {
+                                classroom: true,
+                            },
+                        },
+                    },
+                },
             },
         });
 
@@ -52,3 +60,59 @@ export async function getallStudentParent(req, res) {
     }
 }
 
+export async function studentLookup(req, res) {
+    const { studentId } = req.params;
+    try {
+        const student = await db.student.findUnique({
+            where: {
+                stdId: studentId,
+            },
+            include: {
+                classroomMembers: {
+                    include: {
+                        classroom: true,
+                    },
+                },
+            }
+        });
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+        res.status(200).json(student);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+export async function addStudentParent(req, res) {
+    const { studentId, userId } = req.body;
+    try {
+        const student = await db.student.findUnique({
+            where: {
+                stdId: studentId,
+            },
+        });
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+        const parent = await db.parent.findUnique({
+            where: {
+                lineId: userId,
+            },
+        });
+        if (!parent) {
+            return res.status(404).json({ message: 'Parent not found' });
+        }
+        const studentParent = await db.studentParent.create({
+            data: {
+                stdId: student.stdId,
+                prntId: parent.prntId,
+            },
+        });
+        res.status(201).json(studentParent);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
