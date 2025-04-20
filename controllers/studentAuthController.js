@@ -1,6 +1,7 @@
 import { generateToken, verifyToken } from "../helper/jwt.js";
 import db from '../prisma/client.js';
 import axios from 'axios';
+import { sensorName } from "../helper/helper.js";
 
 export async function checkStudent(req, res) {
     const { studentId } = req.params;
@@ -10,10 +11,13 @@ export async function checkStudent(req, res) {
                 stdId: studentId
             }
         });
+
+        const studentName = student.fName + " " + sensorName(student.lName);
+
         if (!student) {
             return res.status(404).json({ message: 'Student not found' });
         }
-        return res.json({ googleId: student.googleId, studentId: student.studentId });
+        return res.json({ googleId: student.googleId, studentId: student.stdId, studentName });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: 'Internal server error' });
@@ -30,10 +34,10 @@ export async function LoginWithGoogle(req, res) {
     // เช็คว่าผู้ใช้มีในระบบหรือยัง
     let student = await db.student.findUnique({
       where: {
-        googleId: google_id,
+        stdId: studentId
       },
     });
-    if (!student) {
+    if (!student.googleId) {
       // ถ้ายังไม่มี ให้สร้างผู้ใช้ใหม่
       student = await db.student.update({
         where: {
@@ -46,6 +50,7 @@ export async function LoginWithGoogle(req, res) {
       });
     }
     if (student.googleId !== google_id) {
+        console.log(student.googleId, google_id);
         return res.status(401).json({ message: 'Google ID mismatch' });
     }
 
@@ -54,7 +59,7 @@ export async function LoginWithGoogle(req, res) {
     const jwtToken = generateToken({ id: student.stdId, google_id }, '1h');
     const refreshToken = generateToken({ id: student.stdId, google_id }, '7d');
     // ส่ง JWT กลับไปที่ client
-    return res.json({ jwtToken, studentId: student.studentId, refreshToken });
+    return res.json({ jwtToken, studentId: student.stdId, refreshToken, fName:student.fName, lName:student.lName, email:student.email });
   } catch (err) {
     console.error('Google auth error:', err);
     res.status(401).json({ error: 'Invalid Google token' });

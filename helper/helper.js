@@ -49,3 +49,8 @@ export function daybetween(Start, End) {
     }
     return dates;
 }
+
+// ฟังก์ชัน sensor ชื่อให้ลงท้ายด้สย xxxx
+export function sensorName(name) {
+    return name.slice(0, 3) + "xxxx"
+}
