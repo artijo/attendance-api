@@ -51,10 +51,10 @@ export async function LoginWithGoogle(req, res) {
 
 
     // สร้าง JWT
-    const jwtToken = generateToken({ id: student.studentId, google_Id }, '1h');
-    const refreshToken = generateToken({ id: student.studentId, google_Id }, '7d');
+    const jwtToken = generateToken({ id: student.stdId, google_id }, '1h');
+    const refreshToken = generateToken({ id: student.stdId, google_id }, '7d');
     // ส่ง JWT กลับไปที่ client
-    return res.json({ token: jwtToken, studentId: student.studentId, refreshToken });
+    return res.json({ jwtToken, studentId: student.studentId, refreshToken });
   } catch (err) {
     console.error('Google auth error:', err);
     res.status(401).json({ error: 'Invalid Google token' });
@@ -79,7 +79,7 @@ export async function getTokenformRefreshToken(req, res) {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        const token = generateToken({ id: user.id, username: user.username }, '1h');
+        const token = generateToken({ id: user.stdId, google_id: user.googleId }, '1h');
         // res.cookie('token', token,{
         //     httpOnly: true,
         //     secure: true,
