@@ -730,7 +730,6 @@ export const saveAttendenceByTeacher = async (req, res) => {
                     }
                 }
             });
-            console.log(studyTime.timetable.subject);
 
 
             req.body?.map(async (item) => {
