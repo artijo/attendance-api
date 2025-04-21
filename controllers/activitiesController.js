@@ -1,6 +1,7 @@
 import { daybetween } from '../helper/helper.js';
 import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
+import { pushMessageToLine } from '../helper/line.js';
 
 const zone = process.env.TIME_ZONE || 'Asia/Bangkok';
 
@@ -282,6 +283,11 @@ export const paticipatedActivityByteacher = async (req, res) => {
                 actId: actId
             }
         });
+        const teacher = await db.teacher.findFirst({
+            where: {
+                tchId: req.user.id
+            }
+        });
         
         // Use the provided date or current date
         let targetDate = DateTime.now();
@@ -300,15 +306,15 @@ export const paticipatedActivityByteacher = async (req, res) => {
             }
         });
        
-        const activityParticipateCount = await db.activityParticipate.count({
-            where: {
-                actId: actId,
-                joinTimestamp: {
-                    gte: targetDate.startOf('day').toUTC().toJSDate(),
-                    lte: targetDate.endOf('day').toUTC().toJSDate()
-                }
-            }
-        });
+        // const activityParticipateCount = await db.activityParticipate.count({
+        //     where: {
+        //         actId: actId,
+        //         joinTimestamp: {
+        //             gte: targetDate.startOf('day').toUTC().toJSDate(),
+        //             lte: targetDate.endOf('day').toUTC().toJSDate()
+        //         }
+        //     }
+        // });
 
         if (activityPaticipate) {
             if(status == "ABSENT"){
@@ -342,7 +348,7 @@ export const paticipatedActivityByteacher = async (req, res) => {
                         }
                     }
                 });
-                console.log(countActParticipate);
+                // console.log(countActParticipate);
                 if(countActParticipate >= activity.joinLimitNumber){
                     return res.status(400).json({ message: 'จำนวนนักเรียนเต็มแล้ว' });
                 }
@@ -370,6 +376,27 @@ export const paticipatedActivityByteacher = async (req, res) => {
                     joinTimestamp: DateTime.now().toUTC().toJSDate()
                 }
             });
+            // Send LINE notification
+            const parent = await db.studentParent.findMany({
+                where: {
+                    student: {
+                        stdId: stdId
+                    }
+                },
+                include: {
+                    parent: true,
+                    student: true
+                }
+            });
+            if (parent.length > 0) {
+                parent.map(async (p) => {
+                    const message = `เรียนผู้ปกครอง ${p.parent.name} นักเรียน ${p.student.fName} ${p.student.lName} ได้เข้าร่วมกิจกรรม ${activity.actName} วันที่ ${DateTime.fromJSDate(activity.actDate).setZone(zone).toFormat('dd/LL/yyyy')}\n\n\nบันทึกการเข้าร่วมกิจกรรมโดยคุณครู ${teacher.fName} ${teacher.lName}`;
+                    await pushMessageToLine(p.parent.lineId, message);
+                });
+            } else {
+                console.log("No parent found for this student.");  
+            }
+        
             return res.json({ message: 'success' });
         }
     } catch (error) {
