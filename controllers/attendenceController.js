@@ -1,6 +1,6 @@
 import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
-
+import { pushMessageToLine } from '../helper/line.js';
 
 export const studentAttendenceSubject = async (req, res) => { // เช็คชื่อเข้าเรียน
     const body = req.body;
@@ -693,6 +693,7 @@ export const getAttendenceSummaryByPerson = async (req, res) => {
 
 export const saveAttendenceByTeacher = async (req, res) => {
     const body = req.body;
+    // console.log(body);
     const dtNow = DateTime.now();
     if(body){
         try{
@@ -704,6 +705,33 @@ export const saveAttendenceByTeacher = async (req, res) => {
                     attMethodId:true
                 }
             });
+
+            //Search Subjectby studingTimeId
+            const studyTime = await db.studingTime.findFirst({
+                where:{
+                    studyTimeId:body[0].studingTimeId
+                },
+                select:{
+                    timetable:{
+                        select:{
+                            subject:{
+                                select:{
+                                    subNameThai:true,
+                                    subNameEng:true,
+                                    teacher:{
+                                        select:{
+                                            fName:true,
+                                            lName:true,
+                                        }
+                                    },
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            console.log(studyTime.timetable.subject);
+
 
             req.body?.map(async (item) => {
                 // const attendance = await db.attendance.create({
@@ -743,11 +771,21 @@ export const saveAttendenceByTeacher = async (req, res) => {
                         ]
                     }
                 });
+
+                const student = await db.studentParent.findMany({
+                    where:{
+                        stdId:item.stdId
+                    },
+                    include:{
+                        student:true,
+                        parent:true
+                    }
+                });
                 
                 let attendance;
                 
                 if (existingAttendance) {
-                    console.log("update attendance");
+                    // console.log("update attendance");
                     // ถ้ามีข้อมูลอยู่แล้ว ให้อัปเดต
                     // console.log(existingAttendance);
                     attendance = await db.attendance.update({
@@ -762,9 +800,21 @@ export const saveAttendenceByTeacher = async (req, res) => {
                             }
                         }
                     });
+                    //pushMassage
+                    if(student.length > 0){
+                        student.map(async (std) => {
+                            const lineId = std.parent.lineId;
+                            if(lineId){
+                                const message = `เรียนผู้ปกครอง ${std.parent.name} \n${std.student.fName} ${std.student.lName} ได้ทำการแก้ไขเช็คชื่อเรียนวิชา ${studyTime.timetable.subject.subNameThai} (${studyTime.timetable.subject.subNameEng})\nสอนโดย คุณครู${studyTime.timetable.subject.teacher.fName} ${studyTime.timetable.subject.teacher.lName}\nสถานะการเข้าเรียน: ${item.attStatus} \nเวลา: ${dtNow.toFormat('yyyy-MM-dd HH:mm:ss')} หมายเหตุ: ${item.note}\n\n\nการบันทึกนี้ถูกบันทึกโดยคุณครูประจำวิชา`;
+                                await pushMessageToLine(lineId, message);
+                            }
+                        });
+                    }
+
+
                 } else {
                     // ถ้าไม่มีข้อมูล ให้สร้างใหม่
-                    console.log("create new attendance");
+                    // console.log("create new attendance");
                     attendance = await db.attendance.create({
                         data: {
                             student: {
@@ -785,6 +835,17 @@ export const saveAttendenceByTeacher = async (req, res) => {
                             note: item.note
                         }
                     });
+                    
+                    //pushMassage
+                    if(student.length > 0){
+                        student.map(async (std) => {
+                            const lineId = std.parent.lineId;
+                            if(lineId){
+                                const message = `เรียนผู้ปกครอง ${std.parent.name} \n${std.student.fName} ${std.student.lName} ได้ทำการเช็คชื่อเรียนวิชา ${studyTime.timetable.subject.subNameThai} (${studyTime.timetable.subject.subNameEng})\nสอนโดย คุณครู${studyTime.timetable.subject.teacher.fName} ${studyTime.timetable.subject.teacher.lName}\nสถานะการเข้าเรียน: ${item.attStatus} \nเวลา: ${dtNow.toFormat('yyyy-MM-dd HH:mm:ss')} หมายเหตุ: ${item.note}\n\n\nการบันทึกนี้ถูกบันทึกโดยคุณครูประจำวิชา`;
+                                await pushMessageToLine(lineId, message);
+                            }
+                        }
+            )}
                 }
                 
                 // console.log(attendance);
