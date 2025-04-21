@@ -1,0 +1,1 @@
+export const LINE_ENDPOINT = 'https://api.line.me/v2/bot';
