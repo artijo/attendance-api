@@ -116,3 +116,35 @@ export async function addStudentParent(req, res) {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+export async function deleteStudentParent(req, res) {
+    const { studentId, userId } = req.body;
+    try {
+        const student = await db.student.findUnique({
+            where: {
+                stdId: studentId,
+            },
+        });
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+        const parent = await db.parent.findUnique({
+            where: {
+                lineId: userId,
+            },
+        });
+        if (!parent) {
+            return res.status(404).json({ message: 'Parent not found' });
+        }
+        const studentParent = await db.studentParent.deleteMany({
+            where: {
+                stdId: student.stdId,
+                prntId: parent.prntId,
+            },
+        });
+        res.status(200).json(studentParent);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
