@@ -148,3 +148,49 @@ export async function deleteStudentParent(req, res) {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+export async function getParentByLineId(req, res) {
+    const { userId } = req.params;
+    try {
+        const parent = await db.parent.findUnique({
+            where: {
+                lineId: userId,
+            },
+        });
+        if (!parent) {
+            return res.status(404).json({ message: 'Parent not found' });
+        }
+        res.status(200).json(parent);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+export async function updateParent(req, res) {
+    const { userId, name, email, tel }  = req.body;
+    try {
+        const parent = await db.parent.findUnique({
+            where: {
+                lineId: userId,
+            },
+        });
+        if (!parent) {
+            return res.status(404).json({ message: 'Parent not found' });
+        }
+        const updatedParent = await db.parent.update({
+            where: {
+                lineId: userId,
+            },
+            data: {
+                name: name,
+                email: email,
+                tel: tel,
+            },
+        });
+        res.status(200).json(updatedParent);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
