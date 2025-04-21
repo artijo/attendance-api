@@ -328,7 +328,7 @@ export const createTimetable = async (req, res) => {
 
 export const editTimelateTimetable = async (req, res) => {
     const { timetable, lateTime } = req.body;
-    // console.log(lateTime);
+
     if(lateTime && timetable) {
         const updateTimetableLate = await db.timetable.update({
             where:{
@@ -343,34 +343,7 @@ export const editTimelateTimetable = async (req, res) => {
         return res.status(400).json({ message: "ข้อมูลไม่ถูกต้อง" });
     }
 }
-// export const editTimetable = async (req, res) => {
-//     const { timetable, subject, periodtime, timelate } = req.body;
-//     if (timetable && subject && periodtime && timelate) {
-//         try {
-//             const timelateDatetime = DateTime.fromISO(periodtime.startDatabaseFormat).setZone('Asia/Bangkok').plus({ minutes: timelate });
-//             const timelateDatabaseFormat = timelateDatetime.toFormat('HH:mm:ss');
-//             await db.timetable.update({
-//                 where: {
-//                     timetableId: timetable.timetableId
-//                 },
-//                 data: {
-//                     subId: subject.subId,
-//                     classId: timetable.classId,
-//                     timeStart: periodtime.startDatabaseFormat,
-//                     timeEnd: periodtime.endDatabaseFormat,
-//                     timeLate: timelateDatabaseFormat,
-//                     dayOfWeek: Number(timetable.dayOfWeek)
-//                 }
-//             })
-//             return res.status(200).json({ message: "แก้ไขสำเร็จ" })
-//         } catch (err) {
-//             console.error(err);
-//             return res.status(500).json({ message: "เกิดข้อผิดพลาดในขณะสร้างคาบตารางเรียน" });
-//         }
-//     } else {
-//         return res.status(400).json({ message: "ข้อมูลไม่ถูกต้อง" });
-//     }
-// };
+
 
 export const getTimeTableByRoom = async (req, res) => {
     const classid = req.query.classroomid;

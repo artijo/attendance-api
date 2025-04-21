@@ -14,7 +14,7 @@ async function insertActivity() {
         return dates;
     }
     const termId = "term-2025-1";
-    const activityId = "60db5b92-e68b-4d7d-a957-a2453fecd0a5";
+    const activityId = "6dc73dd4-7def-41d1-8a10-f2e53cc51d63";
     const activity = await db.activity.findUnique({
         where:{
             actId:activityId

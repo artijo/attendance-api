@@ -417,6 +417,7 @@ export const getAttendenceByDate = async (req, res) => {
                             fName:true,
                             lName:true,
                             stdId:true,
+                            title:true,
                             attendance:true
                         }
                     }
@@ -454,6 +455,7 @@ export const getAttendenceByDate = async (req, res) => {
                         stdNo:item.stdNo,
                         fName:item.student.fName,
                         lName:item.student.lName,
+                        title:item.student.title,
                         attendance:Attendence
                     };
                 });
