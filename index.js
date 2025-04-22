@@ -45,7 +45,7 @@ environment === 'development' ? app.use(morgan('dev')) : app.use(morgan('combine
 
 // use routes
 app.use('/auth', authRouter);
-app.use('/s',studentRouter); //studentRoute s= student
+app.use('/s', isAuth,studentRouter); //studentRoute s= student
 app.use('/t', isAuth, teacherRouter); // teacherRoute t= teacher
 app.use('/a', isAuth, adminRouter);
 app.use('/p', parentRouter); // parentRoute p= parent
