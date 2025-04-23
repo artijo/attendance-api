@@ -1,5 +1,6 @@
 import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
+import { uploadFileToS3, generateSignedUrl } from '../libs/r2.js';
 
 export async function getAllLeaveRequestsByStudentId(req, res) {
     try {
@@ -116,6 +117,7 @@ export async function CreateLeaveRequest(req, res) {
         const stdId = req.user.id; 
 
         console.log('leaveTypeId', data);
+        console.log('file', req.file);
 
         // Create a new leave request
         const newLeaveRequest = await db.leaveRequest.create({
@@ -140,7 +142,15 @@ export async function CreateLeaveRequest(req, res) {
             data: studingTimeRecords,
         });
 
-        
+        // Upload file to S3 if provided
+        if (req.file) {
+            const {fileName} = await uploadFileToS3(req.file, "nps"); 
+            console.log('fileName', fileName);
+            await db.leaveRequest.update({
+                where: { leaveId: newLeaveRequest.leaveId },
+                data: { LeaveFile: fileName },
+            });
+        }
         
 
         return res.status(201).json("Leave request created successfully");
@@ -153,7 +163,7 @@ export async function CreateLeaveRequest(req, res) {
 export async function getLeaveRequestById(req, res) {
     try {
         const leaveRequestId = req.params.id;
-        const leaveRequest = await db.leaveRequest.findUnique({
+        let leaveRequest = await db.leaveRequest.findUnique({
             where: {
                 leaveId: leaveRequestId,
             },
@@ -182,6 +192,12 @@ export async function getLeaveRequestById(req, res) {
         });
         if (!leaveRequest) {
             return res.status(404).json({ message: 'Leave request not found' });
+        }
+        // Generate signed URL for the leave file if it exists
+        if (leaveRequest.LeaveFile) {
+            const signedUrl = await generateSignedUrl("nps", leaveRequest.LeaveFile); 
+            // console.log('signedUrl', signedUrl);
+            leaveRequest.LeaveFile = signedUrl;
         }
         return res.json(leaveRequest);
     } catch (error) {

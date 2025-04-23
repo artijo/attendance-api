@@ -1,5 +1,6 @@
 import { Router } from "express";
 import multer from "multer";
+import { uploadS3 } from "../libs/multer.js";
 
 const router = Router();
 
@@ -28,7 +29,7 @@ router.post('/attendenceSubject' , studentAttendenceSubject); // ลงชื่
 router.get('/leave', getAllLeaveRequestsByStudentId); // ประวัติการลา
 router.get('/leaveType', getAllLeaveRequestsType); // ประเภทการลา
 router.get('/studingTime/:date', getStudingTimeByDate); // เวลาเรียนในวันนั้นๆ
-router.post('/leave',multer().none() ,CreateLeaveRequest); // สร้างการลา
+router.post('/leave',uploadS3.single('leaveFile') ,CreateLeaveRequest); // สร้างการลา
 router.get('/leave/:id', getLeaveRequestById); // ประวัติการลา
 
 export default router;
