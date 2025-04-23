@@ -267,8 +267,8 @@ model LeaveRequestType {
 
 model LeaveRequestStudingTime {
   leaveRequestStudingTimeId String       @id @default(uuid())
-  leaveId      String       @unique
-  studyTimeId  String       @unique
+  leaveId      String
+  studyTimeId  String
   leaveStatus       EnumLeaveStatus       @default(WAITING)
   leaveRequest LeaveRequest @relation(fields: [leaveId], references: [leaveId])
   studingTime  StudingTime  @relation(fields: [studyTimeId], references: [studyTimeId])
