@@ -270,6 +270,7 @@ model LeaveRequestType {
 }
 
 model LeaveRequestStudingTime {
+  leaveRequestStudingTimeId String       @id @default(uuid())
   leaveId      String       @unique
   studyTimeId  String       @unique
   leaveRequest LeaveRequest @relation(fields: [leaveId], references: [leaveId])
