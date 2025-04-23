@@ -149,3 +149,43 @@ export async function CreateLeaveRequest(req, res) {
         return res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+export async function getLeaveRequestById(req, res) {
+    try {
+        const leaveRequestId = req.params.id;
+        const leaveRequest = await db.leaveRequest.findUnique({
+            where: {
+                leaveId: leaveRequestId,
+            },
+            include: {
+                leaveRequestType: true,
+                student: true,
+                studingTime: {
+                    include: {
+                        teacherApprove: true,
+                        studingTime: {
+                            include: {
+                                timetable: {
+                                    include: {
+                                        subject:{
+                                            include: {
+                                                teacher: true,
+                                            }
+                                        },
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        });
+        if (!leaveRequest) {
+            return res.status(404).json({ message: 'Leave request not found' });
+        }
+        return res.json(leaveRequest);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}
