@@ -1,4 +1,5 @@
 import { Router } from "express";
+import multer from "multer";
 
 const router = Router();
 
@@ -12,7 +13,7 @@ import {
 import {
     getTimeTable
 } from "../controllers/timetableController.js";
-import { getAllLeaveRequestsByStudentId } from "../controllers/leaverequestController.js";
+import { getAllLeaveRequestsByStudentId, getAllLeaveRequestsType, getStudingTimeByDate, CreateLeaveRequest } from "../controllers/leaverequestController.js";
 
 // ประวัติการเข้าเรียน
 router.get('/attendenceHistory', attendanceHistorySearchByTermAndSubjectId);
@@ -25,5 +26,8 @@ router.post('/attendenceSubject' , studentAttendenceSubject); // ลงชื่
 
 // ลา
 router.get('/leave', getAllLeaveRequestsByStudentId); // ประวัติการลา
+router.get('/leaveType', getAllLeaveRequestsType); // ประเภทการลา
+router.get('/studingTime/:date', getStudingTimeByDate); // เวลาเรียนในวันนั้นๆ
+router.post('/leave',multer().none() ,CreateLeaveRequest); // สร้างการลา
 
 export default router;
