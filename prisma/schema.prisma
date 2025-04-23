@@ -66,7 +66,7 @@ model Teacher {
   classId            String?
   classroom          Classrooms?                @relation(fields: [classId], references: [classId])
   attendance         Attendance[]
-  leaveRequest       LeaveRequest[]
+  leaveRequestStudingTime LeaveRequestStudingTime[]
   activity           ActivityTeacher[]
   actParticipate     ActivityParticipate[]
   createdAt          DateTime                  @default(now())
@@ -247,13 +247,9 @@ model LeaveRequest {
   leaveDate         DateTime
   leaveTypeId       String
   leaveReason       String
-  leaveStatus       EnumLeaveStatus
   LeaveFile         String?
   student           Student                   @relation(fields: [stdId], references: [stdId])
   leaveRequestType  LeaveRequestType          @relation(fields: [leaveTypeId], references: [leaveTypeId])
-  tacherApproveId   String?
-  teacherApprove    Teacher?                  @relation(fields: [tacherApproveId], references: [tchId])
-  approverTimestamp DateTime?
   studingTime       LeaveRequestStudingTime[]
   createdAt         DateTime                  @default(now())
   updatedAt         DateTime                  @updatedAt
@@ -273,8 +269,12 @@ model LeaveRequestStudingTime {
   leaveRequestStudingTimeId String       @id @default(uuid())
   leaveId      String       @unique
   studyTimeId  String       @unique
+  leaveStatus       EnumLeaveStatus
   leaveRequest LeaveRequest @relation(fields: [leaveId], references: [leaveId])
   studingTime  StudingTime  @relation(fields: [studyTimeId], references: [studyTimeId])
+  tacherApproveId   String?
+  teacherApprove    Teacher?    @relation(fields: [tacherApproveId], references: [tchId])
+  approverTimestamp DateTime?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   deletedAt    DateTime?
