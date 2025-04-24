@@ -672,7 +672,7 @@ export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
                 }
             })
             // console.log(summaryList);
-            console.log(summaryList);
+            // console.log(summaryList);
             res.json(summaryList);
         }catch(err){
             console.error(err);

@@ -433,8 +433,8 @@ export const getTeacherAdvisorClassroom = async (req, res) => {
 export const getClassroomByClassAndSubject = async (req, res) => {
     const subjectId = req.params.subjectId;
     const termId = req.params.termId;
-    console.log(subjectId);
-    console.log(termId);
+    // console.log(subjectId);
+    // console.log(termId);
     try{
         
         const classrooms = await db.classrooms.findMany({
@@ -445,18 +445,11 @@ export const getClassroomByClassAndSubject = async (req, res) => {
                     }
                 },
                 termId:termId,
-                // AND:{
-                //     termId:termId,
-                //     timetable:{
-                //         every:{
-                //             subId:subjectId
-                //         }
-                //     }
-                // }  
             },
             include:{
                 classroomType:true,
-                teacher:true
+                teacher:true,
+                term:true
             },
             orderBy: [
                 {classLevel: 'asc'},
