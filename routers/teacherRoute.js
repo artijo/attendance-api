@@ -11,7 +11,7 @@ import { getTeacherTimetable } from "../controllers/timetableController.js";
 import { getActivityByTeacher, getActivity, paticipatedActivityByteacher, abstactActivityFilterByRoom, abstactActivityClassroom } from "../controllers/activitiesController.js";
 import { getAllAcademicTerms, getTermDateBetweenFilterHolidays } from "../controllers/termController.js";
 import { getHolidayList } from "../controllers/holidayController.js";
-import { getLeaveRequestForTeacher, getLeaveRequestForTeacherByleaveRequestStudingTimeId } from "../controllers/leaverequestController.js";
+import { getLeaveRequestForTeacher, getLeaveRequestForTeacherByleaveRequestStudingTimeId, teacherUpdateStatusLeaveRequest } from "../controllers/leaverequestController.js";
 
 const router = Router();
 
@@ -47,5 +47,6 @@ router.get('/holiday/:termId', getHolidayList);
 
 router.get('/leave-requests', getLeaveRequestForTeacher); // get leave request for teacher
 router.get('/leave-requests/:id', getLeaveRequestForTeacherByleaveRequestStudingTimeId); // get leave request for teacher by studing time id
+router.put('/leave-requests/studingtime/:id', teacherUpdateStatusLeaveRequest); // update leave request for teacher
 
 export default router;
