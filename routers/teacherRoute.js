@@ -8,7 +8,7 @@ import { getStuydingTimeById } from "../controllers/stuyingTimeController.js";
 import { abstactAttendenceBySubject, getAttendenceByDateAndStudnet, getAttendenceBySubject, getAttendenceSummaryBySubjectIsExam, saveAttendenceByTeacher } from "../controllers/attendenceController.js";
 import { getTeacherAdvisorClassroom, getAllClassroom, getClassroomByClassAndSubject } from "../controllers/classroomController.js";
 import { getTeacherTimetable } from "../controllers/timetableController.js";
-import { getActivityByTeacher, getActivity, paticipatedActivityByteacher } from "../controllers/activitiesController.js";
+import { getActivityByTeacher, getActivity, paticipatedActivityByteacher, abstactActivityFilterByRoom, abstactActivityClassroom } from "../controllers/activitiesController.js";
 import { getAllAcademicTerms, getTermDateBetweenFilterHolidays } from "../controllers/termController.js";
 import { getHolidayList } from "../controllers/holidayController.js";
 import { getLeaveRequestForTeacher, getLeaveRequestForTeacherByleaveRequestStudingTimeId } from "../controllers/leaverequestController.js";
@@ -40,6 +40,8 @@ router.get('/term/:termId', getTermDateBetweenFilterHolidays);
 router.get('/activities', getActivityByTeacher); // get activity by teacher
 router.get('/activity/:uuid', getActivity); // get activity by UUID
 router.post('/activity/:actId/participate', paticipatedActivityByteacher); // paticipated activity
+router.get('/activity/abstact/byclassroom/:activityId/:classId',abstactActivityClassroom);
+router.get('/activity/abstact/:activityId',abstactActivityFilterByRoom);
 
 router.get('/holiday/:termId', getHolidayList);
 
