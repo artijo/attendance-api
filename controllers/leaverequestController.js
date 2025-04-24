@@ -320,3 +320,107 @@ export async function getLeaveRequestForTeacherByleaveRequestStudingTimeId(req, 
         return res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+export async function teacherUpdateStatusLeaveRequest(req, res) {
+    const studyTimeId = req.params.id; // Assuming you have the teacher ID in the request
+    const teacherId = req.user.id; // Assuming you have the teacher ID in the request
+    const status = req.body.action; // Assuming you have the status in the request body
+
+    console.log(req.body)
+
+    try {
+        // Check if the leave request exists
+        const leaveRequest = await db.leaveRequestStudingTime.findUnique({
+            where: {
+                leaveRequestStudingTimeId: studyTimeId,
+            },
+            include: {
+                leaveRequest: true,
+                studingTime: true,
+            }
+        });
+
+        if (!leaveRequest) {
+            return res.status(404).json({ message: 'Leave request not found' });
+        }
+
+        // Update the teacher approval status
+        const updatedLeaveRequest = await db.leaveRequestStudingTime.update({
+            where: {
+                leaveRequestStudingTimeId: studyTimeId,
+            },
+            data: {
+                teacherApprove: {
+                    connect: { tchId: teacherId },
+                },
+                approverTimestamp: DateTime.now().toJSDate(),
+                leaveStatus: status.toUpperCase(), // Convert status to uppercase
+            },
+        });
+
+        //attendence 
+        if (status.toUpperCase() === "APPROVED") {
+            const studingTime = await db.studingTime.findUnique({
+                where: {
+                    studyTimeId: leaveRequest.studyTimeId,
+                },
+            });
+            if (!studingTime) {
+                return res.status(404).json({ message: 'Studing time not found' });
+            }
+            // has attendence?
+            const attendence = await db.attendance.findFirst({
+                where: {
+                    stdId: leaveRequest.leaveRequest.stdId,
+                    studingTimeId: studingTime.studyTimeId,
+                },
+            });
+            console.log('attendence', attendence);
+            // get attendence medhod
+            const attendenceMethodId = await db.attendanceMethod.findFirst({
+                where: {
+                    attMethodName:"ระบบลา"
+                },
+            });
+            if (attendence) {
+                // update attendence
+                await db.attendence.update({
+                    where: {
+                        attId: attendence.attId,
+                    },
+                    data: {
+                        attStatus: "LEAVE",
+                        attTimestamp: DateTime.now().toJSDate(),
+                        attMethod:{
+                            connect: { attMethodId: attendenceMethodId.attMethodId },
+                        },
+                        operatedBy: "ระบบลา",
+                    },
+                });
+            } else{
+                // create attendence
+                await db.attendance.create({
+                    data: {
+                        student: {
+                            connect: { stdId: leaveRequest.leaveRequest.stdId },
+                        },
+                        studingTime: {
+                            connect: { studyTimeId: studingTime.studyTimeId },
+                        },
+                        attTimestamp: DateTime.now().toJSDate(),
+                        attMethod: {
+                            connect: { attMethodId: attendenceMethodId.attMethodId },
+                        },
+                        attStatus: "LEAVE",
+                        operatedBy: "ระบบลา",
+                    },
+                });
+            }
+        }
+
+        return res.json(updatedLeaveRequest);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}
