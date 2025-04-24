@@ -469,13 +469,14 @@ export const abstactActivityClassroom = async (req, res) => {
 export const abstactActivityFilterByRoom = async(req, res) => {
     
     const activityId = req.params.activityId;
+    
     try{
         const activitys = await db.activity.findFirst({
             where: {
                 actId:activityId
             }
         });
-    
+        // console.log(activitys);
         //หาว่ากิจกรรมที่ต้องการ insert นั้นอยู่ระหว่างช่วงเทอมไหน
         const dateTimeNow = DateTime.fromISO(activitys.actDate.toISOString()).setZone('Asia/Bangkok');
         const dateActivityStart = dateTimeNow.toString().split("T")[0];
@@ -490,6 +491,7 @@ export const abstactActivityFilterByRoom = async(req, res) => {
                 return false;
             };
         }
+        // console.log(dateActivityStart);
     
         const termLists = await db.academicTerms.findMany({});
         let termId;
@@ -498,15 +500,15 @@ export const abstactActivityFilterByRoom = async(req, res) => {
                 termId = term.termId;
             }
         };
-    
         // console.log(termId);
-        ////////////////
+    
         const actDateStart = DateTime.fromISO(activitys.actDate.toISOString(), { zone : 'UTC' }).setZone('Asia/Bangkok');
         const actDateEnd = DateTime.fromISO(activitys.actDateEnd.toISOString(), { zone: 'UTC'}).setZone('Asia/Bangkok');
         const paticipateCount = daybetween(
             actDateStart.toString().split('T')[0], 
             actDateEnd.toString().split('T')[0]
         ).length;
+        
     
         const classroomsHasMembers = await db.classrooms.findMany({
             where:{
@@ -524,6 +526,15 @@ export const abstactActivityFilterByRoom = async(req, res) => {
                 { classRoom: 'asc'}
             ]
         });
+
+        // const classroom = await db.classrooms.findMany({
+        //     where:{
+        //         termId: termId
+        //     },
+        // });
+        // console.log(termId);
+
+        // console.log(classroomsHasMembers);
         
         const abstactFilterByClassroom = await  classroomsHasMembers.reduce(async (prev, curr) => {
             const acc = await prev;
@@ -543,6 +554,7 @@ export const abstactActivityFilterByRoom = async(req, res) => {
                         }
                     },
                 });
+                // console.log(participate);
                 const objectDraft = {
                     stdId: member.stdId,
                     title: member.student.title,

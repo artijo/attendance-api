@@ -3,9 +3,9 @@ import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
 
 export const createTimetableByAddSubject = async (req, res) => {
-    const { classroom, timetable, schedule } = req.body;
+    const { classroom, timetable, schedule, weekday } = req.body;
     // console.log(classroom);
-    if (classroom && timetable && schedule) {
+    if (classroom && timetable && schedule && weekday) {
         try {
             const findPeriod = await db.timetable.findFirst({
                 where: {
@@ -41,8 +41,9 @@ export const createTimetableByAddSubject = async (req, res) => {
                         classroom: true,
                     }
                 });
-                const subjectExistsInPeriod = subjectOnTimetable.find(({ timeStart, timeEnd, dayOfWeek, subId }) => String(timeStart) === schedule.startDatabaseFormat && String(timeEnd) === schedule.endDatabaseFormat && dayOfWeek === Number(day));
+                const subjectExistsInPeriod = subjectOnTimetable.find(({ timeStart, timeEnd, dayOfWeek, subId }) => String(timeStart) === schedule.startDatabaseFormat && String(timeEnd) === schedule.endDatabaseFormat && dayOfWeek === Number(weekday));
                 if (subjectExistsInPeriod != undefined) return res.status(400).json({ message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${periodtime.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}` });
+                // console.log(subjectExistsInPeriod);
                 const createTimetable = await db.timetable.create({
                     data: {
                         subId: timetable.subject.subId,
