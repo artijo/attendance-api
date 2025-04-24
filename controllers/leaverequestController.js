@@ -205,3 +205,118 @@ export async function getLeaveRequestById(req, res) {
         return res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+export async function getLeaveRequestForTeacher(req, res) {
+    try {
+        const teacherId = req.user.id; // Assuming you have the teacher ID in the request
+        // get subjectsId from teacherId
+        const subjects = await db.subject.findMany({
+            where: {
+                tchId: teacherId,
+            },
+            select: {
+                subId: true,
+            }
+        });
+        const subjectIds = subjects.map(subject => subject.subId);
+
+        // get leaveRequest by subjectId
+        const leaveRequests = await db.leaveRequest.findMany({
+            where: {
+                studingTime: {
+                    some: {
+                        studingTime: {
+                            timetable: {
+                                subId: {
+                                    in: subjectIds,
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            include: {
+                leaveRequestType: true,
+                student: true,
+                studingTime: {
+                    include: {
+                        teacherApprove: true,
+                        studingTime: {
+                            include: {
+                                timetable: {
+                                    include: {
+                                        subject:true,
+                                        classroom: true,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        });
+        if (!leaveRequests) {
+            return res.status(404).json({ message: 'Leave request not found' });
+        }
+        // Generate signed URL for the leave file if it exists
+        // leaveRequests.forEach(async (leaveRequest) => {
+        //     if (leaveRequest.LeaveFile) {
+        //         const signedUrl = await generateSignedUrl("nps", leaveRequest.LeaveFile); 
+        //         // console.log('signedUrl', signedUrl);
+        //         leaveRequest.LeaveFile = signedUrl;
+        //     }
+        // });
+        return res.json(leaveRequests);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+export async function getLeaveRequestForTeacherByleaveRequestStudingTimeId(req, res) {
+    try {
+        const leaveId = req.params.id; // Assuming you have the teacher ID in the request
+        let leaveRequests = await db.leaveRequest.findMany({
+            where: {
+                leaveId: leaveId
+            },
+            include: {
+                leaveRequestType: true,
+                student: true,
+                studingTime: {
+                    include: {
+                        teacherApprove: true,
+                        studingTime: {
+                            include: {
+                                timetable: {
+                                    include: {
+                                        subject:{
+                                            include: {
+                                                teacher: true,
+                                            }
+                                        },
+                                        classroom: true,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        });
+        // console.log('leaveRequests', leaveRequests);
+        if (!leaveRequests) {
+            return res.status(404).json({ message: 'Leave request not found' });
+        }
+        //Generate signed URL for the leave file if it exists
+        if (leaveRequests[0].LeaveFile) {
+            const signedUrl = await generateSignedUrl("nps", leaveRequests[0].LeaveFile); 
+            // console.log('signedUrl', signedUrl);
+            leaveRequests[0].LeaveFile = signedUrl;
+        }
+        return res.json(leaveRequests[0]);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}
