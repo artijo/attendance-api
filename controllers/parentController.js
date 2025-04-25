@@ -2,7 +2,6 @@ import db from '../prisma/client.js';
 
 export async function createParent(req, res) {
     const { userId, displayName } = req.body;
-    console.log(userId);
     try {
         const parent = await db.parent.findUnique({
             where: {
@@ -104,6 +103,17 @@ export async function addStudentParent(req, res) {
         if (!parent) {
             return res.status(404).json({ message: 'Parent not found' });
         }
+        // check if the student is already linked to the parent
+        const isAlreadyLinked = await db.studentParent.findFirst({
+            where: {
+                stdId: student.stdId,
+                prntId: parent.prntId,
+            }
+        })
+        if (isAlreadyLinked) {
+            return res.status(400).json({ message: 'Student is already linked to this parent' });
+        }
+
         const studentParent = await db.studentParent.create({
             data: {
                 stdId: student.stdId,
