@@ -1,6 +1,9 @@
 import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
 import { uploadFileToS3, generateSignedUrl } from '../libs/r2.js';
+import { pushMassageWithImageToLine, pushMessageToLine } from '../helper/line.js';
+import { formatTitle } from '../helper/helper.js';
+formatTitle
 
 export async function getAllLeaveRequestsByStudentId(req, res) {
     try {
@@ -116,9 +119,6 @@ export async function CreateLeaveRequest(req, res) {
         const data = req.body;
         const stdId = req.user.id; 
 
-        console.log('leaveTypeId', data);
-        console.log('file', req.file);
-
         // Create a new leave request
         const newLeaveRequest = await db.leaveRequest.create({
             data: {
@@ -146,12 +146,41 @@ export async function CreateLeaveRequest(req, res) {
         if (req.file) {
             const {fileName} = await uploadFileToS3(req.file, "nps"); 
             console.log('fileName', fileName);
-            await db.leaveRequest.update({
+            const leavereq = await db.leaveRequest.update({
                 where: { leaveId: newLeaveRequest.leaveId },
                 data: { LeaveFile: fileName },
             });
         }
-        
+       
+        const studentparent = await db.studentParent.findMany({
+            where: {
+                stdId: stdId,
+            },
+            include: {
+                parent: true,
+            }
+        });
+        // get Lineid
+        const parentId = studentparent.map((parent) => parent.parent.lineId);
+
+        // // Send notification to parent via LINE
+        if (parentId.length > 0) {
+            const studentdata = await db.student.findUnique({
+                where: {
+                    stdId: stdId,
+                }
+            })
+            parentId.forEach(async (parentId) => {
+                    
+                    const message = `${formatTitle(studentdata.title)}${studentdata.fName} ${studentdata.lName} ได้ทำการขอลาเรียนในวันที่ ${data.leaveDate} เนื่องจาก ${data.leaveReason}`;
+                    const imageUrl = req.file ? await generateSignedUrl("nps", req.file.filename) : null; // Generate signed URL for the uploaded file
+                    if (imageUrl) {
+                        await pushMassageWithImageToLine(parentId, message, imageUrl);
+                    } else {
+                        await  pushMessageToLine(parentId, message);
+                    }
+                })
+        }
 
         return res.status(201).json("Leave request created successfully");
     } catch (error) {

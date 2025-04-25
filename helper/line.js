@@ -26,3 +26,32 @@ export async function pushMessageToLine(userId, message) {
         throw error;
     }
 }
+
+export async function pushMassageWithImageToLine(userId, message, imageUrl) {
+    const url = `${LINE_ENDPOINT}/message/push`;
+    const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${LINE_CHANNEL_ACCESS_TOKEN}`,
+    };
+    const data = {
+        to: userId,
+        messages: [
+            {
+                type: "text",
+                text: message,
+            },
+            {
+                type: "image",
+                originalContentUrl: imageUrl,
+                previewImageUrl: imageUrl,
+            },
+        ],
+    };
+    try {
+        const response = await axios.post(url, data, { headers });
+        return response.data;
+    } catch (error) {
+        console.error("Error sending message to LINE:", error.response.data);
+        throw error;
+    }
+}
