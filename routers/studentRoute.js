@@ -14,7 +14,7 @@ import {
 import {
     getTimeTable
 } from "../controllers/timetableController.js";
-import { getAllLeaveRequestsByStudentId, getAllLeaveRequestsType, getStudingTimeByDate, CreateLeaveRequest, getLeaveRequestById } from "../controllers/leaverequestController.js";
+import { getAllLeaveRequestsByStudentId, getAllLeaveRequestsType, getStudingTimeByDate, CreateLeaveRequest, getLeaveRequestById, cancelLeaveRequest } from "../controllers/leaverequestController.js";
 
 // ประวัติการเข้าเรียน
 router.get('/attendenceHistory', attendanceHistorySearchByTermAndSubjectId);
@@ -31,5 +31,6 @@ router.get('/leaveType', getAllLeaveRequestsType); // ประเภทกา�
 router.get('/studingTime/:date', getStudingTimeByDate); // เวลาเรียนในวันนั้นๆ
 router.post('/leave',uploadS3.single('leaveFile') ,CreateLeaveRequest); // สร้างการลา
 router.get('/leave/:id', getLeaveRequestById); // ประวัติการลา
+router.delete('/leave/:id', cancelLeaveRequest); // ยกเลิกการลา
 
 export default router;

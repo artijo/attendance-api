@@ -517,3 +517,25 @@ export async function getLeaveRequestForAdminByLeaveId(req, res) {
         return res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+export async function cancelLeaveRequest(req, res) {
+    const leaveRequestId = req.params.id;
+    // delete leaverequeststudyingtime by leaveId
+    try {
+        await db.leaveRequestStudingTime.deleteMany({
+            where: {
+                leaveId: leaveRequestId,
+            },
+        });
+        // delete leaverequest by leaveId
+        await db.leaveRequest.delete({
+            where: {
+                leaveId: leaveRequestId,
+            },
+        });
+        return res.status(200).json({ message: 'Leave request cancelled successfully' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}
