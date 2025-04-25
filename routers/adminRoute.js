@@ -28,6 +28,8 @@ import { getHolidayListAuto, createHoliday, getHolidayList, deleteHoliday, getOn
 import { getFullCalendarStudyTime} from "../controllers/stuyingTimeController.js";
 import { getAllActivitiesByType, getActivity, getActivityType, createActivity, editActivity, abstactActivityClassroom, abstactActivityFilterByRoom } from "../controllers/activitiesController.js";
 import {getAttendenceBySubject,getAttendenceByDate,getAttendenceSummaryByClassroom, getAttendenceSummaryBySubjectIsExam} from "../controllers/attendenceController.js";
+import { getAllLeaveRequestForAdmin, getLeaveRequestForAdminByLeaveId } from "../controllers/leaverequestController.js";
+
 const router = Router();
 
 // students Management
@@ -125,5 +127,9 @@ router.get('/attendence/:subjectId/:classroomId', getAttendenceBySubject);
 router.get('/attendence/byDate/:date/:classroomId', getAttendenceByDate);
 router.get('/atttendence/byClassroom/:classroomId', getAttendenceSummaryByClassroom);
 router.get('/atttendence/abstract/:classroomId/:subjectId', getAttendenceSummaryBySubjectIsExam);
+
+// LeaveRequest
+router.get('/leave-requests', getAllLeaveRequestForAdmin); // get leave request for admin
+router.get('/leave-requests/:id', getLeaveRequestForAdminByLeaveId); // get leave request for admin by leave id
 
 export default router;
