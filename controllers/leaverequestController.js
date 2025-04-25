@@ -327,8 +327,6 @@ export async function teacherUpdateStatusLeaveRequest(req, res) {
     const status = req.body.action; // Assuming you have the status in the request body
     const rejectReason = req.body.rejectReason; // Assuming you have the status in the request body
 
-    console.log(req.body)
-
     try {
         // Check if the leave request exists
         const leaveRequest = await db.leaveRequestStudingTime.findUnique({
