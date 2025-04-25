@@ -275,6 +275,7 @@ model LeaveRequestStudingTime {
   tacherApproveId   String?
   teacherApprove    Teacher?    @relation(fields: [tacherApproveId], references: [tchId])
   approverTimestamp DateTime?
+  rejectedNote String?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   deletedAt    DateTime?

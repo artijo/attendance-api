@@ -325,6 +325,7 @@ export async function teacherUpdateStatusLeaveRequest(req, res) {
     const studyTimeId = req.params.id; // Assuming you have the teacher ID in the request
     const teacherId = req.user.id; // Assuming you have the teacher ID in the request
     const status = req.body.action; // Assuming you have the status in the request body
+    const rejectReason = req.body.rejectReason; // Assuming you have the status in the request body
 
     console.log(req.body)
 
@@ -355,6 +356,7 @@ export async function teacherUpdateStatusLeaveRequest(req, res) {
                 },
                 approverTimestamp: DateTime.now().toJSDate(),
                 leaveStatus: status.toUpperCase(), // Convert status to uppercase
+                rejectedNote: rejectReason || null,
             },
         });
 
