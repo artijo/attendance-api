@@ -145,11 +145,22 @@ export async function CreateLeaveRequest(req, res) {
         // Upload file to S3 if provided
         if (req.file) {
             const {fileName} = await uploadFileToS3(req.file, "nps"); 
-            console.log('fileName', fileName);
+            // console.log('fileName', fileName);
             const leavereq = await db.leaveRequest.update({
                 where: { leaveId: newLeaveRequest.leaveId },
                 data: { LeaveFile: fileName },
             });
+        }
+
+        if(data.tel) {
+            await db.student.update({ 
+                    where: {
+                        stdId: stdId,
+                    },
+                    data: {
+                        tel: data.tel,
+                    }
+                });
         }
        
         const studentparent = await db.studentParent.findMany({

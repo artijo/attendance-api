@@ -59,7 +59,7 @@ export async function LoginWithGoogle(req, res) {
     const jwtToken = generateToken({ id: student.stdId, google_id }, '1h');
     const refreshToken = generateToken({ id: student.stdId, google_id }, '7d');
     // ส่ง JWT กลับไปที่ client
-    return res.json({ jwtToken, studentId: student.stdId, refreshToken, fName:student.fName, lName:student.lName, email:student.email });
+    return res.json({ jwtToken, studentId: student.stdId, refreshToken, fName:student.fName, lName:student.lName, email:student.email, tel:student.tel });
   } catch (err) {
     console.error('Google auth error:', err);
     res.status(401).json({ error: 'Invalid Google token' });
