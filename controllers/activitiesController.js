@@ -578,7 +578,7 @@ export const abstactActivityFilterByRoom = async(req, res) => {
         },Promise.resolve({}))
         return res.status(200).send(abstactFilterByClassroom);
     }catch(error){
-        return res.status(501).send("message: something happening");
+        return res.status(500).send("message: something happening");
     }
     
 }
