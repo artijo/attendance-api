@@ -31,6 +31,7 @@ model Student {
   leaveRequest   LeaveRequest[]
   activity       ActivityParticipate[]
   classroomMembers ClassroomMember[]
+  Leader          Leader[]
   createdAt      DateTime                  @default(now())
   updatedAt      DateTime                  @updatedAt
   deletedAt      DateTime?
@@ -38,11 +39,8 @@ model Student {
 
 model Leader {
   ldrId          String                    @id @default(uuid())
-  fName          String
-  lName          String
-  email          String?                   @unique
-  tel            String?                   @unique
-  password       String
+  stdId          String                   
+  student       Student                   @relation(fields: [stdId], references: [stdId])
   classroom      Classrooms[]
   attendance     Attendance[]
   activity       ActivityParticipate[]
@@ -146,9 +144,9 @@ model Classrooms {
   // timetable     Timetable?
   timetable     Timetable[]
   teacher       Teacher[]
-  leaderId      String?
-  leader        Leader?                    @relation(fields: [leaderId], references: [ldrId])
   activity      ClassroomCanjoinActivity[]
+  ldrId      String?
+  leader        Leader?                    @relation(fields: [ldrId], references: [ldrId])
   createdAt     DateTime                   @default(now())
   updatedAt     DateTime                   @updatedAt
   deletedAt     DateTime?
