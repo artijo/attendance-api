@@ -382,8 +382,12 @@ export const getTimeTableByRoom = async (req, res) => {
                             leader: {
                                 select: {
                                     ldrId: true,
-                                    fName: true,
-                                    lName: true,
+                                    student: {
+                                        select: {
+                                            fName:true,
+                                            lName:true
+                                        }
+                                    }
                                 }
                             },
                             classroomType: {
