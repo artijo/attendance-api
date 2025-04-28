@@ -5,6 +5,25 @@ export const createClassroom = async (req,res) => {
 
     if(body){
         try{
+            if(body.leaderId){
+                var leader = await db.leader.findFirst({
+                    where:{
+                        stdId: body.leaderId
+                    }
+                })
+                if(leader){
+                    var leaderId = leader.ldrId;
+                } else {
+                    leader = await db.leader.create({
+                        data:{
+                            student : {
+                                connect: {stdId: body.leaderId}
+                            }
+                        }
+                    })
+                    leaderId = leader.ldrId;
+                }
+            }
             const classroom = await db.classrooms.create({
                 data:{
                     classLevel:parseInt(body.classLevel),
@@ -13,7 +32,11 @@ export const createClassroom = async (req,res) => {
                         connect: {termId:body.termId}
                     },
                     // classTypeId:body.classTypeId,
-                    leader: body.leaderId?{connect:{ldrId:body.leaderId}}:undefined,
+                    leader: leaderId ? {
+                        connect:{
+                            ldrId: leaderId
+                        }
+                    } : undefined,
                     classroomType:{connect:{classTypeId:body.classTypeId}}
                 }
             })
@@ -40,6 +63,27 @@ export const updateClassroom = async (req,res) => {
     const body = req.body;
     if(body){
         try{
+            let leaderId;
+            if(body.leaderId){
+                var leader = await db.leader.findFirst({
+                    where:{
+                        stdId: body.leaderId
+                    }
+                })
+                if(leader){
+                    leaderId = leader.ldrId;
+                } else {
+                    leader = await db.leader.create({
+                        data:{
+                            student : {
+                                connect: {stdId: body.leaderId}
+                            }
+                        }
+                    })
+                    leaderId = leader.ldrId;
+                }
+            }
+            
             const classroom = await db.classrooms.update({
                 where:{
                     classId:body.classId
@@ -51,10 +95,14 @@ export const updateClassroom = async (req,res) => {
                         connect: {termId:body.termId}
                     },
                     classroomType:{connect:{classTypeId:body.classTypeId}},
-                    leader: body.leaderId?{connect:{ldrId:body.leaderId}}:undefined,
+                    leader: leaderId ? {
+                        connect:{
+                            ldrId: leaderId
+                        }
+                    } : undefined,
                 }
             })
-            body.teacherIds.forEach(async (teacherId) => {
+            body.teacherIds?.forEach(async (teacherId) => {
                 await db.teacher.update({
                     where:{
                         tchId:teacherId
@@ -63,12 +111,12 @@ export const updateClassroom = async (req,res) => {
                         classId:classroom.classId
                     }
                 })
-            }
-            );
+            });
             return res.json({message:"Update Classroom Success"})
 
         }catch(err){
             console.error(err);
+            return res.status(500).json({message: "Update Classroom Failed", error: err.message});
         };
     };
 };
@@ -96,6 +144,12 @@ export const getAllClassroom = async (req,res) => {
                     include: {
                         student: true
                     }
+                },
+                leader:{
+                    include: {
+                        student:true
+                    }
+
                 }
             },
             orderBy:[{
@@ -103,6 +157,7 @@ export const getAllClassroom = async (req,res) => {
                 {classRoom:"asc"
             }]
         });
+        console.log(classroom);
         return res.json(classroom)
     }catch(error){
         console.error(error);
@@ -129,7 +184,11 @@ export const getClassroom = async (req,res) => {
                     }
                 },
                 teacher: true,
-                leader: true,
+                leader: {
+                    include: {
+                        student:true
+                    }
+                },
                 timetable: {
                     where: {
                         deletedAt: null
@@ -387,7 +446,6 @@ export const getClassroomFilterByAcademicYearAndLevel = async (req, res) => {
 export const getTeacherAdvisorClassroom = async (req, res) => {
     const user = req.user;
     // if(!user) res.status(500).json({message: "มีข้อผิดพลาดบางอย่างภายใน server โดยไม่ทราบสาเหตุ"});
-    console.log(user)
     try{
         const advisorList = await db.teacher.findMany({
             where: {
@@ -411,7 +469,11 @@ export const getTeacherAdvisorClassroom = async (req, res) => {
                 },
                 term:true,
                 classroomType:true,
-                leader:true
+                leader: {
+                    include: {
+                        student:true
+                    }
+                }
             },
             orderBy:[
                 {term:{

@@ -29,6 +29,7 @@ export const getAllActivitiesByType = async (req, res) => {
         return res.json(activities)
     } catch (error) {
         console.error(error);
+        return res.status(500).json({ message: 'Failed to fetch activities', error: error.message });
     };
 }
 
@@ -107,6 +108,7 @@ export const getActivityType = async (req, res) => {
         return res.json(activityType)
     } catch (error) {
         console.error(error);
+        return res.status(500).json({ message: 'Failed to fetch activity types', error: error.message });
     };
 }
 
@@ -167,6 +169,7 @@ export const createActivity = async (req, res) => {
         return res.json(activity)
     } catch (error) {
         console.error(error);
+        return res.status(500).json({ message: 'Failed to create activity', error: error.message });
     };
 }
 
@@ -240,6 +243,7 @@ export const editActivity = async (req, res) => {
         return res.json(activity)
     } catch (error) {
         console.error(error);
+        return res.status(500).json({ message: 'Failed to update activity', error: error.message });
     };
 }
 
@@ -271,6 +275,7 @@ export const getActivityByTeacher = async (req, res) => {
         return res.json(activity)
     } catch (error) {
         console.error(error);
+        return res.status(500).json({ message: 'Failed to fetch activities', error: error.message });
     };
 }
 
@@ -573,7 +578,7 @@ export const abstactActivityFilterByRoom = async(req, res) => {
         },Promise.resolve({}))
         return res.status(200).send(abstactFilterByClassroom);
     }catch(error){
-        return res.status(501).send("message: something happening");
+        return res.status(500).send("message: something happening");
     }
     
 }
