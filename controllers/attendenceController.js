@@ -842,11 +842,56 @@ export const abstactAttendenceBySubject = async (req, res) => {
 
 export const studentAttendenceEnrollment = async (req, res) => {
     const { enrollmentInfo, location } = req.body;
-    const studentId = req.user;
+    const studentId = req.user.id;
+
+    function statusEnrollment(sTime, lTime, enrollmentTime) {
+        const startTime = DateTime.fromISO(sTime).setZone('Asia/Bangkok');
+        const lateTime = DateTime.fromISO(lTime).setZone('Asia/Bangkok');
+        const lateMinute = startTime.diff(lateTime, 'minutes').minutes;
+        const enrollmentMinute = enrollmentTime.diff(startTime, 'minutes').minutes;
+        if(enrollmentMinute <= lateMinute){
+            return "PRESENT";
+        }else if(enrollmentMinute > lateMinute){
+            return "LATE";
+        }
+    }
+    // console.log(enrollmentInfo);
     if(enrollmentInfo && location && studentId) {
-        console.log(enrollmentInfo);
-        console.log(studentId);
-        console.log(location);
+        // console.log(enrollmentInfo);
+        // console.log(studentId);
+        // console.log(location);
+        try{
+            const dtNow = DateTime.now().setZone('Asia/Bangkok'); 
+
+            const attendanceMethod = await db.attendanceMethod.findFirst({
+                where:{
+                    attMethodName: "เช็คชื่อด้วยระบบ Gps"
+                },
+                select:{
+                    attMethodId:true
+                }
+            });
+
+            const createAttendance = await db.attendance.create({
+                data: {
+                    stdId: studentId,
+                    studingTimeId: enrollmentInfo.studyTimeId,
+                    attMethodId: attendanceMethod.attMethodId,
+                    attTimestamp: dtNow,
+                    attStatus: statusEnrollment(enrollmentInfo.timetable.timeStart, enrollmentInfo.timetable.timeLate, dtNow),
+                    latitute: location.latitude,
+                    longitute: location.longitude,
+                    note: `ลงชื่อเข้าเรียนวิชา ${enrollmentInfo.timetable.subject.subNameThai} (${enrollmentInfo.timetable.subject.subNameEng})\nเวลา: ${dtNow.toFormat('yyyy-MM-dd HH:mm:ss')}`,
+                    operatedBy: "Student",
+                    tchId: enrollmentInfo.timetable.subject.teacher.tchId,
+                    leaderId: null,
+                }
+            });
+            res.status(200).json({message: 1});
+
+        }catch(error) {
+            console.error(error);
+        };
     }else{
         return res.status(400).send({message:"bad requset"});
     }
