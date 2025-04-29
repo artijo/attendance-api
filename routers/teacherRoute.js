@@ -5,7 +5,7 @@ import {
 } from "../controllers/teacherController.js";
 import { getSubjectByTeacher, getSubject } from "../controllers/subjectController.js";
 import { getStuydingTimeById } from "../controllers/stuyingTimeController.js";
-import { abstactAttendenceBySubject, getAttendenceByDateAndStudnet, getAttendenceBySubject, getAttendenceSummaryBySubjectIsExam, saveAttendenceByTeacher } from "../controllers/attendenceController.js";
+import { abstactAttendenceBySubject, getAttendenceByDateAndStudnet, getAttendenceBySubject, getAttendenceSummaryBySubjectIsExam, saveAttendenceByTeacher, generateLinkAttendanceForQR } from "../controllers/attendenceController.js";
 import { getTeacherAdvisorClassroom, getAllClassroom, getClassroomByClassAndSubject } from "../controllers/classroomController.js";
 import { getTeacherTimetable } from "../controllers/timetableController.js";
 import { getActivityByTeacher, getActivity, paticipatedActivityByteacher, abstactActivityFilterByRoom, abstactActivityClassroom } from "../controllers/activitiesController.js";
@@ -31,6 +31,7 @@ router.get('/classrooms/check/:termId/:subjectId', getClassroomByClassAndSubject
 router.get('/classrooms/classrooms/checkdetail/:subjectId/:classroomId', getAttendenceSummaryBySubjectIsExam);
 router.get('/attendence/:subjectId/:classroomId', getAttendenceBySubject);
 router.post('/attendence/byday',getAttendenceByDateAndStudnet)
+router.post('/attendance/generate-qr', generateLinkAttendanceForQR); // generate link for QR code
 // getAttendenceSummaryBySubjectIsExam
 // getClassroomByClassAndSubject
 

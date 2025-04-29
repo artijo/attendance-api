@@ -2,6 +2,7 @@ import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
 import { pushMessageToLine } from '../helper/line.js';
 import { formatTitle } from '../helper/helper.js';
+import { generateToken, decodeToken } from '../helper/jwt.js';
 
 
 export const getSubjectTimetableByClassroom = async (req, res) => {
@@ -1036,6 +1037,21 @@ export const studentAttendenceEnrollment = async (req, res) => {
             });
             res.status(200).json({message: 1});
 
+        }catch(error) {
+            console.error(error);
+        };
+    }else{
+        return res.status(400).send({message:"bad requset"});
+    }
+}
+
+export const generateLinkAttendanceForQR = async (req, res) => {
+    const { studyTimeId } = req.body;
+    if(studyTimeId){
+        try{
+            const token = generateToken({ studyTimeId }, '10m');
+            const link = `${process.env.STUDENT_WEB_CLIENT}/attendance/qr/${token}`;
+            res.status(200).json({link});
         }catch(error) {
             console.error(error);
         };
