@@ -691,3 +691,83 @@ export const getTeacherTimetable = async (req, res) => {
         console.error(error)
     }
 }
+
+export const getTimetableRoleStudent = async (req, res) => {
+    const studentId = req.user.id;
+    const dtNow = DateTime.now().setZone('Asia/Bangkok');
+    const dtNowString = dtNow.toString();
+    const dtStart = DateTime.fromISO(`${dtNowString.split("T")[0]}T00:00:00`).setZone('Asia/Bangkok');
+    const dtEnd = DateTime.fromISO(`${dtNowString.split("T")[0]}T23:59:59`).setZone('Asia/Bangkok');
+    if(studentId != undefined) {
+        try{
+            const term = await db.academicTerms.findFirst({
+                where:{
+                    AND: [
+                        {termStart: {
+                            lte: dtStart
+                        },},
+                        {termEnd: {
+                            gte: dtEnd
+                        }}
+                    ]
+                }
+            });
+
+            const classroom = await db.classroomMember.findFirst({
+                where: {
+                    AND : [
+                        { stdId: studentId },
+                        { classroom: {
+                            termId: term.termId
+                        }}
+                    ]
+                },
+                include: {
+                    classroom: true,
+                    student: true
+                }
+            });
+            
+            const timetable = await db.timetable.findMany({
+                where: {
+                    classId: classroom.classId,
+                    dayOfWeek : dtNow.weekday,
+                }
+            });
+
+            const studingTime = await db.studingTime.findMany({
+                where: {
+                    timetableId: {
+                        in: timetable.map((item) => item.timetableId)
+                    },
+                    studingTimeDate: {
+                        gte: dtStart,
+                        lte: dtEnd
+                    }
+                },
+                orderBy: {
+                    studingTimeDate: 'asc'
+                },
+                include: {
+                    timetable: {
+                        include: {
+                            subject:{
+                                include:{
+                                    teacher: true
+                                }
+                            },
+                            classroom: true
+                        }
+                    }
+                }
+            });
+            // console.log(studingTime);
+            return res.status(200).json(studingTime);
+        }catch(error){
+            console.error(error);
+            return res.status(500).json({ message: "เกิดข้อผิดพลาด" });
+        }
+    }else{
+        return res.status(400).json({ message: "ข้อมูลไม่ถูกต้อง" });
+    }
+};

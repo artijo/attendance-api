@@ -12,18 +12,20 @@ import {
 } from "../controllers/attendenceController.js";
 
 import {
-    getTimeTable
+    getTimeTable,
+    getTimetableRoleStudent
 } from "../controllers/timetableController.js";
 import { getAllLeaveRequestsByStudentId, getAllLeaveRequestsType, getStudingTimeByDate, CreateLeaveRequest, getLeaveRequestById, cancelLeaveRequest } from "../controllers/leaverequestController.js";
 
 // ประวัติการเข้าเรียน
-router.get('/attendenceHistory', attendanceHistorySearchByTermAndSubjectId);
-router.get('/studentClassroom', getAllStudentClassroomTerm);
-router.get('/getSubject', getSubjectTimetableByClassroom);
+router.get('/timetable', getTimetableRoleStudent);
+// router.get('/attendenceHistory', attendanceHistorySearchByTermAndSubjectId);
+// router.get('/studentClassroom', getAllStudentClassroomTerm);
+// router.get('/getSubject', getSubjectTimetableByClassroom);
 
 // ลงชื่อเข้าเรียน 
-router.get('/studentTimetable/:classroomId/:dayOfWeek', getTimeTable); // เอาไว้ดึงข้อมูลเพื่อเช็คว่าเริ่มเรียนตอนนไหน
-router.post('/attendenceSubject' , studentAttendenceSubject); // ลงชื่อเข้าเรียน
+// router.get('/studentTimetable/:classroomId/:dayOfWeek', getTimeTable); // เอาไว้ดึงข้อมูลเพื่อเช็คว่าเริ่มเรียนตอนนไหน
+// router.post('/attendenceSubject' , studentAttendenceSubject); // ลงชื่อเข้าเรียน
 
 // ลา
 router.get('/leave', getAllLeaveRequestsByStudentId); // ประวัติการลา
