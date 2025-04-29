@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {
-    getStudentAllAttendenceExcelOneSubject,
+    getTeacherInfo,
 
 } from "../controllers/teacherController.js";
 import { getSubjectByTeacher, getSubject } from "../controllers/subjectController.js";
@@ -14,6 +14,8 @@ import { getHolidayList } from "../controllers/holidayController.js";
 import { getLeaveRequestForTeacher, getLeaveRequestForTeacherByleaveRequestStudingTimeId, teacherUpdateStatusLeaveRequest } from "../controllers/leaverequestController.js";
 
 const router = Router();
+
+router.get('/teacher-info', getTeacherInfo); // get teacher info by uuid
 
 router.get('/subjects', getSubjectByTeacher); // get subject by teacher
 router.get('/subject/:UUID', getSubject); // get subject by UUID

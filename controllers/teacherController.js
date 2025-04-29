@@ -299,3 +299,28 @@ export const deleteDepartment = async (req, res) => {
         }
     }
 }
+
+export async function getTeacherInfo (req, res) {
+    const teacherId = req.user.id;
+    try {
+        const teacher = await db.teacher.findUnique({
+            where: {
+                tchId: teacherId
+            },
+            include: {
+                department: true,
+                classroom: true,
+                subject: true,
+                activity: true
+            }
+        });
+
+        if (!teacher) {
+            return res.status(404).json({ message: 'Teacher not found' });
+        }
+        return res.json(teacher);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}
