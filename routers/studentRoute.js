@@ -1,15 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { uploadS3 } from "../libs/multer.js";
-
 const router = Router();
-
-import {
-    studentAttendenceSubject,
-    attendanceHistorySearchByTermAndSubjectId, 
-    getAllStudentClassroomTerm,
-    getSubjectTimetableByClassroom
-} from "../controllers/attendenceController.js";
 
 import {
     getTimeTable,
@@ -19,6 +11,11 @@ import { getAllLeaveRequestsByStudentId, getAllLeaveRequestsType, getStudingTime
 
 // ประวัติการเข้าเรียน
 router.get('/timetable', getTimetableRoleStudent);
+
+// นักเรียนลงชื่อเข้าเรียน
+router.post('/attendence/enrollment', getTimetableRoleStudent);
+
+
 // router.get('/attendenceHistory', attendanceHistorySearchByTermAndSubjectId);
 // router.get('/studentClassroom', getAllStudentClassroomTerm);
 // router.get('/getSubject', getSubjectTimetableByClassroom);
