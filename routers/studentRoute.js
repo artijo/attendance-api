@@ -9,7 +9,7 @@ import {
 } from "../controllers/timetableController.js";
 import { getAllLeaveRequestsByStudentId, getAllLeaveRequestsType, getStudingTimeByDate, CreateLeaveRequest, getLeaveRequestById, cancelLeaveRequest } from "../controllers/leaverequestController.js";
 import { studentAttendenceEnrollment } from "../controllers/attendenceController.js";
-import { getClassroomBystdId, getClassroomMembersByClassroomId, getTimeTableandStudytimeByClassId } from "../controllers/leaderController.js";
+import { getClassroomBystdId, getClassroomMembersByClassroomId, getTimeTableandStudytimeByClassId, getStuydingTimeById, saveAttendenceByLeader } from "../controllers/leaderController.js";
 
 // ประวัติการเข้าเรียน
 router.get('/timetable', getTimetableRoleStudent);
@@ -30,5 +30,7 @@ router.delete('/leave/:id', cancelLeaveRequest); // ยกเลิกการ�
 router.get('/leader/classrooms', getClassroomBystdId); // ห้องเรียนของนักเรียน
 router.get('/leader/classrooms/:classId/members', getClassroomMembersByClassroomId); // สมาชิกในห้องเรียน
 router.get('/leader/classrooms/:classId/timetable', getTimeTableandStudytimeByClassId); // ตารางเรียนของห้องเรียน
+router.get('/leader/studytime/:studingTimeId', getStuydingTimeById); // ตารางเรียนของห้องเรียน
+router.post('/leader/attendance/bulk', saveAttendenceByLeader); // บันทึกการเข้าเรียนของหัวหน้าห้อง
 
 export default router;
