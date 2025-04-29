@@ -72,3 +72,56 @@ export async function getClassroomMembersByClassroomId(req, res) {
         return res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+export async function getTimeTableandStudytimeByClassId(req, res) {
+    const { classId } = req.params;
+    const zone = 'Asia/Bangkok'; // กำหนด timezone ของประเทศไทย
+    
+    // ใช้ timezone ของไทยในการกำหนดวันของสัปดาห์
+    const todaydayofweek = DateTime.now().setZone(zone).weekday;
+    
+    // สร้างช่วงเวลาของวันนี้โดยระบุ timezone ให้ชัดเจน
+    const todayStart = DateTime.now().setZone(zone).startOf('day').toUTC().toJSDate();
+    const todayEnd = DateTime.now().setZone(zone).endOf('day').toUTC().toJSDate();
+    
+    try {
+        const timetable = await db.timetable.findMany({
+            where: {
+                classId: classId,
+                dayOfWeek: todaydayofweek,
+                studyTime: {
+                    some: {
+                        studingTimeDate: {
+                            gte: todayStart,
+                            lte: todayEnd
+                        }
+                    }
+                }
+            },
+            include: {
+                classroom: true,
+                subject: {
+                    include: {
+                        teacher: true,
+                    }
+                },
+                studyTime: {
+                    where: {
+                        studingTimeDate: {
+                            gte: todayStart,
+                            lte: todayEnd
+                        }
+                    }
+                }
+            }
+        });
+        
+        if (!timetable || timetable.length === 0) {
+            return res.status(404).json({ message: 'Timetable not found' });
+        }
+        return res.json(timetable);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}
