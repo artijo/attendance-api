@@ -54,12 +54,19 @@ export async function LoginWithGoogle(req, res) {
         return res.status(401).json({ message: 'Google ID mismatch' });
     }
 
+    // isLeader?
+    const isLeader = await db.leader.findFirst({
+        where: {
+            stdId: student.stdId
+        }
+    });
+
 
     // สร้าง JWT
     const jwtToken = generateToken({ id: student.stdId, google_id }, '1h');
     const refreshToken = generateToken({ id: student.stdId, google_id }, '7d');
     // ส่ง JWT กลับไปที่ client
-    return res.json({ jwtToken, studentId: student.stdId, refreshToken, fName:student.fName, lName:student.lName, email:student.email, tel:student.tel });
+    return res.json({ jwtToken, studentId: student.stdId, refreshToken, fName:student.fName, lName:student.lName, email:student.email, tel:student.tel, isLeader });
   } catch (err) {
     console.error('Google auth error:', err);
     res.status(401).json({ error: 'Invalid Google token' });
