@@ -209,8 +209,17 @@ export const getSubjectByTeacher = async (req, res) => {
                     teacher:true,
                     timetable: {
                         include: {
-                            classroom: true,
-                            studyTime: true
+                            classroom: {
+                                include:{
+                                    term:true,
+                                }
+                            },
+                            studyTime: true,
+                            subject: {
+                                include:{
+                                    teacher:true
+                                }
+                            }
                         }
                     }
                 }
