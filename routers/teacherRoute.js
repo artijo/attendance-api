@@ -7,7 +7,6 @@ import { getSubjectByTeacher, getSubject } from "../controllers/subjectControlle
 import { getStuydingTimeById } from "../controllers/stuyingTimeController.js";
 import { abstactAttendenceBySubject, getAttendenceByDateAndStudnet, getAttendenceBySubject, getAttendenceSummaryBySubjectIsExam, saveAttendenceByTeacher, generateLinkAttendanceForQR } from "../controllers/attendenceController.js";
 import { getTeacherAdvisorClassroom, getAllClassroom, getClassroomByClassAndSubject } from "../controllers/classroomController.js";
-import { getTeacherTimetable } from "../controllers/timetableController.js";
 import { getActivityByTeacher, getActivity, paticipatedActivityByteacher, abstactActivityFilterByRoom, abstactActivityClassroom } from "../controllers/activitiesController.js";
 import { getAllAcademicTerms, getTermDateBetweenFilterHolidays } from "../controllers/termController.js";
 import { getHolidayList } from "../controllers/holidayController.js";
@@ -19,9 +18,8 @@ router.get('/teacher-info', getTeacherInfo); // get teacher info by uuid
 
 router.get('/subjects', getSubjectByTeacher); // get subject by teacher
 router.get('/subject/:UUID', getSubject); // get subject by UUID
-router.get('/studyTime/:UUID', getStuydingTimeById); // get study time by UUID
+router.get('/studyTime/:UUID', getStuydingTimeById); // get study time by UUID')
 
-router.post('/timetable/teacher', getTeacherTimetable);
 router.post('/attendance/bulk', saveAttendenceByTeacher); // save attendence
 
 router.get('/classrooms', getTeacherAdvisorClassroom); //get list room study

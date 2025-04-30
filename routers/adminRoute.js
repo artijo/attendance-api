@@ -75,6 +75,7 @@ router.get('/timetableR', getTimeTableByRoom);
 router.put('/timetable/editlatetime',editTimelateTimetable)
 router.post('/timetable', createTimetable);
 router.delete('/timetable/:timetableId', deleteTimetable);
+// router.delete('/timetable/delete', deleteTimetable)
 router.get('/subjectTimetable/:classroomId', getSubjectTimetable);
 
 router.post('/timetable/bysubject', createTimetableByAddSubject);
