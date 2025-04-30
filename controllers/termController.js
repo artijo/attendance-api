@@ -134,7 +134,7 @@ export const createTerm = async (req, res) => {
 export const updateTerm = async (req, res) => {
     const body = req.body;
     const termId = body.termId;
-    const acadamicyear = parseInt(body.academicYear) - 543;
+    const acadamicyear = parseInt(body.academicYear);
     const semester = parseInt(body.semester);
     const termStart = DateTime.fromISO(`${body.termStart}T00:00:00`).setZone('Asia/Bangkok');
     const termEnd = DateTime.fromISO(`${body.termEnd}T00:00:00`).setZone('Asia/Bangkok');
