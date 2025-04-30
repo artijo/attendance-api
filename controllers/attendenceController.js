@@ -2,7 +2,7 @@ import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
 import { pushMessageToLine } from '../helper/line.js';
 import { formatTitle } from '../helper/helper.js';
-import { generateToken, decodeToken } from '../helper/jwt.js';
+import { generateToken, decodeToken, verifyToken } from '../helper/jwt.js';
 
 
 export const getSubjectTimetableByClassroom = async (req, res) => {
@@ -1057,5 +1057,151 @@ export const generateLinkAttendanceForQR = async (req, res) => {
         };
     }else{
         return res.status(400).send({message:"bad requset"});
+    }
+}
+
+export const saveAttendenceByStudentWithQR = async (req, res) => {
+    const body = req.body;
+    // console.log(body);
+    const dtNow = DateTime.now();
+    if(body){
+        const {qrToken} = body;
+        try{
+        const verify = verifyToken(qrToken);
+        if(!verify){
+            return res.status(400).send({message:"หมดเวลาเช็คชื่อ"});
+        }
+        const { studyTimeId } = verify;
+
+
+            const AttMethodId = await db.attendanceMethod.findFirst({
+                where:{
+                    attMethodName: "เช็คชื่อด้วยด้วย QR Code"
+                },
+                select:{
+                    attMethodId:true
+                }
+            });
+
+            //Search Subjectby studingTimeId
+            const studyTime = await db.studingTime.findFirst({
+                where:{
+                    studyTimeId:studyTimeId
+                },
+                select:{
+                    timetable:{
+                        select:{
+                            subject:{
+                                select:{
+                                    subNameThai:true,
+                                    subNameEng:true,
+                                    teacher:{
+                                        select:{
+                                            fName:true,
+                                            lName:true,
+                                        }
+                                    },
+                                }
+                            },
+                            classroom: true
+                        }
+                    }
+                }
+            });
+
+            // เช็คว่าเป็นนักเรียนที่สามารถเช็คชื่อวิชานี้ได้หรือไม่
+            const isstudentinclass = await db.classroomMember.findFirst({
+                where:{
+                    stdId:req.user.id,
+                    classId:studyTime.timetable.classId
+                }
+            });
+            if(!isstudentinclass){
+                return res.status(400).send({message:"ไม่ใช่นักเรียนที่สามารถเช็คชื่อวิชานี้ได้"});
+            }
+
+            const existingAttendance = await db.attendance.findFirst({
+                where: {
+                    AND: [
+                        { student: { stdId: req.user.id } },
+                        { studingTime: { studyTimeId: studyTimeId} }
+                    ]
+                }
+            });
+
+            const student = await db.studentParent.findMany({
+                where:{
+                    stdId:req.user.id
+                },
+                include:{
+                    student:true,
+                    parent:true
+                }
+            });
+
+            let attendance;
+
+            if (existingAttendance) {
+                // console.log("update attendance");
+                // ถ้ามีข้อมูลอยู่แล้ว ให้อัปเดต
+                // console.log(existingAttendance);
+                attendance = await db.attendance.update({
+                    where: { attId: existingAttendance.attId },
+                    data: {
+                        attTimestamp: dtNow,
+                        attStatus: "PRESENT",
+                        operatedBy: "Student",
+                    }
+                });
+                //pushMassage
+                if(student.length > 0){
+                    student.map(async (std) => {
+                        const lineId = std.parent.lineId;
+                        if(lineId){
+                            const message = `เรียนผู้ปกครอง ${std.parent.name} \n${formatTitle(std.student.title)}${std.student.fName} ${std.student.lName} ได้ทำการแก้ไขเช็คชื่อเรียนวิชา ${studyTime.timetable.subject.subNameThai} (${studyTime.timetable.subject.subNameEng})\nสอนโดยคุณครู: ${studyTime.timetable.subject.teacher.fName} ${studyTime.timetable.subject.teacher.lName}\nสถานะการเข้าเรียน: เข้าเรียน \nเวลา: ${dtNow.toFormat('yyyy-MM-dd HH:mm:ss')}\n\n\nการบันทึกนี้ถูกบันทึกโดยนักเรียนด้วย QR Code จากครูประจำวิชา`;
+                            await pushMessageToLine(lineId, message);
+                        }
+                    });
+                }
+
+
+            } else {
+                // ถ้าไม่มีข้อมูล ให้สร้างใหม่
+                // console.log("create new attendance");
+                attendance = await db.attendance.create({
+                    data: {
+                        student: {
+                            connect: { stdId: req.user.id }
+                        },
+                        studingTime: {
+                            connect: { studyTimeId: studyTimeId }
+                        },
+                        attMethod: {
+                            connect: { attMethodId: AttMethodId.attMethodId }
+                        },
+                        attTimestamp: dtNow,
+                        attStatus: "PRESENT",
+                        operatedBy: "Student",
+                    }
+                });
+                
+                //pushMassage
+                if(student.length > 0){
+                    student.map(async (std) => {
+                        const lineId = std.parent.lineId;
+                        if(lineId){
+                            const message = `เรียนผู้ปกครอง ${std.parent.name} \n${formatTitle(std.student.title)}${std.student.fName} ${std.student.lName} ได้ทำการเช็คชื่อเรียนวิชา ${studyTime.timetable.subject.subNameThai} (${studyTime.timetable.subject.subNameEng})\nสอนโดยคุณครู: ${studyTime.timetable.subject.teacher.fName} ${studyTime.timetable.subject.teacher.lName}\nสถานะการเข้าเรียน: มาเรียน \nเวลา: ${dtNow.toFormat('yyyy-MM-dd HH:mm:ss')}\n\n\nการบันทึกนี้ถูกบันทึกโดยนักเรียนด้วย QR Code จากครูประจำวิชา`;
+                            await pushMessageToLine(lineId, message);
+                        }
+                    }
+        )}
+            }
+
+           
+            return res.json({message : 'success', studyTime, attendanceTime: dtNow.toFormat('yyyy-MM-dd HH:mm:ss')});
+        }catch(err){
+            console.error(err);
+            res.status(500).json({message : err})
+        };
     }
 }
