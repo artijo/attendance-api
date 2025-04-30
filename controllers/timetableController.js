@@ -600,24 +600,25 @@ export const getTimeTable = async (req, res) => { // ใช้สำหรับ
 
 };
 
-
-
 export const getTimetableRoleStudent = async (req, res) => {
     const studentId = req.user.id;
-    const dtNow = DateTime.now().setZone('Asia/Bangkok');
+    const dtNow = DateTime.now();
     const dtNowString = dtNow.toString();
-    const dtStart = DateTime.fromISO(`${dtNowString.split("T")[0]}T00:00:00`).setZone('Asia/Bangkok');
-    const dtEnd = DateTime.fromISO(`${dtNowString.split("T")[0]}T23:59:59`).setZone('Asia/Bangkok');
+    const termSerach = DateTime.fromISO(`${dtNowString.split("T")[0]}T00:00:00`).setZone('Asia/Bangkok');
+    const studyTimeStart = DateTime.fromISO(`${dtNowString.split("T")[0]}T08:40:00`).setZone('UTC');
+    const studyTimeEnd = DateTime.fromISO(`${dtNowString.split("T")[0]}T15:30:00`).setZone('UTC');
     if(studentId != undefined) {
         try{
             const term = await db.academicTerms.findFirst({
                 where:{
-                    AND: [
+                    OR: [
                         {termStart: {
-                            lte: dtStart
-                        },},
+                            gte: termSerach,
+                            lte: termSerach,
+                        }},
                         {termEnd: {
-                            gte: dtEnd
+                            gte: termSerach,
+                            lte: termSerach,
                         }}
                     ]
                 }
@@ -637,6 +638,8 @@ export const getTimetableRoleStudent = async (req, res) => {
                     student: true
                 }
             });
+
+            // console.log(dtStart);
             
             const timetable = await db.timetable.findMany({
                 where: {
@@ -651,8 +654,8 @@ export const getTimetableRoleStudent = async (req, res) => {
                         in: timetable.map((item) => item.timetableId)
                     },
                     studingTimeDate: {
-                        gte: dtStart,
-                        lte: dtEnd
+                        gte: studyTimeStart,
+                        lte: studyTimeEnd
                     }
                 },
                 orderBy: {
@@ -671,7 +674,6 @@ export const getTimetableRoleStudent = async (req, res) => {
                     }
                 }
             });
-            // console.log(studingTime);
             return res.status(200).json(studingTime);
         }catch(error){
             console.error(error);
