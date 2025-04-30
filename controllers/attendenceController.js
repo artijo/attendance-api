@@ -1066,6 +1066,7 @@ export const saveAttendenceByStudentWithQR = async (req, res) => {
     const dtNow = DateTime.now();
     if(body){
         const {qrToken} = body;
+        try{
         const verify = verifyToken(qrToken);
         if(!verify){
             return res.status(400).send({message:"หมดเวลาเช็คชื่อ"});
@@ -1073,7 +1074,6 @@ export const saveAttendenceByStudentWithQR = async (req, res) => {
         const { studyTimeId } = verify;
 
 
-        try{
             const AttMethodId = await db.attendanceMethod.findFirst({
                 where:{
                     attMethodName: "เช็คชื่อด้วยด้วย QR Code"
@@ -1201,7 +1201,7 @@ export const saveAttendenceByStudentWithQR = async (req, res) => {
             return res.json({message : 'success', studyTime, attendanceTime: dtNow.toFormat('yyyy-MM-dd HH:mm:ss')});
         }catch(err){
             console.error(err);
-            res.json({message : 1})
+            res.status(500).json({message : err})
         };
     }
 }
