@@ -8,7 +8,7 @@ import {
     getTimetableRoleStudent
 } from "../controllers/timetableController.js";
 import { getAllLeaveRequestsByStudentId, getAllLeaveRequestsType, getStudingTimeByDate, CreateLeaveRequest, getLeaveRequestById, cancelLeaveRequest } from "../controllers/leaverequestController.js";
-import { studentAttendenceEnrollment, saveAttendenceByLeader } from "../controllers/attendenceController.js";
+import { studentAttendenceEnrollment, saveAttendenceByLeader, saveAttendenceByStudentWithQR } from "../controllers/attendenceController.js";
 import { getClassroomBystdId, getClassroomMembersByClassroomId, getTimeTableandStudytimeByClassId, getStuydingTimeById } from "../controllers/leaderController.js";
 
 // ประวัติการเข้าเรียน
@@ -16,7 +16,7 @@ router.get('/timetable', getTimetableRoleStudent);
 
 // นักเรียนลงชื่อเข้าเรียน
 router.post('/attendence/enrollment', studentAttendenceEnrollment);
-
+router.post('/attendance/qr', saveAttendenceByStudentWithQR); // บันทึกการเข้าเรียนด้วย QR Code
 
 // ลา
 router.get('/leave', getAllLeaveRequestsByStudentId); // ประวัติการลา
