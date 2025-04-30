@@ -4,6 +4,31 @@ import { pushMessageToLine } from '../helper/line.js';
 import { formatTitle } from '../helper/helper.js';
 import { generateToken, decodeToken, verifyToken } from '../helper/jwt.js';
 
+export const isEnrollment = async (req,res) => {
+    const studentId = req.user.id;
+    const { enrollmentInfo } = req.body;
+    if(studentId && enrollmentInfo) {
+        try{
+            const isAttendece = await db.attendance.findFirst({
+                where:{
+                    studingTimeId: enrollmentInfo.studyTimeId,
+                    stdId: studentId
+                }
+            })
+            if(isAttendece != null){
+                return res.status(200).json({isFound: 1 });
+            }else{
+                return res.status(200).json({isFound: 0})
+            }
+        }catch(error) {
+            console.error(error);
+            return res.status(500).json({message:"เกิดอะไรบ้างอย่างขึ้นที่ server"});
+        }
+        
+    }else{
+        return res.status(401).json({message:"มีบางอย่างผิดพลาด"})
+    }
+}
 
 export const getSubjectTimetableByClassroom = async (req, res) => {
     const classId = req.query.classroom;
