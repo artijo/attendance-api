@@ -609,7 +609,7 @@ export const getTimetableRoleStudent = async (req, res) => {
     const studyTimeEnd = DateTime.fromISO(`${dtNowString.split("T")[0]}T15:30:00`).setZone('UTC');
     if(studentId != undefined) {
         try{
-            const term = await db.academicTerms.findFirst({
+            let term = await db.academicTerms.findFirst({
                 where:{
                     OR: [
                         {termStart: {
@@ -623,6 +623,16 @@ export const getTimetableRoleStudent = async (req, res) => {
                     ]
                 }
             });
+
+            // if term is null get latest term
+            if(!term){
+                 term = await db.academicTerms.findFirst({
+                    orderBy:{
+                        termStart: 'desc'
+                    }
+                });
+            }
+            // console.log(termSerach)
 
             const classroom = await db.classroomMember.findFirst({
                 where: {
@@ -638,6 +648,10 @@ export const getTimetableRoleStudent = async (req, res) => {
                     student: true
                 }
             });
+
+            if(!classroom){
+                return res.status(404).json({ message: "ไม่พบข้อมูลห้องเรียน" });
+            }
 
             // console.log(dtStart);
             
