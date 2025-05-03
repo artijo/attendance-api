@@ -602,6 +602,7 @@ export const generateLinkActivityForQR = async (req, res) => {
 
 export const saveActivityByStudentWithQR = async (req, res) => {
     const { token } = req.body;
+    
     if(token){
         try{
             const verify = verifyToken(token);
@@ -610,6 +611,17 @@ export const saveActivityByStudentWithQR = async (req, res) => {
                     actId: verify.activityId
                 }
             });
+            // ถ้าไม่อยู่ในวันที่และเวลาจัดกิจกรรมไม่สามารถเข้าร่วมได้
+            const activityDate = DateTime.fromISO(activity.actDate.toISOString(), { zone : 'UTC' }).setZone(zone);
+            const activityDateEnd = DateTime.fromISO(activity.actDateEnd.toISOString(), { zone: 'UTC'}).setZone(zone);
+            const activityTimeStart = DateTime.fromISO(activity.actStartTime.toISOString(), { zone: 'UTC'}).setZone(zone);
+            const activityTimeEnd = DateTime.fromISO(activity.actEndTime.toISOString(), { zone: 'UTC'}).setZone(zone);
+            if(activityDate > DateTime.now().setZone(zone) || activityDateEnd < DateTime.now().setZone(zone)){
+                return res.status(400).json({message:"activity is not in date"});
+            }
+            if(activityTimeStart > DateTime.now().setZone(zone) || activityTimeEnd < DateTime.now().setZone(zone)){
+                return res.status(400).json({message:"activity is not in time"});
+            }
             // check activity is full
             if(activity.joinLimitNumber) {
                 const count = await db.activityParticipate.count({
@@ -631,7 +643,8 @@ export const saveActivityByStudentWithQR = async (req, res) => {
             });
             if(activityParticipate){
                 return res.status(200).json({message:"join activity success"});
-            }else{
+            }
+            else{
                 await db.activityParticipate.create({
                     data:{
                         actId:activity.actId,
