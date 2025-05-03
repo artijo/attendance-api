@@ -1,4 +1,6 @@
-import { DateTime, Zone } from "luxon";
+import { DateTime } from "luxon";
+
+const zone = process.env.TIME_ZONE || 'Asia/Bangkok';
 
 export function formatTime(stringTime) { // HH:MM:SS ->  [HH, MM, SS]
     const time = stringTime.split(':');
@@ -37,8 +39,8 @@ export function CheckDateBetween(startDate, endDate, checkStart, checkEnd){
 export function daybetween(Start, End) {
     const dates = [];
     if (Start !== "" && End !== "") {
-        const startDate = DateTime.fromISO(Start).setZone('Asia/Bangkok');
-        const endDate = DateTime.fromISO(End).setZone('Asia/Bangkok');
+        const startDate = DateTime.fromISO(Start).setZone(zone);
+        const endDate = DateTime.fromISO(End).setZone(zone);
         let currentDate = startDate;
         while (currentDate <= endDate) {
             dates.push(currentDate.toISODate().split("-").join("-")); // เพิ่มวันที่ในรูปแบบ YYYY-MM-DD

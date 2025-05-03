@@ -2,6 +2,8 @@ import { DateTime } from 'luxon';
 import { fecthHolidayDateTime } from '../helper/holidayApi.js';
 import db from '../prisma/client.js';
 
+const zone = process.env.TIME_ZONE || 'Asia/Bangkok';
+
 export const fullCalendarHoliday = async (req, res) => {
     const classroomId = req.params.classroomId;
     try {
@@ -24,8 +26,8 @@ export const fullCalendarHoliday = async (req, res) => {
             ]
         });
         const fullCalendarHoliday = holiday.map((holiday) => {
-            const startHolidayDateFormat = DateTime.fromJSDate(holiday.startHolidayDate).setZone('Asia/Bangkok');
-            const endHolidayDateFormat = DateTime.fromJSDate(holiday.endHolidayDate).setZone('Asia/Bangkok');
+            const startHolidayDateFormat = DateTime.fromJSDate(holiday.startHolidayDate).setZone(zone);
+            const endHolidayDateFormat = DateTime.fromJSDate(holiday.endHolidayDate).setZone(zone);
             // console.log(startHolidayDateFormat);
             // console.log(endHolidayDateFormat);
             const object = {
@@ -105,7 +107,7 @@ export const getOneHoliday = async (req, res) => {
 export const updateHoliday = async (req, res) => {
     const holidayId = req.params.holidayId;
     const body = req.body;
-    const holidaydateChangeTimezone = DateTime.fromISO(`${body.startHolidayDate}T00:00:00`).setZone('Asia/Bangkok');
+    const holidaydateChangeTimezone = DateTime.fromISO(`${body.startHolidayDate}T00:00:00`).setZone(zone);
     if (body) {
         try {
             const holiday = await db.holiday.update({
@@ -160,7 +162,7 @@ export const createHoliday = async (req, res) => {
             });
 
             const getStudyTimeHaveAttendence = studyTime.map((studytime) => {
-                const studytimedate = DateTime.fromJSDate(studytime.studingTimeDate).setZone('Asia/Bangkok').toFormat('yyyy-MM-dd');
+                const studytimedate = DateTime.fromJSDate(studytime.studingTimeDate).setZone(zone).toFormat('yyyy-MM-dd');
                 if(studytime.attendance.length > 0){
                     return studytimedate
                 }else{
@@ -171,15 +173,15 @@ export const createHoliday = async (req, res) => {
             // console.log(getStudyTimeHaveAttendence);
 
             const holidayDateList = holidayList.filter((holiday) => {
-                const date = DateTime.fromISO(holiday.startDate+"T00:00:00").setZone('Asia/Bangkok').toFormat('yyyy-MM-dd');
+                const date = DateTime.fromISO(holiday.startDate+"T00:00:00").setZone(zone).toFormat('yyyy-MM-dd');
                 return !getStudyTimeHaveAttendence.includes(date);
             });
 
             if(holidayDateList.length > 0) {
                 const datetimeholidayDatelist =holidayDateList.map((datelist) => {
                     const dateObject = {
-                        dateStart: DateTime.fromISO(datelist.startDate+"T00:00:00").setZone('Asia/Bangkok'),
-                        dateEnd: DateTime.fromISO(datelist.endDate+"T23:59:00").setZone('Asia/Bangkok')
+                        dateStart: DateTime.fromISO(datelist.startDate+"T00:00:00").setZone(zone),
+                        dateEnd: DateTime.fromISO(datelist.endDate+"T23:59:00").setZone(zone)
                     }
                     return dateObject;
                 });
@@ -203,8 +205,8 @@ export const createHoliday = async (req, res) => {
                     }
                 };
                 for (const holiday of holidayDateList) {
-                    const startDate = DateTime.fromISO(holiday.startDate + "T00:00:00").setZone('Asia/Bangkok');
-                    const endDate = DateTime.fromISO(holiday.endDate + "T00:00:00").setZone('Asia/Bangkok');
+                    const startDate = DateTime.fromISO(holiday.startDate + "T00:00:00").setZone(zone);
+                    const endDate = DateTime.fromISO(holiday.endDate + "T00:00:00").setZone(zone);
                     const createholiday = await db.holiday.create({
                         data: {
                             holidayName: holiday.holidayname,

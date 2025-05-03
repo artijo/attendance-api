@@ -2,6 +2,8 @@ import { DateTime, Zone } from 'luxon';
 import db from '../prisma/client.js';
 import { CheckDateBetween, daybetween } from '../helper/helper.js';
 
+const zone = process.env.TIME_ZONE || 'Asia/Bangkok';
+
 export const getAllAcademicTerms = async (req,res) => {
     try{
         const academicTerms = await db.academicTerms.findMany({
@@ -36,20 +38,20 @@ export const getTermDateBetweenFilterHolidays = async (req, res) => {
                 }
             });
             const holidayListDate = holidays.map((holiday) => {
-                const timezoneformat = DateTime.fromJSDate(holiday.startHolidayDate).setZone('Asia/Bangkok');
+                const timezoneformat = DateTime.fromJSDate(holiday.startHolidayDate).setZone(zone);
                 const holidayDay = timezoneformat.toISODate();
                 // console.log(holidayDay);
                 return holidayDay;
             });
-            const termStart = DateTime.fromJSDate(term.termStart).setZone('Asia/Bangkok').toISO();
-            const termEnd = DateTime.fromJSDate(term.termEnd).setZone('Asia/Bangkok').toISO();
+            const termStart = DateTime.fromJSDate(term.termStart).setZone(zone).toISO();
+            const termEnd = DateTime.fromJSDate(term.termEnd).setZone(zone).toISO();
             const termDateBetween = daybetween(termStart, termEnd).filter((date) => {
-                const checkSatAndSun = DateTime.fromISO(`${date}T17:00:00`).setZone('Asia/Bangkok').weekday;
+                const checkSatAndSun = DateTime.fromISO(`${date}T17:00:00`).setZone(zone).weekday;
                 // console.log(checkSatAndSun);
                 return checkSatAndSun != 6 && checkSatAndSun != 7;
                 // console.log(checkSatAndSun); 
             }).filter((date) => {
-                // const checkSatAndSun = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok').day;
+                // const checkSatAndSun = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone(zone).day;
                 return !holidayListDate.includes(date);
             });
 
@@ -86,8 +88,8 @@ export const createTerm = async (req, res) => {
     const body = req.body;
     const acadamicyear = parseInt(body.academicYear) - 543;
     const semester = parseInt(body.semester);
-    const termStart = DateTime.fromISO(`${body.termStart}T00:00:00`).setZone('Asia/Bangkok');
-    const termEnd = DateTime.fromISO(`${body.termEnd}T00:00:00`).setZone('Asia/Bangkok');
+    const termStart = DateTime.fromISO(`${body.termStart}T00:00:00`).setZone(zone);
+    const termEnd = DateTime.fromISO(`${body.termEnd}T00:00:00`).setZone(zone);
     // console.log(termStart);
     // console.log(termEnd);
     if(acadamicyear && semester && termStart && termEnd) {
@@ -136,8 +138,8 @@ export const updateTerm = async (req, res) => {
     const termId = body.termId;
     const acadamicyear = parseInt(body.academicYear);
     const semester = parseInt(body.semester);
-    const termStart = DateTime.fromISO(`${body.termStart}T00:00:00`).setZone('Asia/Bangkok');
-    const termEnd = DateTime.fromISO(`${body.termEnd}T00:00:00`).setZone('Asia/Bangkok');
+    const termStart = DateTime.fromISO(`${body.termStart}T00:00:00`).setZone(zone);
+    const termEnd = DateTime.fromISO(`${body.termEnd}T00:00:00`).setZone(zone);
     if(body){
         try{
             await db.academicTerms.update({

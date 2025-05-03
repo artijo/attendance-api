@@ -3,6 +3,8 @@ import { DateTime } from 'luxon';
 import { pushMessageToLine } from '../helper/line.js';
 import { formatTitle } from '../helper/helper.js';
 
+const zone = process.env.TIME_ZONE || 'Asia/Bangkok';
+
 export function getAllLeaders(req, res) {
     try {
         db.leader.findMany(
@@ -77,7 +79,6 @@ export async function getClassroomMembersByClassroomId(req, res) {
 
 export async function getTimeTableandStudytimeByClassId(req, res) {
     const { classId } = req.params;
-    const zone = 'Asia/Bangkok'; // กำหนด timezone ของประเทศไทย
     
     // ใช้ timezone ของไทยในการกำหนดวันของสัปดาห์
     const todaydayofweek = DateTime.now().setZone(zone).weekday;

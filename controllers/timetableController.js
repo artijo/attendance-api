@@ -2,6 +2,8 @@ import { daybetween, formatDayOfWeeks } from '../helper/helper.js';
 import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
 
+const zone = process.env.TIME_ZONE || 'Asia/Bangkok';
+
 export const createTimetableByAddSubject = async (req, res) => {
     const { classroom, timetable, schedule, weekday } = req.body;
     // console.log(classroom);
@@ -62,24 +64,24 @@ export const createTimetableByAddSubject = async (req, res) => {
                 });
 
                 const holidayListDate = holiday.map((holiday) => {
-                    const timezoneformat = DateTime.fromJSDate(holiday.startHolidayDate).setZone('Asia/Bangkok');
+                    const timezoneformat = DateTime.fromJSDate(holiday.startHolidayDate).setZone(zone);
                     const holidayDay = timezoneformat.toISODate();
                     return holidayDay;
                 });
 
                 const termDateBetween = daybetween(classroom.term.termStart, classroom.term.termEnd).filter((date) => {
-                    const checkSatAndSun = DateTime.fromISO(`${date}T${createTimetable.timeStart}`).setZone('Asia/Bangkok').weekday;
+                    const checkSatAndSun = DateTime.fromISO(`${date}T${createTimetable.timeStart}`).setZone(zone).weekday;
                     // console.log(checkSatAndSun);
                     return checkSatAndSun != 6 && checkSatAndSun != 7;
                     // console.log(checkSatAndSun); 
                 }).filter((date) => {
-                    // const checkSatAndSun = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok').day;
+                    // const checkSatAndSun = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone(zone).day;
                     return !holidayListDate.includes(date);
                 });
                 // console.log(termDateBetween);
                 //  // เรียก daybetween เพื่อดูระหว่างวันไหนของเทอม และ filter วันเสาร์อาทิตย์ออกหลังจากนั้น filter วันหยุดต่อ
                 for (const date of termDateBetween) {
-                    const dateformat = DateTime.fromISO(`${date}T${createTimetable.timeStart}`).setZone('Asia/Bangkok');
+                    const dateformat = DateTime.fromISO(`${date}T${createTimetable.timeStart}`).setZone(zone);
                     if (Number(dateformat.weekday) === Number(timetable.dayOfWeek)) {
                         await db.studingTime.create({
                             data: {
@@ -265,7 +267,7 @@ export const createTimetable = async (req, res) => {
             });
             const subjectExistsInPeriod = subjectOnTimetable.find(({ timeStart, timeEnd, dayOfWeek, subId }) => String(timeStart) === periodtime.startDatabaseFormat && String(timeEnd) === periodtime.endDatabaseFormat && dayOfWeek === Number(day));
             if (subjectExistsInPeriod != undefined) return res.status(400).json({ message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${periodtime.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}` });
-            const timelateDatetime = DateTime.fromISO(periodtime.startDatabaseFormat).setZone('Asia/Bangkok').plus({ minutes: timelate });
+            const timelateDatetime = DateTime.fromISO(periodtime.startDatabaseFormat).setZone(zone).plus({ minutes: timelate });
             const timelateDatabaseFormat = timelateDatetime.toFormat('HH:mm:ss');
             const timetable = await db.timetable.create({
                 data: {
@@ -285,24 +287,24 @@ export const createTimetable = async (req, res) => {
             });
 
             const holidayListDate = holiday.map((holiday) => {
-                const timezoneformat = DateTime.fromJSDate(holiday.startHolidayDate).setZone('Asia/Bangkok');
+                const timezoneformat = DateTime.fromJSDate(holiday.startHolidayDate).setZone(zone);
                 const holidayDay = timezoneformat.toISODate();
                 // console.log(holidayDay);
                 return holidayDay;
             });
 
             const termDateBetween = daybetween(classroom.term.termStart, classroom.term.termEnd).filter((date) => {
-                const checkSatAndSun = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok').weekday;
+                const checkSatAndSun = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone(zone).weekday;
                 // console.log(checkSatAndSun);
                 return checkSatAndSun != 6 && checkSatAndSun != 7;
                 // console.log(checkSatAndSun); 
             }).filter((date) => {
-                // const checkSatAndSun = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok').day;
+                // const checkSatAndSun = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone(zone).day;
                 return !holidayListDate.includes(date);
             });
             //  // เรียก daybetween เพื่อดูระหว่างวันไหนของเทอม และ filter วันเสาร์อาทิตย์ออกหลังจากนั้น filter วันหยุดต่อ
             for (const date of termDateBetween) {
-                const dateformat = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok');
+                const dateformat = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone(zone);
                 if (Number(dateformat.weekday) === Number(day)) {
                     await db.studingTime.create({
                         data: {
@@ -604,7 +606,7 @@ export const getTimetableRoleStudent = async (req, res) => {
     const studentId = req.user.id;
     const dtNow = DateTime.now();
     const dtNowString = dtNow.toString();
-    const termSerach = DateTime.fromISO(`${dtNowString.split("T")[0]}T00:00:00`).setZone('Asia/Bangkok');
+    const termSerach = DateTime.fromISO(`${dtNowString.split("T")[0]}T00:00:00`).setZone(zone);
     const studyTimeStart = DateTime.fromISO(`${dtNowString.split("T")[0]}T08:40:00`).setZone('UTC');
     const studyTimeEnd = DateTime.fromISO(`${dtNowString.split("T")[0]}T15:30:00`).setZone('UTC');
     if(studentId != undefined) {

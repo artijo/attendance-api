@@ -4,6 +4,8 @@ import { pushMessageToLine } from '../helper/line.js';
 import { formatTitle } from '../helper/helper.js';
 import { generateToken, decodeToken, verifyToken } from '../helper/jwt.js';
 
+const zone = process.env.TIME_ZONE || 'Asia/Bangkok';
+
 export const isEnrollment = async (req,res) => {
     const studentId = req.user.id;
     const { enrollmentInfo } = req.body;
@@ -107,8 +109,8 @@ export const getAttendenceBySubject = async (req, res) => {
                 }
             })
             let months = [];
-            const startDateTime = DateTime.fromJSDate(term.term.termStart).setZone('Asia/Bangkok');
-            const endDateTime = DateTime.fromJSDate(term.term.termEnd).setZone('Asia/Bangkok');
+            const startDateTime = DateTime.fromJSDate(term.term.termStart).setZone(zone);
+            const endDateTime = DateTime.fromJSDate(term.term.termEnd).setZone(zone);
             for(let m = startDateTime.month; m <= endDateTime.month; m++){
                 months.push(m);
             }
@@ -177,7 +179,7 @@ export const getAttendenceByDateAndStudnet = async (req, res) => {
                     classroomMembers:true
                 }
             });
-            const weekday = DateTime.fromISO(`${date}T00:00:00`).setZone('Asia/Bangkok').weekday;
+            const weekday = DateTime.fromISO(`${date}T00:00:00`).setZone(zone).weekday;
             const timetable = await db.timetable.findMany({
                 where:{
                     AND:[
@@ -189,7 +191,7 @@ export const getAttendenceByDateAndStudnet = async (req, res) => {
 
             // console.log(timetable);
             const listOfTimetableId = timetable.map((timetable) => timetable.timetableId);
-            const listOfTimetableDate = timetable.map((timetable) => DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok'));
+            const listOfTimetableDate = timetable.map((timetable) => DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone(zone));
             const studyTime = await db.studingTime.findMany({
                 where: {
                     AND: [
@@ -255,7 +257,7 @@ export const getAttendenceByDate = async (req, res) => {
     const classroomId = req.params.classroomId;
     if(date && classroomId) {
         try{
-            const weekdayOnDateInput = DateTime.fromISO(`${date}T00:00:00`).setZone('Asia/Bangkok').weekday;
+            const weekdayOnDateInput = DateTime.fromISO(`${date}T00:00:00`).setZone(zone).weekday;
             const timetables = await db.timetable.findMany({
                 where:{
                     AND:[
@@ -275,7 +277,7 @@ export const getAttendenceByDate = async (req, res) => {
                         },
                         {
                             studingTimeDate:  {
-                                in:timetables.map((timetable) => DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone('Asia/Bangkok'))
+                                in:timetables.map((timetable) => DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone(zone))
                             }
                         }
                     ]
@@ -1018,8 +1020,8 @@ export const studentAttendenceEnrollment = async (req, res) => {
     const studentId = req.user.id;
 
     function statusEnrollment(sTime, lTime, enrollmentTime) {
-        const startTime = DateTime.fromISO(sTime).setZone('Asia/Bangkok');
-        const lateTime = DateTime.fromISO(lTime).setZone('Asia/Bangkok');
+        const startTime = DateTime.fromISO(sTime).setZone(zone);
+        const lateTime = DateTime.fromISO(lTime).setZone(zone);
         const lateMinute = startTime.diff(lateTime, 'minutes').minutes;
         const enrollmentMinute = enrollmentTime.diff(startTime, 'minutes').minutes;
         if(enrollmentMinute <= lateMinute){
@@ -1034,7 +1036,7 @@ export const studentAttendenceEnrollment = async (req, res) => {
         // console.log(studentId);
         // console.log(location);
         try{
-            const dtNow = DateTime.now().setZone('Asia/Bangkok'); 
+            const dtNow = DateTime.now().setZone(zone); 
 
             const attendanceMethod = await db.attendanceMethod.findFirst({
                 where:{

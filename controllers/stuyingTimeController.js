@@ -2,6 +2,8 @@ import db from '../prisma/client.js';
 import { formatTime, formatDateYYYYMMDD, daybetween } from '../helper/helper.js';
 import { DateTime } from 'luxon';
 
+const zone = process.env.TIME_ZONE || 'Asia/Bangkok';
+
 export const getFullCalendarStudyTime = async (req, res) => {
     const classroomId = req.params.classroomId;
     try{
@@ -39,7 +41,7 @@ export const getFullCalendarStudyTime = async (req, res) => {
             }
         });
         const fullCalendarEventFormat = studyTimes.map((studytime) => {
-            const startDateTime = DateTime.fromISO(studytime.studingTimeDate.toISOString()).setZone('Asia/Bangkok');
+            const startDateTime = DateTime.fromISO(studytime.studingTimeDate.toISOString()).setZone(zone);
             const endDateTime = startDateTime.plus({ minutes: 50 });
             return {
                 title: `${studytime.timetable.subject.subCode}-${studytime.timetable.subject.subNameThai}`,

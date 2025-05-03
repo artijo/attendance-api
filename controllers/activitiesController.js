@@ -428,8 +428,8 @@ export const abstactActivityClassroom = async (req, res) => {
             student:true
         }
     });
-    const actDateStart = DateTime.fromISO(activities.actDate.toISOString(), { zone : 'UTC' }).setZone('Asia/Bangkok');
-    const actDateEnd = DateTime.fromISO(activities.actDateEnd.toISOString(), { zone: 'UTC'}).setZone('Asia/Bangkok');
+    const actDateStart = DateTime.fromISO(activities.actDate.toISOString(), { zone : 'UTC' }).setZone(zone);
+    const actDateEnd = DateTime.fromISO(activities.actDateEnd.toISOString(), { zone: 'UTC'}).setZone(zone);
     const dayBetween = daybetween(
         actDateStart.toString().split('T')[0], 
         actDateEnd.toString().split('T')[0]
@@ -483,7 +483,7 @@ export const abstactActivityFilterByRoom = async(req, res) => {
         });
         // console.log(activitys);
         //หาว่ากิจกรรมที่ต้องการ insert นั้นอยู่ระหว่างช่วงเทอมไหน
-        const dateTimeNow = DateTime.fromISO(activitys.actDate.toISOString()).setZone('Asia/Bangkok');
+        const dateTimeNow = DateTime.fromISO(activitys.actDate.toISOString()).setZone(zone);
         const dateActivityStart = dateTimeNow.toString().split("T")[0];
         function isSchoolOpen(dateStr){
             const startDate = DateTime.fromJSDate(dateStr.termStart, {zone: 'UTC'}); // วันที่เริ่มเปิดเทอม
@@ -507,8 +507,8 @@ export const abstactActivityFilterByRoom = async(req, res) => {
         };
         // console.log(termId);
     
-        const actDateStart = DateTime.fromISO(activitys.actDate.toISOString(), { zone : 'UTC' }).setZone('Asia/Bangkok');
-        const actDateEnd = DateTime.fromISO(activitys.actDateEnd.toISOString(), { zone: 'UTC'}).setZone('Asia/Bangkok');
+        const actDateStart = DateTime.fromISO(activitys.actDate.toISOString(), { zone : 'UTC' }).setZone(zone);
+        const actDateEnd = DateTime.fromISO(activitys.actDateEnd.toISOString(), { zone: 'UTC'}).setZone(zone);
         const paticipateCount = daybetween(
             actDateStart.toString().split('T')[0], 
             actDateEnd.toString().split('T')[0]
