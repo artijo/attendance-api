@@ -601,7 +601,7 @@ export const generateLinkActivityForQR = async (req, res) => {
 }
 
 export const saveActivityByStudentWithQR = async (req, res) => {
-    const { token } = req.body;
+    const { qrToken:token } = req.body;
     
     if(token){
         try{
@@ -609,17 +609,32 @@ export const saveActivityByStudentWithQR = async (req, res) => {
             const activity = await db.activity.findFirst({
                 where:{
                     actId: verify.activityId
+                },
+                include: {
+                    classroom: {
+                        include: {
+                            classroom: true
+                        }
+                    }
                 }
             });
             // ถ้าไม่อยู่ในวันที่และเวลาจัดกิจกรรมไม่สามารถเข้าร่วมได้
-            const activityDate = DateTime.fromISO(activity.actDate.toISOString(), { zone : 'UTC' }).setZone(zone);
-            const activityDateEnd = DateTime.fromISO(activity.actDateEnd.toISOString(), { zone: 'UTC'}).setZone(zone);
-            const activityTimeStart = DateTime.fromISO(activity.actStartTime.toISOString(), { zone: 'UTC'}).setZone(zone);
-            const activityTimeEnd = DateTime.fromISO(activity.actEndTime.toISOString(), { zone: 'UTC'}).setZone(zone);
-            if(activityDate > DateTime.now().setZone(zone) || activityDateEnd < DateTime.now().setZone(zone)){
+            const activityDate = DateTime.fromISO(activity.actDate.toISOString(), { zone : 'UTC' }).setZone(zone).startOf('day');
+            const activityDateEnd = DateTime.fromISO(activity.actDateEnd.toISOString(), { zone: 'UTC'}).setZone(zone).endOf('day');
+            // Check if current date is within activity date range
+            // console.log(activityDate.toString(), activityDateEnd.toString());
+            const now = DateTime.now().setZone(zone);
+            // console.log(now.toString());
+            if (now < activityDate || now > activityDateEnd) {
                 return res.status(400).json({message:"activity is not in date"});
             }
-            if(activityTimeStart > DateTime.now().setZone(zone) || activityTimeEnd < DateTime.now().setZone(zone)){
+            
+            // Compare just the time portions
+            const currentTime = now.toFormat('HH:mm');
+            const startTime = activity.actStartTime;
+            const endTime = activity.actEndTime;
+            
+            if(currentTime < startTime || currentTime > endTime){
                 return res.status(400).json({message:"activity is not in time"});
             }
             // check activity is full
@@ -633,6 +648,38 @@ export const saveActivityByStudentWithQR = async (req, res) => {
                     return res.status(400).json({message:"activity is full"});
                 }
             }
+            // ตรวจสอบว่าเป็นนักเรียนในห้องเรียนที่สามารถเข้าร่วมกิจกรรมได้หรือไม่ถ้ามีการกำหนด
+            if(activity.joinLimit){
+                const classroom = await db.classroomCanjoinActivity.findMany({
+                    where:{
+                        activity:{
+                            actId: activity.actId
+                        },
+                        classroom:{
+                            classId: {
+                                in: activity.classroom.map((classroom) => classroom.classId)
+                            }
+                        }
+                    }
+                });
+                console.log(classroom);
+                // search for student in classroom
+                if(classroom){
+                    const student = await db.classroomMember.findFirst({
+                        where:{
+                            stdId: req.user.id,
+                            classId: {
+                                in: classroom.map((classroom) => classroom.classId)
+                            }
+                        }
+                    });
+                    if(!student){
+                        return res.status(400).json({message:"you are not in classroom that can join this activity"});
+                    }
+                }
+            }
+
+            // check if student already joined the activity
             const activityParticipate = await db.activityParticipate.findFirst({
                 where:{
                     AND:{
@@ -642,7 +689,7 @@ export const saveActivityByStudentWithQR = async (req, res) => {
                 }
             });
             if(activityParticipate){
-                return res.status(200).json({message:"join activity success"});
+                return res.status(200).json({message:"join activity success", activity, joinTimestamp: now.toJSDate()});
             }
             else{
                 await db.activityParticipate.create({
@@ -653,13 +700,13 @@ export const saveActivityByStudentWithQR = async (req, res) => {
                         operateBy:"student",
                     }
                 });
-                return res.status(200).json({message:"join activity success"});
+                return res.status(200).json({message:"join activity success", activity, joinTimestamp: now.toJSDate()});
             }
         }catch(error) {
             console.error(error);
-            return res.status(500).send("message: something happening");
+            return res.status(500).json({message:"something happening", error});
         };
     }else{
-        return res.status(400).send({message:"bad requset"});
+        return res.status(400).json({message:"bad requset"});
     }
 }

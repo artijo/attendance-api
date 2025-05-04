@@ -42,6 +42,6 @@ router.get('/leader/studytime/:studingTimeId', getStuydingTimeById); // ตา�
 router.post('/leader/attendance/bulk', saveAttendenceByLeader); // บันทึกการเข้าเรียนของหัวหน้าห้อง
 
 // กิจกรรม
-router.post('/activity/join', saveActivityByStudentWithQR);
+router.post('/activity/join/qr', saveActivityByStudentWithQR);
 
 export default router;
