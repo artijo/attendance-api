@@ -783,3 +783,141 @@ export const getActivityByLeader = async (req, res) => {
         return res.status(500).json({ message: 'Failed to fetch activities', error: error.message });
     }
 }
+
+export const paticipatedActivityByLeader = async (req, res) => {
+    const { actId } = req.params;
+    const { stdId, status, note, date } = req.body;
+    try {
+        const activity = await db.activity.findFirst({
+            where: {
+                actId: actId
+            }
+        });
+        const teacher = await db.teacher.findFirst({
+            where: {
+                tchId: req.user.id
+            }
+        });
+        
+        // Use the provided date or current date
+        let targetDate = DateTime.now();
+        if (date) {
+            targetDate = DateTime.fromISO(date);
+        }
+
+        // get Leader by stdId
+        const leader = await db.leader.findFirst({
+            where: {
+                stdId: req.user.id
+            }
+        });
+        
+        const activityPaticipate = await db.activityParticipate.findFirst({
+            where: {
+                actId: actId,
+                stdId: stdId,
+                joinTimestamp: {
+                    gte: targetDate.startOf('day').toUTC().toJSDate(),
+                    lte: targetDate.endOf('day').toUTC().toJSDate()
+                }
+            }
+        });
+       
+        // const activityParticipateCount = await db.activityParticipate.count({
+        //     where: {
+        //         actId: actId,
+        //         joinTimestamp: {
+        //             gte: targetDate.startOf('day').toUTC().toJSDate(),
+        //             lte: targetDate.endOf('day').toUTC().toJSDate()
+        //         }
+        //     }
+        // });
+
+        if (activityPaticipate) {
+            if(status == "ABSENT"){
+                await db.activityParticipate.delete({
+                    where: {
+                        actParticipateId: activityPaticipate.actParticipateId
+                    }
+                });
+                return res.json({ message: 'success' });
+            } else {
+                // console.log(DateTime.now().toUTC().toJSDate());
+                await db.activityParticipate.update({
+                    where: {
+                        actParticipateId: activityPaticipate.actParticipateId
+                    },
+                    data: {
+                        note,
+                    }
+                });
+                return res.json({ message: 'success' });
+            }
+        } else {
+            if(activity.joinLimit && activity.joinLimitNumber > 0){
+                //count activityparticipate
+                const countActParticipate = await db.activityParticipate.count({
+                    where: {
+                        actId: actId,
+                        joinTimestamp: {
+                            gte: targetDate.startOf('day').toUTC().toJSDate(),
+                            lte: targetDate.endOf('day').toUTC().toJSDate()
+                        }
+                    }
+                });
+                // console.log(countActParticipate);
+                if(countActParticipate >= activity.joinLimitNumber){
+                    return res.status(400).json({ message: 'จำนวนนักเรียนเต็มแล้ว' });
+                }
+            }
+            // Create with the target date instead of current date if date is provided
+            await db.activityParticipate.create({
+                data: {
+                    activity: {
+                        connect: {
+                            actId: actId
+                        }
+                    },
+                    student: {
+                        connect: {
+                            stdId: stdId
+                        }
+                    },
+                    note: note,
+                    operateBy: "LEADER",
+                    leader: {
+                        connect: {
+                            ldrId: leader.ldrId
+                        }
+                    },
+                    joinTimestamp: DateTime.now().toUTC().toJSDate()
+                }
+            });
+            // Send LINE notification
+            const parent = await db.studentParent.findMany({
+                where: {
+                    student: {
+                        stdId: stdId
+                    }
+                },
+                include: {
+                    parent: true,
+                    student: true
+                }
+            });
+            if (parent.length > 0) {
+                parent.map(async (p) => {
+                    const message = `เรียนผู้ปกครอง ${p.parent.name} นักเรียน ${p.student.fName} ${p.student.lName} ได้เข้าร่วมกิจกรรม ${activity.actName} วันที่ ${DateTime.fromJSDate(activity.actDate).setZone(zone).toFormat('dd/LL/yyyy')}\n\n\nบันทึกการเข้าร่วมกิจกรรมโดยหัวหน้าห้อง`;
+                    await pushMessageToLine(p.parent.lineId, message);
+                });
+            } else {
+                console.log("No parent found for this student.");  
+            }
+        
+            return res.json({ message: 'success' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal server error' });
+    };
+}
