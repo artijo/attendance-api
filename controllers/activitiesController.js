@@ -588,7 +588,29 @@ export const generateLinkActivityForQR = async (req, res) => {
     const { activityId } = req.body;
     if(activityId){
         try{
-            const token = generateToken({ activityId }, '10m');
+            //เวลาหมดอายุ Token เท่ากับวันที่สิ้นสุดกิจกรรม
+            const activity = await db.activity.findFirst({
+                where:{
+                    actId: activityId
+                }
+            });
+            if(!activity) return res.status(400).send({message:"activity not found"});
+            const now = DateTime.now().setZone(zone);
+            const activityDateEnd = DateTime.fromISO(activity.actDateEnd.toISOString(), { zone: 'UTC'}).setZone(zone).endOf('day');
+           
+            // เวลาหมดอายุ Token โดยเริมนับจากเวลาปัจจุบันถึงเวลาสิ้นสุดกิจกรรม
+            const diff = activityDateEnd.diff(now, ['days', 'hours', 'minutes', 'seconds']);
+            console.log(diff.toObject());
+            
+            // Calculate expiry time in seconds
+            const expirySeconds = Math.floor((diff.toObject().days * 24 * 60 * 60) + 
+                                          (diff.toObject().hours * 60 * 60) + 
+                                          (diff.toObject().minutes * 60) + 
+                                          (diff.toObject().seconds));
+            
+            const token = generateToken({
+                activityId: activity.actId
+            }, expirySeconds);
             const link = `${process.env.STUDENT_WEB_CLIENT}/activity/qr/${token}`;
             res.status(200).json({link});
         }catch(error) {
@@ -606,6 +628,7 @@ export const saveActivityByStudentWithQR = async (req, res) => {
     if(token){
         try{
             const verify = verifyToken(token);
+            // console.log(verify);
             const activity = await db.activity.findFirst({
                 where:{
                     actId: verify.activityId
@@ -662,7 +685,7 @@ export const saveActivityByStudentWithQR = async (req, res) => {
                         }
                     }
                 });
-                console.log(classroom);
+                // console.log(classroom);
                 // search for student in classroom
                 if(classroom){
                     const student = await db.classroomMember.findFirst({
