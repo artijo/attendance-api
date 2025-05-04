@@ -733,3 +733,39 @@ export const saveActivityByStudentWithQR = async (req, res) => {
         return res.status(400).json({message:"bad requset"});
     }
 }
+
+export const getActivityByLeader = async (req, res) => {
+    const { classId } = req.query;
+    console.log(classId);
+    // ดึง activity ทั้งหมด ถ้ากิจกรรมไหนมีการจำกัดตามห้องเรียนให้ filter ตามห้องเรียนที่ไม่เกี่ยวข้องออกไป
+   try {
+         const activities = await db.activity.findMany({
+                include: {
+                 activityType: true,
+                 teacher: true,
+                 actParticipate: true,
+                 classroom: {
+                      include: {
+                            classroom: {
+                             include: {
+                                  term: true
+                             }
+                            }
+                      }
+                 }
+                }
+          });
+          // filter เอาห้องเรียนที่ไม่เกี่ยวข้องออก
+            const filteredActivities = activities.filter(activity => {
+                    if (activity.classroom && activity.classroom.length > 0) {
+                        return activity.classroom.some(classroom => classroom.classId === classId);
+                    }
+                    return true; // Include activities without classroom restrictions
+                }
+            );
+            return res.json(filteredActivities);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Failed to fetch activities', error: error.message });
+    }
+}
