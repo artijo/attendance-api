@@ -36,7 +36,7 @@ export const getAllActivitiesByType = async (req, res) => {
 
 export const getActivity = async (req, res) => {
     const uuid = req.params.uuid;
-    const { date } = req.query;
+    const { date, classId } = req.query;
         
     try {
         let actParticipateFilter = {};
@@ -53,7 +53,17 @@ export const getActivity = async (req, res) => {
                 }
             };
         }
-        
+
+        // If classId is provided in query, filter actParticipate by classId
+        if (classId) {
+            actParticipateFilter = {
+                ...actParticipateFilter,
+                where: {
+                    ...actParticipateFilter.where,
+                    classId: classId
+                }
+            }
+        }
         const activity = await db.activity.findUnique({
             where: {
                 actId: uuid
@@ -742,7 +752,11 @@ export const getActivityByLeader = async (req, res) => {
          const activities = await db.activity.findMany({
                 include: {
                  activityType: true,
-                 teacher: true,
+                 teacher: {
+                    include: {
+                        teacher: true
+                    }
+                 },
                  actParticipate: true,
                  classroom: {
                       include: {
