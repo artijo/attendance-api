@@ -26,7 +26,7 @@ import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject
 import { getAllAcademicTerms, createTerm, deleteTerm, getOneAcademicTerm,updateTerm, getTermDateBetweenFilterHolidays } from "../controllers/termController.js";
 import { getHolidayListAuto, createHoliday, getHolidayList, deleteHoliday, getOneHoliday, updateHoliday, fullCalendarHoliday } from "../controllers/holidayController.js"
 import { getFullCalendarStudyTime} from "../controllers/stuyingTimeController.js";
-import { getAllActivitiesByType, getActivity, getActivityType, createActivity, editActivity, abstactActivityClassroom, abstactActivityFilterByRoom } from "../controllers/activitiesController.js";
+import { getAllActivitiesByType, getActivity, getActivityType, createActivity, editActivity, abstactActivityClassroom, abstactActivityFilterByRoom, generateLinkActivityForQR } from "../controllers/activitiesController.js";
 import {getAttendenceBySubject,getAttendenceByDate,getAttendenceSummaryByClassroom, getAttendenceSummaryBySubjectIsExam} from "../controllers/attendenceController.js";
 import { getAllLeaveRequestForAdmin, getLeaveRequestForAdminByLeaveId } from "../controllers/leaverequestController.js";
 
@@ -122,6 +122,7 @@ router.get('/activityType', getActivityType);
 router.put('/activity/:uuid', editActivity);
 router.get('/activity/abstact/byclassroom/:activityId/:classId',abstactActivityClassroom);
 router.get('/activity/abstact/:activityId',abstactActivityFilterByRoom);
+router.post('/activity/generate-qr', generateLinkActivityForQR); // generate link for QR code
 
 //Attendence
 router.get('/attendence/:subjectId/:classroomId', getAttendenceBySubject);
