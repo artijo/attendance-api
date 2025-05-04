@@ -7,7 +7,7 @@ import { getSubjectByTeacher, getSubject } from "../controllers/subjectControlle
 import { getStuydingTimeById } from "../controllers/stuyingTimeController.js";
 import { abstactAttendenceBySubject, getAttendenceByDateAndStudnet, getAttendenceBySubject, getAttendenceSummaryBySubjectIsExam, saveAttendenceByTeacher, generateLinkAttendanceForQR } from "../controllers/attendenceController.js";
 import { getTeacherAdvisorClassroom, getAllClassroom, getClassroomByClassAndSubject } from "../controllers/classroomController.js";
-import { getActivityByTeacher, getActivity, paticipatedActivityByteacher, abstactActivityFilterByRoom, abstactActivityClassroom, generateLinkActivityForQR, saveActivityByStudentWithQR } from "../controllers/activitiesController.js";
+import { getActivityByTeacher, getActivity, paticipatedActivityByteacher, abstactActivityFilterByRoom, abstactActivityClassroom, generateLinkActivityForQR } from "../controllers/activitiesController.js";
 import { getAllAcademicTerms, getTermDateBetweenFilterHolidays } from "../controllers/termController.js";
 import { getHolidayList } from "../controllers/holidayController.js";
 import { getLeaveRequestForTeacher, getLeaveRequestForTeacherByleaveRequestStudingTimeId, teacherUpdateStatusLeaveRequest } from "../controllers/leaverequestController.js";
@@ -44,7 +44,6 @@ router.post('/activity/:actId/participate', paticipatedActivityByteacher); // pa
 router.get('/activity/abstact/byclassroom/:activityId/:classId',abstactActivityClassroom);
 router.get('/activity/abstact/:activityId',abstactActivityFilterByRoom);
 router.post('/activity/generate-qr', generateLinkActivityForQR); // generate link for QR code
-router.post('/activity/join', saveActivityByStudentWithQR); // join activity with QR code
 router.get('/holiday/:termId', getHolidayList);
 
 router.get('/leave-requests', getLeaveRequestForTeacher); // get leave request for teacher

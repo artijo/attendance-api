@@ -11,6 +11,7 @@ import { getAllLeaveRequestsByStudentId, getAllLeaveRequestsType, getStudingTime
 import { studentAttendenceEnrollment, saveAttendenceByLeader, saveAttendenceByStudentWithQR, isEnrollment, summarzieAttendenceByDateStudent } from "../controllers/attendenceController.js";
 import { getClassroomBystdId, getClassroomMembersByClassroomId, getTimeTableandStudytimeByClassId, getStuydingTimeById } from "../controllers/leaderController.js";
 import { getTermByStudent } from "../controllers/termController.js";
+import { saveActivityByStudentWithQR } from "../controllers/activitiesController.js";
 
 
 //timetable 
@@ -39,5 +40,8 @@ router.get('/leader/classrooms/:classId/members', getClassroomMembersByClassroom
 router.get('/leader/classrooms/:classId/timetable', getTimeTableandStudytimeByClassId); // ตารางเรียนของห้องเรียน
 router.get('/leader/studytime/:studingTimeId', getStuydingTimeById); // ตารางเรียนของห้องเรียน
 router.post('/leader/attendance/bulk', saveAttendenceByLeader); // บันทึกการเข้าเรียนของหัวหน้าห้อง
+
+// กิจกรรม
+router.post('/activity/join', saveActivityByStudentWithQR);
 
 export default router;
