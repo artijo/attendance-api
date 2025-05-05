@@ -12,7 +12,7 @@ import { studentAttendenceEnrollment, saveAttendenceByLeader, saveAttendenceBySt
 import { getClassroomBystdId, getClassroomMembersByClassroomId, getTimeTableandStudytimeByClassId, getStuydingTimeById } from "../controllers/leaderController.js";
 import { getTermByStudent } from "../controllers/termController.js";
 import { getSubjectByStudent } from "../controllers/subjectController.js";
-import { saveActivityByStudentWithQR, getActivityByLeader, getActivity, paticipatedActivityByLeader, getActivityStudent } from "../controllers/activitiesController.js";
+import { saveActivityByStudentWithQR, getActivityByLeader, getActivity, paticipatedActivityByLeader, getActivityStudent, activityCheckIn, isActivityThisTimeCheckIn } from "../controllers/activitiesController.js";
 
 
 //timetable 
@@ -32,7 +32,10 @@ router.get('/attendence/history/subjectdetail/:termId/:subjectId', summarzieAtte
 router.get('/term', getTermByStudent);
 
 //กิจกรรม
+
 router.get('/activity', getActivityStudent);
+router.get('/activity/isCheckin/:activityId', isActivityThisTimeCheckIn);
+router.post('/activity', activityCheckIn);
 
 // ลา
 router.get('/leave', getAllLeaveRequestsByStudentId); // ประวัติการลา

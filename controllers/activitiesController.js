@@ -958,30 +958,29 @@ export const getActivityStudent = async (req, res) => {
             const firstTermStartDate = DateTime.fromJSDate(terms[0].termStart).setZone('UTC');
             const lastTermStartDate = DateTime.fromJSDate(terms[terms.length - 1].termEnd).setZone('UTC');
             const activity = await db.activity.findMany({
-                where:{
-                    AND:[
-                        {actDate: {gte:firstTermStartDate}},
-                        {actDateEnd: {lte:lastTermStartDate}}
+                where: {
+                    AND: [
+                        { actDate: { gte: firstTermStartDate } },
+                        { actDateEnd: { lte: lastTermStartDate } }
                     ]
                 },
                 include: {
-                    classroom:true
+                    classroom: true
                 }
             });
-            const filterActivity = activity.reduce((accumulator,item) => {
-                if(item.classroom.length > 0){
+            const filterActivity = activity.reduce((accumulator, item) => {
+                if (item.classroom.length > 0) {
                     item.classroom.map((classCanJoin) => {
-                        if(arrayOfClassID.includes(classCanJoin.classId)) {
+                        if (arrayOfClassID.includes(classCanJoin.classId)) {
                             accumulator.push(item);
                         }
                     });
-                }else{
+                } else {
                     accumulator.push(item);
                 };
                 return accumulator;
-            },[]);
-            // console.log(filterActivity);
-            return res.status(200).json("kuy");
+            }, []);
+            return res.status(200).json(filterActivity);
         } catch (error) {
             console.error(error);
             return res.status(500).json({ message: 'Internal server error' })
@@ -991,3 +990,69 @@ export const getActivityStudent = async (req, res) => {
         return res.status(400).json({ message: 'Bad requset' })
     }
 };
+
+export const activityCheckIn = async (req, res) => {
+    const { activity } = req.body;
+    // console.log(activity.actId);
+    const studentId = req.user.id;
+    const dtNow = DateTime.now().setZone('Asia/Bangkok');
+    if (activity && studentId) {
+        try {
+            const createActivityPaticipate = await db.activityParticipate.create({
+                data: {
+                    activity: {
+                        connect: {
+                            actId: activity.actId
+                        }
+                    },
+                    student: {
+                        connect: {
+                            stdId: studentId
+                        }
+                    },
+                    note: "-",
+                    joinTimestamp: dtNow,
+                    operateBy: 'student',
+                }
+            });
+            return res.status(200).json({ status: 1 });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Internal server error' });
+        };
+    } else {
+        console.error('Bad reqsuet');
+        return res.status(400).json({ message: 'Bad requset' });
+    };
+};
+
+export const isActivityThisTimeCheckIn = async (req, res) => {
+    const { activityId } = req.params;
+    const studentId = req.user.id;
+    const dtNowStartDay = DateTime.now().setZone('Asia/Bangkok').startOf('day');
+    const dtNowEndDay = DateTime.now().setZone('Asia/Bangkok').endOf('day');
+    console.log(dtNowEndDay.toUTC().toString());
+    if (activityId && studentId) {
+        try {
+            const isActivityPaticipate = await db.activityParticipate.findFirst({
+                where: {
+                    AND: [
+                        {actId: activityId},
+                        {stdId: studentId}
+                    ]
+                }
+            });
+            if (isActivityPaticipate) {
+                return res.status(200).json({ isFound: true });
+            } else {
+                return res.status(200).json({ isFound: false });
+            }
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+    } else {
+        console.error('Bad reqsuet');
+        return res.status(400).json({ message: 'Bad requset' });
+    }
+}
