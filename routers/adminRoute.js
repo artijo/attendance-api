@@ -3,7 +3,8 @@ import { Router } from "express";
 import {
     createStudent,getAllStudent,
     updateStudent, getStudent,
-    createStudentWithFile, getStudentwithoutClassroom
+    createStudentWithFile, getStudentwithoutClassroom,
+    getStudentforaddmemberinclassroom
  } from "../controllers/studentController.js";
 import {
     createTeacher, getAllTeacher,
@@ -39,6 +40,7 @@ router.post('/student', createStudent);
 router.put('/student',updateStudent);
 router.post('/students/bulk', createStudentWithFile);
 router.get('/students/withoutClassroom', getStudentwithoutClassroom);
+router.get('/students/foraddmemberinclassroom', getStudentforaddmemberinclassroom); // ดึงข้อมูลนักเรียนที่ยังไม่มีห้องเรียน
 
 // teacher Management
 router.get('/teacher/:uuid', getTeacher); // ดึงข้อมูล teacher
