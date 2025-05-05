@@ -61,8 +61,7 @@ model Teacher {
   deptId             String?
   department         Department?                @relation(fields: [deptId], references: [deptId])
   subject            Subject[]
-  classId            String?
-  classroom          Classrooms?                @relation(fields: [classId], references: [classId])
+  classTeacher       ClassroomTeacher[]
   attendance         Attendance[]
   leaveRequestStudingTime LeaveRequestStudingTime[]
   activity           ActivityTeacher[]
@@ -143,7 +142,7 @@ model Classrooms {
   term          AcademicTerms              @relation(fields: [termId], references: [termId])
   // timetable     Timetable?
   timetable     Timetable[]
-  teacher       Teacher[]
+  classTeacher  ClassroomTeacher[]
   activity      ClassroomCanjoinActivity[]
   ldrId      String?
   leader        Leader?                    @relation(fields: [ldrId], references: [ldrId])
@@ -371,6 +370,17 @@ model AcademicTerms {
   termEnd DateTime
   classroom Classrooms[]
   holiday Holiday[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+}
+
+model ClassroomTeacher {
+  classTeacherId String @id @default(uuid())
+  classId String
+  tchId String
+  classroom Classrooms @relation(fields: [classId], references: [classId])
+  teacher Teacher @relation(fields: [tchId], references: [tchId])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
