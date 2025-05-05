@@ -1268,11 +1268,6 @@ export const summarzieAttendenceByDateStudent = async (req, res) => {
                         gte: starttime,
                         lte: endtime
                     },
-                    attendance:{
-                        every: {
-                            stdId:studentId
-                        }
-                    }
                 },
                 include: {
                     attendance: true,
@@ -1290,8 +1285,18 @@ export const summarzieAttendenceByDateStudent = async (req, res) => {
                     studingTimeDate: 'asc'
                 }
             });
-            return res.status(200).json(studytime);
+
+            const studytimeFilter = studytime.map((st) => {
+                const filterAttendence = st.attendance.filter((att) => att.stdId === studentId);
+                const newObject = {
+                    ...st,
+                    attendance: filterAttendence
+                };
+                return newObject; 
+            });
+            return res.status(200).json(studytimeFilter);
         } catch (error) {
+            console.error(error);
             return res.status(500).json({ message: 'something happen on server side' })
         }
     } else {
@@ -1318,11 +1323,6 @@ export const summarzieAttendenceBySubject = async (req, res) => {
                     timetable: {
                         subId: subjectId
                     },
-                    attendance:{
-                        every: {
-                            stdId:studentId
-                        }
-                    }
                 },
                 include: {
                     attendance: true,
@@ -1336,7 +1336,17 @@ export const summarzieAttendenceBySubject = async (req, res) => {
                     studingTimeDate:'asc'
                 }
             });
-            return res.status(200).json(stduytime);
+
+            const studytimeFilter = stduytime.map((st) => {
+                const filterAttendence = st.attendance.filter((att) => att.stdId === studentId);
+                const newObject = {
+                    ...st,
+                    attendance: filterAttendence
+                };
+                return newObject; 
+            });
+
+            return res.status(200).json(studytimeFilter);
         } catch (error) {
             return res.status(500).json({ message: 'something happen on server-side'})
         }
