@@ -1038,10 +1038,15 @@ export const isActivityThisTimeCheckIn = async (req, res) => {
                 where: {
                     AND: [
                         {actId: activityId},
-                        {stdId: studentId}
+                        {stdId: studentId},
+                        {joinTimestamp: {
+                            gte: dtNowStartDay,
+                            lte: dtNowEndDay
+                        }}
                     ]
                 }
             });
+            // console.log(isActivityPaticipate);
             if (isActivityPaticipate) {
                 return res.status(200).json({ isFound: true });
             } else {
