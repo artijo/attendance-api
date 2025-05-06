@@ -2,6 +2,7 @@ import { daybetween } from '../helper/helper.js';
 import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
 import { pushMessageToLine } from '../helper/line.js';
+import { generateToken, decodeToken, verifyToken } from '../helper/jwt.js';
 
 const zone = process.env.TIME_ZONE || 'Asia/Bangkok';
 
@@ -581,4 +582,84 @@ export const abstactActivityFilterByRoom = async(req, res) => {
         return res.status(500).send("message: something happening");
     }
     
+}
+
+export const generateLinkActivityForQR = async (req, res) => {
+    const { activityId } = req.body;
+    if(activityId){
+        try{
+            const token = generateToken({ activityId }, '10m');
+            const link = `${process.env.STUDENT_WEB_CLIENT}/activity/qr/${token}`;
+            res.status(200).json({link});
+        }catch(error) {
+            console.error(error);
+            return res.status(500).send("message: something happening");
+        };
+    }else{
+        return res.status(400).send({message:"bad requset"});
+    }
+}
+
+export const saveActivityByStudentWithQR = async (req, res) => {
+    const { token } = req.body;
+    
+    if(token){
+        try{
+            const verify = verifyToken(token);
+            const activity = await db.activity.findFirst({
+                where:{
+                    actId: verify.activityId
+                }
+            });
+            // ถ้าไม่อยู่ในวันที่และเวลาจัดกิจกรรมไม่สามารถเข้าร่วมได้
+            const activityDate = DateTime.fromISO(activity.actDate.toISOString(), { zone : 'UTC' }).setZone(zone);
+            const activityDateEnd = DateTime.fromISO(activity.actDateEnd.toISOString(), { zone: 'UTC'}).setZone(zone);
+            const activityTimeStart = DateTime.fromISO(activity.actStartTime.toISOString(), { zone: 'UTC'}).setZone(zone);
+            const activityTimeEnd = DateTime.fromISO(activity.actEndTime.toISOString(), { zone: 'UTC'}).setZone(zone);
+            if(activityDate > DateTime.now().setZone(zone) || activityDateEnd < DateTime.now().setZone(zone)){
+                return res.status(400).json({message:"activity is not in date"});
+            }
+            if(activityTimeStart > DateTime.now().setZone(zone) || activityTimeEnd < DateTime.now().setZone(zone)){
+                return res.status(400).json({message:"activity is not in time"});
+            }
+            // check activity is full
+            if(activity.joinLimitNumber) {
+                const count = await db.activityParticipate.count({
+                    where:{
+                        actId: activity.actId
+                    }
+                });
+                if(count >= activity.joinLimitNumber){
+                    return res.status(400).json({message:"activity is full"});
+                }
+            }
+            const activityParticipate = await db.activityParticipate.findFirst({
+                where:{
+                    AND:{
+                        stdId: req.user.id,
+                        actId: activity.actId
+                    }
+                }
+            });
+            if(activityParticipate){
+                return res.status(200).json({message:"join activity success"});
+            }
+            else{
+                await db.activityParticipate.create({
+                    data:{
+                        actId:activity.actId,
+                        stdId: req.user.id,
+                        joinTimestamp:DateTime.fromISO(activity.actDate.toISOString(), { zone : 'UTC' }).setZone(zone),
+                        operateBy:"student",
+                    }
+                });
+                return res.status(200).json({message:"join activity success"});
+            }
+        }catch(error) {
+            console.error(error);
+            return res.status(500).send("message: something happening");
+        };
+    }else{
+        return res.status(400).send({message:"bad requset"});
+    }
 }
