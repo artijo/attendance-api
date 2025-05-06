@@ -935,7 +935,7 @@ export const getActivityStudent = async (req, res) => {
                         include: {
                             term: true
                         }
-                    }
+                    },
                 }
             });
             // console.log(studentClassroomMember);
@@ -965,7 +965,8 @@ export const getActivityStudent = async (req, res) => {
                     ]
                 },
                 include: {
-                    classroom: true
+                    classroom: true,
+                    activityType: true
                 }
             });
             const filterActivity = activity.reduce((accumulator, item) => {
@@ -1037,16 +1038,17 @@ export const isActivityThisTimeCheckIn = async (req, res) => {
             const isActivityPaticipate = await db.activityParticipate.findFirst({
                 where: {
                     AND: [
-                        {actId: activityId},
-                        {stdId: studentId},
-                        {joinTimestamp: {
-                            gte: dtNowStartDay,
-                            lte: dtNowEndDay
-                        }}
+                        { actId: activityId },
+                        { stdId: studentId },
+                        {
+                            joinTimestamp: {
+                                gte: dtNowStartDay,
+                                lte: dtNowEndDay
+                            }
+                        }
                     ]
                 }
             });
-            // console.log(isActivityPaticipate);
             if (isActivityPaticipate) {
                 return res.status(200).json({ isFound: true });
             } else {
@@ -1061,3 +1063,33 @@ export const isActivityThisTimeCheckIn = async (req, res) => {
         return res.status(400).json({ message: 'Bad requset' });
     }
 }
+
+export const activityHistoryStudent = async (req, res) => {
+    const studnetId = req.user.id;
+    const { activityId } = req.params;
+    if (activityId && studnetId) {
+        try{
+            const activityPaticipate = await db.activityParticipate.findMany({
+                where: {
+                    stdId: studnetId,
+                    actId: activityId
+                },
+                include: {
+                    teacher:true,
+                    leader:{
+                        include:{
+                            student:true
+                        }
+                    }
+                }
+            });
+            return res.status(200).json(activityPaticipate);
+        }catch(error) { 
+            console.error(error);
+            return res.status(500).json({ message: 'Internal server error' });
+        };
+    } else {
+        console.error('Bad requset');
+        return res.status(400).json({ message: 'Bad requset' })
+    };
+};

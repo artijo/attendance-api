@@ -12,7 +12,7 @@ import { studentAttendenceEnrollment, saveAttendenceByLeader, saveAttendenceBySt
 import { getClassroomBystdId, getClassroomMembersByClassroomId, getTimeTableandStudytimeByClassId, getStuydingTimeById } from "../controllers/leaderController.js";
 import { getTermByStudent } from "../controllers/termController.js";
 import { getSubjectByStudent } from "../controllers/subjectController.js";
-import { saveActivityByStudentWithQR, getActivityByLeader, getActivity, paticipatedActivityByLeader, getActivityStudent, activityCheckIn, isActivityThisTimeCheckIn } from "../controllers/activitiesController.js";
+import { saveActivityByStudentWithQR, getActivityByLeader, getActivity, paticipatedActivityByLeader, getActivityStudent, activityCheckIn, isActivityThisTimeCheckIn, activityHistoryStudent } from "../controllers/activitiesController.js";
 
 
 //timetable 
@@ -35,11 +35,12 @@ router.get('/term', getTermByStudent);
 
 router.get('/activity', getActivityStudent);
 router.get('/activity/isCheckin/:activityId', isActivityThisTimeCheckIn);
+router.get('/activity/hitory/:activityId',activityHistoryStudent);
 router.post('/activity', activityCheckIn);
 
 // ลา
 router.get('/leave', getAllLeaveRequestsByStudentId); // ประวัติการลา
-router.get('/leaveType', getAllLeaveRequestsType); // ประเภทการลา
+router.get('/leaveType', getAllLeaveRequestsType); // ประเภทการลา   
 router.get('/studingTime/:date', getStudingTimeByDate); // เวลาเรียนในวันนั้นๆ
 router.post('/leave',uploadS3.single('leaveFile') ,CreateLeaveRequest); // สร้างการลา
 router.get('/leave/:id', getLeaveRequestById); // ประวัติการลา
