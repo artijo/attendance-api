@@ -19,7 +19,7 @@ export const isEnrollment = async (req,res) => {
             })
             if(isAttendece != null){
                 return res.status(200).json({isFound: 1 });
-            }else{
+            }else if(isAttendece == null){
                 return res.status(200).json({isFound: 0})
             }
         }catch(error) {
@@ -1223,8 +1223,6 @@ export const saveAttendenceByStudentWithQR = async (req, res) => {
                     }
         )}
             }
-
-           
             return res.json({message : 'success', studyTime, attendanceTime: dtNow.toFormat('yyyy-MM-dd HH:mm:ss')});
         }catch(err){
             console.error(err);
@@ -1232,3 +1230,59 @@ export const saveAttendenceByStudentWithQR = async (req, res) => {
         };
     }
 }
+
+export const summarzieAttendenceByDateStudent = async (req, res) => {
+    const studentId = req.user.id;
+    const termId = req.params.termId;
+    const date = req.params.date;
+    const dateStart = DateTime.fromISO(`${date}T00:00:00`).setZone('Asia/Bangkok');
+    const starttime = DateTime.fromISO(`${dateStart.toString().split('T')[0]}T01:40:00Z`).setZone('UTC');
+    const endtime = DateTime.fromISO(`${dateStart.toString().split('T')[0]}T08:40:00Z`).setZone('UTC');
+    // console.log(endtime);
+    if(termId && studentId && date){
+        try{
+            const classroomMember = await db.classroomMember.findFirst({
+                where: {
+                    stdId:studentId,
+                    classroom: {
+                        termId: termId
+                    }
+                }
+            });
+            
+            const studytime = await db.studingTime.findMany({
+                where: {
+                    timetable: {
+                        classId: classroomMember.classId,
+                        dayOfWeek: dateStart.weekday,
+                    },
+                    studingTimeDate: {
+                        gte:starttime,
+                        lte:endtime
+                    }
+                },
+                include: {
+                    attendance:true, 
+                    timetable:{
+                        include: {
+                            subject:{
+                                include: {
+                                    teacher:true
+                                }
+                            }
+                        }
+                    }
+                },
+                orderBy: {
+                    studingTimeDate:'asc'
+                }
+            });
+            return res.status(200).json(studytime);
+        }catch(error) {
+            return res.status(500).json({message: 'something happen on server side'})
+        }
+    }else{
+        return res.status(400).json({message: 'bad requset'})
+    }
+};
+

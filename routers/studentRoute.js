@@ -8,16 +8,22 @@ import {
     getTimetableRoleStudent
 } from "../controllers/timetableController.js";
 import { getAllLeaveRequestsByStudentId, getAllLeaveRequestsType, getStudingTimeByDate, CreateLeaveRequest, getLeaveRequestById, cancelLeaveRequest } from "../controllers/leaverequestController.js";
-import { studentAttendenceEnrollment, saveAttendenceByLeader, saveAttendenceByStudentWithQR, isEnrollment } from "../controllers/attendenceController.js";
+import { studentAttendenceEnrollment, saveAttendenceByLeader, saveAttendenceByStudentWithQR, isEnrollment, summarzieAttendenceByDateStudent } from "../controllers/attendenceController.js";
 import { getClassroomBystdId, getClassroomMembersByClassroomId, getTimeTableandStudytimeByClassId, getStuydingTimeById } from "../controllers/leaderController.js";
+import { getTermByStudent } from "../controllers/termController.js";
 
-// ประวัติการเข้าเรียน
+
+//timetable 
 router.get('/timetable', getTimetableRoleStudent);
 
 // นักเรียนลงชื่อเข้าเรียน
 router.post('/attendence/isEnrollment', isEnrollment);
 router.post('/attendence/enrollment', studentAttendenceEnrollment);
 router.post('/attendance/qr', saveAttendenceByStudentWithQR); // บันทึกการเข้าเรียนด้วย QR Code
+router.get('/attendence/history/:termId/:date', summarzieAttendenceByDateStudent);
+
+//เทอม
+router.get('/term', getTermByStudent);
 
 // ลา
 router.get('/leave', getAllLeaveRequestsByStudentId); // ประวัติการลา
