@@ -11,8 +11,8 @@ import { getAllLeaveRequestsByStudentId, getAllLeaveRequestsType, getStudingTime
 import { studentAttendenceEnrollment, saveAttendenceByLeader, saveAttendenceByStudentWithQR, isEnrollment, summarzieAttendenceByDateStudent, summarzieAttendenceBySubject } from "../controllers/attendenceController.js";
 import { getClassroomBystdId, getClassroomMembersByClassroomId, getTimeTableandStudytimeByClassId, getStuydingTimeById } from "../controllers/leaderController.js";
 import { getTermByStudent } from "../controllers/termController.js";
-import { saveActivityByStudentWithQR } from "../controllers/activitiesController.js";
 import { getSubjectByStudent } from "../controllers/subjectController.js";
+import { saveActivityByStudentWithQR, getActivityByLeader, getActivity, paticipatedActivityByLeader } from "../controllers/activitiesController.js";
 
 
 //timetable 
@@ -45,6 +45,9 @@ router.get('/leader/classrooms/:classId/members', getClassroomMembersByClassroom
 router.get('/leader/classrooms/:classId/timetable', getTimeTableandStudytimeByClassId); // ตารางเรียนของห้องเรียน
 router.get('/leader/studytime/:studingTimeId', getStuydingTimeById); // ตารางเรียนของห้องเรียน
 router.post('/leader/attendance/bulk', saveAttendenceByLeader); // บันทึกการเข้าเรียนของหัวหน้าห้อง
+router.get('/leader/activities', getActivityByLeader); // กิจกรรมที่หัวหน้าห้องต้องทำ
+router.get('/leader/activity/:uuid', getActivity); // กิจกรรมที่หัวหน้าห้องต้องทำ
+router.post('/leader/activity/:actId/participate', paticipatedActivityByLeader); // หัวหน้าห้องเข้าร่วมกิจกรรม
 
 // กิจกรรม
 router.post('/activity/join/qr', saveActivityByStudentWithQR);
