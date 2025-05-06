@@ -8,10 +8,11 @@ import {
     getTimetableRoleStudent
 } from "../controllers/timetableController.js";
 import { getAllLeaveRequestsByStudentId, getAllLeaveRequestsType, getStudingTimeByDate, CreateLeaveRequest, getLeaveRequestById, cancelLeaveRequest } from "../controllers/leaverequestController.js";
-import { studentAttendenceEnrollment, saveAttendenceByLeader, saveAttendenceByStudentWithQR, isEnrollment, summarzieAttendenceByDateStudent } from "../controllers/attendenceController.js";
+import { studentAttendenceEnrollment, saveAttendenceByLeader, saveAttendenceByStudentWithQR, isEnrollment, summarzieAttendenceByDateStudent, summarzieAttendenceBySubject } from "../controllers/attendenceController.js";
 import { getClassroomBystdId, getClassroomMembersByClassroomId, getTimeTableandStudytimeByClassId, getStuydingTimeById } from "../controllers/leaderController.js";
 import { getTermByStudent } from "../controllers/termController.js";
 import { saveActivityByStudentWithQR } from "../controllers/activitiesController.js";
+import { getSubjectByStudent } from "../controllers/subjectController.js";
 
 
 //timetable 
@@ -21,7 +22,11 @@ router.get('/timetable', getTimetableRoleStudent);
 router.post('/attendence/isEnrollment', isEnrollment);
 router.post('/attendence/enrollment', studentAttendenceEnrollment);
 router.post('/attendance/qr', saveAttendenceByStudentWithQR); // บันทึกการเข้าเรียนด้วย QR Code
+
+//ประวัติการเข้าเรียน
 router.get('/attendence/history/:termId/:date', summarzieAttendenceByDateStudent);
+router.get('/attendecne/subjectlist/:termId', getSubjectByStudent);
+router.get('/attendence/history/subjectdetail/:termId/:subjectId', summarzieAttendenceBySubject);
 
 //เทอม
 router.get('/term', getTermByStudent);
