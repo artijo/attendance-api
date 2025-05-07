@@ -543,8 +543,9 @@ export const getClassroomByClassAndSubject = async (req, res) => {
             },
             include:{
                 classroomType:true,
-                teacher:true,
-                term:true
+                // teacher:true,
+                term:true,
+                classTeacher:true
             },
             orderBy: [
                 {classLevel: 'asc'},
@@ -552,9 +553,7 @@ export const getClassroomByClassAndSubject = async (req, res) => {
             ]
             
         });
-        console.log(classrooms);
         res.status(200).json(classrooms);
-
     }catch(error){
         res.status(501).json("เกิดข้อผิดพลาดบางอย่างบน Server");
         console.error(error);
