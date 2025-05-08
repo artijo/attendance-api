@@ -261,7 +261,6 @@ export const getSubjectByStudent = async (req, res) => {
                 }
             });
 
-
             const subjectList = classroomMember.classroom.timetable.reduce((accumulator,item) => {
                 const itemfind = accumulator.find((acc) =>  acc.subId === item.subject.subId);
                 if(!itemfind) {
