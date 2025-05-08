@@ -181,3 +181,32 @@ export const deleteTerm = async (req, res) => {
     };
 };
 
+export const getTermByStudent =  async (req, res) => {
+    const studentId = req.user.id;
+    if(studentId) {
+        try{
+            const classRoomMember = await db.classroomMember.findMany({
+                where: {
+                    stdId: studentId
+                },
+                include: {
+                    classroom: {
+                        include: {
+                            term:{
+                                include:{
+                                    holiday:true
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            const termList = classRoomMember.map((classroomMember) => classroomMember.classroom.term);
+            res.status(200).json(termList);
+        }catch(error) {
+            res.status(500).json({ message: "something happen!"});
+        };
+    }else{
+        return res.status(400).json({message: 'id not found'});
+    };
+};

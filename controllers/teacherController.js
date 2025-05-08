@@ -50,7 +50,16 @@ export const getAllTeacher = async (req, res) => {
                 }
             ],
             include:{
-                department: true
+                department: true,
+                classTeacher: {
+                    include:{
+                        classroom: {
+                            include:{
+                                term: true,
+                            }
+                        }
+                    }
+                },
             }
         });
         res.json(teacherLists)
@@ -105,7 +114,15 @@ export const getTeacher = async (req, res) => {
                 },
                 include: {
                     department: true,
-                    classroom: true
+                    classTeacher: {
+                        include: {
+                            classroom: {
+                                include: {
+                                    term: true,
+                                }
+                            }
+                        }
+                    },
                 }
             });
             res.json(teacher);

@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "npx prisma db push && node index.js",
+    "start": "npx prsima db push && npx prisma generate && node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -23,11 +23,11 @@
   },
   "homepage": "https://github.com/artijo/student_attendance_api#readme",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.787.0",
-    "@aws-sdk/s3-request-presigner": "^3.787.0",
-    "@prisma/client": "^6.6.0",
+    "@aws-sdk/client-s3": "^3.802.0",
+    "@aws-sdk/s3-request-presigner": "^3.802.0",
+    "@prisma/client": "^6.7.0",
     "@vinejs/vine": "^3.0.1",
-    "axios": "^1.8.4",
+    "axios": "^1.9.0",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -37,12 +37,12 @@
     "luxon": "^3.6.1",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.2",
-    "resend": "^4.3.0",
+    "resend": "^4.5.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9",
-    "prisma": "^6.6.0"
+    "nodemon": "^3.1.10",
+    "prisma": "^6.7.0"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

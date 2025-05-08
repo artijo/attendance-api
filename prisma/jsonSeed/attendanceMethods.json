@@ -7,5 +7,14 @@
     },
     {
         "attMethodName": "เช็คชื่อด้วยคุณครู"
+    },
+    {
+        "attMethodName": "เช็คชื่อด้วยระบบ QR Code"
+    },
+    {
+        "attMethodName": "ระบบลา"
+    },
+    {
+        "attMethodName": "เช็คชื่อด้วยหัวหน้าห้อง"
     }
 ]

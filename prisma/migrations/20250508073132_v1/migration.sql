@@ -6,50 +6,49 @@ CREATE TABLE `Student` (
     `lName` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NULL,
     `tel` VARCHAR(191) NULL,
+    `googleId` VARCHAR(191) NULL,
+    `lineId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `deletedAt` DATETIME(3) NULL,
 
     UNIQUE INDEX `Student_email_key`(`email`),
     UNIQUE INDEX `Student_tel_key`(`tel`),
+    UNIQUE INDEX `Student_googleId_key`(`googleId`),
+    UNIQUE INDEX `Student_lineId_key`(`lineId`),
     PRIMARY KEY (`stdId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Leader` (
     `ldrId` VARCHAR(191) NOT NULL,
-    `fName` VARCHAR(191) NOT NULL,
-    `lName` VARCHAR(191) NOT NULL,
-    `email` VARCHAR(191) NULL,
-    `tel` VARCHAR(191) NULL,
-    `password` VARCHAR(191) NOT NULL,
+    `stdId` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `deletedAt` DATETIME(3) NULL,
 
-    UNIQUE INDEX `Leader_email_key`(`email`),
-    UNIQUE INDEX `Leader_tel_key`(`tel`),
     PRIMARY KEY (`ldrId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Teacher` (
     `tchId` VARCHAR(191) NOT NULL,
-    `tchCode` VARCHAR(191) NOT NULL,
     `fName` VARCHAR(191) NOT NULL,
     `lName` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NULL,
     `tel` VARCHAR(191) NULL,
-    `password` VARCHAR(191) NOT NULL,
+    `password` VARCHAR(191) NULL,
+    `googleId` VARCHAR(191) NULL,
+    `lineId` VARCHAR(191) NULL,
     `deptId` VARCHAR(191) NULL,
-    `classId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `deletedAt` DATETIME(3) NULL,
 
-    UNIQUE INDEX `Teacher_tchCode_key`(`tchCode`),
     UNIQUE INDEX `Teacher_email_key`(`email`),
     UNIQUE INDEX `Teacher_tel_key`(`tel`),
+    UNIQUE INDEX `Teacher_googleId_key`(`googleId`),
+    UNIQUE INDEX `Teacher_lineId_key`(`lineId`),
     PRIMARY KEY (`tchId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -70,12 +69,14 @@ CREATE TABLE `Parent` (
     `name` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NULL,
     `tel` VARCHAR(191) NULL,
+    `lineId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `deletedAt` DATETIME(3) NULL,
 
     UNIQUE INDEX `Parent_email_key`(`email`),
     UNIQUE INDEX `Parent_tel_key`(`tel`),
+    UNIQUE INDEX `Parent_lineId_key`(`lineId`),
     PRIMARY KEY (`prntId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -97,14 +98,13 @@ CREATE TABLE `Subject` (
     `subCode` VARCHAR(191) NOT NULL,
     `subNameThai` VARCHAR(191) NOT NULL,
     `subNameEng` VARCHAR(191) NULL,
-    `subCredit` INTEGER NOT NULL,
+    `subCredit` DOUBLE NOT NULL,
     `tchId` VARCHAR(191) NOT NULL,
     `subTypeId` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `deletedAt` DATETIME(3) NULL,
 
-    UNIQUE INDEX `Subject_subCode_key`(`subCode`),
     PRIMARY KEY (`subId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -127,7 +127,7 @@ CREATE TABLE `Classrooms` (
     `classRoom` INTEGER NOT NULL,
     `classTypeId` VARCHAR(191) NOT NULL,
     `termId` VARCHAR(191) NOT NULL,
-    `leaderId` VARCHAR(191) NULL,
+    `ldrId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `deletedAt` DATETIME(3) NULL,
@@ -222,37 +222,13 @@ CREATE TABLE `AttendanceMethod` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `EditAttendance` (
-    `attId` VARCHAR(191) NOT NULL,
-    `stdId` VARCHAR(191) NOT NULL,
-    `studingTimeId` VARCHAR(191) NOT NULL,
-    `attTimestamp` DATETIME(3) NOT NULL,
-    `attStatus` ENUM('PRESENT', 'ABSENT', 'LATE', 'ACTIVITY', 'LEAVE') NOT NULL,
-    `attMethodId` VARCHAR(191) NOT NULL,
-    `latitute` DOUBLE NULL,
-    `longitute` DOUBLE NULL,
-    `note` VARCHAR(191) NULL,
-    `operatedBy` VARCHAR(191) NOT NULL,
-    `tchId` VARCHAR(191) NULL,
-    `leaderId` VARCHAR(191) NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
-    `deletedAt` DATETIME(3) NULL,
-
-    PRIMARY KEY (`attId`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
 CREATE TABLE `LeaveRequest` (
     `leaveId` VARCHAR(191) NOT NULL,
     `stdId` VARCHAR(191) NOT NULL,
     `leaveDate` DATETIME(3) NOT NULL,
     `leaveTypeId` VARCHAR(191) NOT NULL,
     `leaveReason` VARCHAR(191) NOT NULL,
-    `leaveStatus` ENUM('WAITING', 'APPROVED', 'REJECTED') NOT NULL,
     `LeaveFile` VARCHAR(191) NULL,
-    `tacherApproveId` VARCHAR(191) NULL,
-    `approverTimestamp` DATETIME(3) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `deletedAt` DATETIME(3) NULL,
@@ -273,14 +249,18 @@ CREATE TABLE `LeaveRequestType` (
 
 -- CreateTable
 CREATE TABLE `LeaveRequestStudingTime` (
+    `leaveRequestStudingTimeId` VARCHAR(191) NOT NULL,
     `leaveId` VARCHAR(191) NOT NULL,
     `studyTimeId` VARCHAR(191) NOT NULL,
+    `leaveStatus` ENUM('WAITING', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'WAITING',
+    `tacherApproveId` VARCHAR(191) NULL,
+    `approverTimestamp` DATETIME(3) NULL,
+    `rejectedNote` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `deletedAt` DATETIME(3) NULL,
 
-    UNIQUE INDEX `LeaveRequestStudingTime_leaveId_key`(`leaveId`),
-    UNIQUE INDEX `LeaveRequestStudingTime_studyTimeId_key`(`studyTimeId`)
+    PRIMARY KEY (`leaveRequestStudingTimeId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -357,23 +337,6 @@ CREATE TABLE `ActivityParticipate` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `EditActivityParticipate` (
-    `actParticipateId` VARCHAR(191) NOT NULL,
-    `actId` VARCHAR(191) NOT NULL,
-    `stdId` VARCHAR(191) NOT NULL,
-    `note` VARCHAR(191) NULL,
-    `joinTimestamp` DATETIME(3) NOT NULL,
-    `operateBy` VARCHAR(191) NOT NULL,
-    `teacherId` VARCHAR(191) NULL,
-    `leaderId` VARCHAR(191) NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
-    `deletedAt` DATETIME(3) NULL,
-
-    PRIMARY KEY (`actParticipateId`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
 CREATE TABLE `Holiday` (
     `holidayId` VARCHAR(191) NOT NULL,
     `startHolidayDate` DATETIME(3) NOT NULL,
@@ -403,6 +366,18 @@ CREATE TABLE `AcademicTerms` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `ClassroomTeacher` (
+    `classTeacherId` VARCHAR(191) NOT NULL,
+    `classId` VARCHAR(191) NOT NULL,
+    `tchId` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `deletedAt` DATETIME(3) NULL,
+
+    PRIMARY KEY (`classTeacherId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `Admin` (
     `adminId` VARCHAR(191) NOT NULL,
     `username` VARCHAR(191) NOT NULL,
@@ -421,10 +396,10 @@ CREATE TABLE `Admin` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `Teacher` ADD CONSTRAINT `Teacher_deptId_fkey` FOREIGN KEY (`deptId`) REFERENCES `Department`(`deptId`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `Leader` ADD CONSTRAINT `Leader_stdId_fkey` FOREIGN KEY (`stdId`) REFERENCES `Student`(`stdId`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Teacher` ADD CONSTRAINT `Teacher_classId_fkey` FOREIGN KEY (`classId`) REFERENCES `Classrooms`(`classId`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `Teacher` ADD CONSTRAINT `Teacher_deptId_fkey` FOREIGN KEY (`deptId`) REFERENCES `Department`(`deptId`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `StudentParent` ADD CONSTRAINT `StudentParent_stdId_fkey` FOREIGN KEY (`stdId`) REFERENCES `Student`(`stdId`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -445,7 +420,7 @@ ALTER TABLE `Classrooms` ADD CONSTRAINT `Classrooms_classTypeId_fkey` FOREIGN KE
 ALTER TABLE `Classrooms` ADD CONSTRAINT `Classrooms_termId_fkey` FOREIGN KEY (`termId`) REFERENCES `AcademicTerms`(`termId`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Classrooms` ADD CONSTRAINT `Classrooms_leaderId_fkey` FOREIGN KEY (`leaderId`) REFERENCES `Leader`(`ldrId`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `Classrooms` ADD CONSTRAINT `Classrooms_ldrId_fkey` FOREIGN KEY (`ldrId`) REFERENCES `Leader`(`ldrId`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `ClassroomMember` ADD CONSTRAINT `ClassroomMember_classId_fkey` FOREIGN KEY (`classId`) REFERENCES `Classrooms`(`classId`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -478,34 +453,19 @@ ALTER TABLE `Attendance` ADD CONSTRAINT `Attendance_tchId_fkey` FOREIGN KEY (`tc
 ALTER TABLE `Attendance` ADD CONSTRAINT `Attendance_leaderId_fkey` FOREIGN KEY (`leaderId`) REFERENCES `Leader`(`ldrId`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `EditAttendance` ADD CONSTRAINT `EditAttendance_stdId_fkey` FOREIGN KEY (`stdId`) REFERENCES `Student`(`stdId`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `EditAttendance` ADD CONSTRAINT `EditAttendance_studingTimeId_fkey` FOREIGN KEY (`studingTimeId`) REFERENCES `StudingTime`(`studyTimeId`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `EditAttendance` ADD CONSTRAINT `EditAttendance_attMethodId_fkey` FOREIGN KEY (`attMethodId`) REFERENCES `AttendanceMethod`(`attMethodId`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `EditAttendance` ADD CONSTRAINT `EditAttendance_tchId_fkey` FOREIGN KEY (`tchId`) REFERENCES `Teacher`(`tchId`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `EditAttendance` ADD CONSTRAINT `EditAttendance_leaderId_fkey` FOREIGN KEY (`leaderId`) REFERENCES `Leader`(`ldrId`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `LeaveRequest` ADD CONSTRAINT `LeaveRequest_stdId_fkey` FOREIGN KEY (`stdId`) REFERENCES `Student`(`stdId`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `LeaveRequest` ADD CONSTRAINT `LeaveRequest_leaveTypeId_fkey` FOREIGN KEY (`leaveTypeId`) REFERENCES `LeaveRequestType`(`leaveTypeId`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `LeaveRequest` ADD CONSTRAINT `LeaveRequest_tacherApproveId_fkey` FOREIGN KEY (`tacherApproveId`) REFERENCES `Teacher`(`tchId`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `LeaveRequestStudingTime` ADD CONSTRAINT `LeaveRequestStudingTime_leaveId_fkey` FOREIGN KEY (`leaveId`) REFERENCES `LeaveRequest`(`leaveId`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `LeaveRequestStudingTime` ADD CONSTRAINT `LeaveRequestStudingTime_studyTimeId_fkey` FOREIGN KEY (`studyTimeId`) REFERENCES `StudingTime`(`studyTimeId`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `LeaveRequestStudingTime` ADD CONSTRAINT `LeaveRequestStudingTime_tacherApproveId_fkey` FOREIGN KEY (`tacherApproveId`) REFERENCES `Teacher`(`tchId`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Activity` ADD CONSTRAINT `Activity_actTypeId_fkey` FOREIGN KEY (`actTypeId`) REFERENCES `ActivityType`(`actTypeId`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -535,16 +495,10 @@ ALTER TABLE `ActivityParticipate` ADD CONSTRAINT `ActivityParticipate_teacherId_
 ALTER TABLE `ActivityParticipate` ADD CONSTRAINT `ActivityParticipate_leaderId_fkey` FOREIGN KEY (`leaderId`) REFERENCES `Leader`(`ldrId`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `EditActivityParticipate` ADD CONSTRAINT `EditActivityParticipate_stdId_fkey` FOREIGN KEY (`stdId`) REFERENCES `Student`(`stdId`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `EditActivityParticipate` ADD CONSTRAINT `EditActivityParticipate_actId_fkey` FOREIGN KEY (`actId`) REFERENCES `Activity`(`actId`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `EditActivityParticipate` ADD CONSTRAINT `EditActivityParticipate_teacherId_fkey` FOREIGN KEY (`teacherId`) REFERENCES `Teacher`(`tchId`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `EditActivityParticipate` ADD CONSTRAINT `EditActivityParticipate_leaderId_fkey` FOREIGN KEY (`leaderId`) REFERENCES `Leader`(`ldrId`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `Holiday` ADD CONSTRAINT `Holiday_termId_fkey` FOREIGN KEY (`termId`) REFERENCES `AcademicTerms`(`termId`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ClassroomTeacher` ADD CONSTRAINT `ClassroomTeacher_classId_fkey` FOREIGN KEY (`classId`) REFERENCES `Classrooms`(`classId`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ClassroomTeacher` ADD CONSTRAINT `ClassroomTeacher_tchId_fkey` FOREIGN KEY (`tchId`) REFERENCES `Teacher`(`tchId`) ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -3,7 +3,8 @@ import { Router } from "express";
 import {
     createStudent,getAllStudent,
     updateStudent, getStudent,
-    createStudentWithFile, getStudentwithoutClassroom
+    createStudentWithFile, getStudentwithoutClassroom,
+    getStudentforaddmemberinclassroom
  } from "../controllers/studentController.js";
 import {
     createTeacher, getAllTeacher,
@@ -26,7 +27,7 @@ import { getSubject,getAllSubject, getAllSubjectType, createSubject, editSubject
 import { getAllAcademicTerms, createTerm, deleteTerm, getOneAcademicTerm,updateTerm, getTermDateBetweenFilterHolidays } from "../controllers/termController.js";
 import { getHolidayListAuto, createHoliday, getHolidayList, deleteHoliday, getOneHoliday, updateHoliday, fullCalendarHoliday } from "../controllers/holidayController.js"
 import { getFullCalendarStudyTime} from "../controllers/stuyingTimeController.js";
-import { getAllActivitiesByType, getActivity, getActivityType, createActivity, editActivity, abstactActivityClassroom, abstactActivityFilterByRoom } from "../controllers/activitiesController.js";
+import { getAllActivitiesByType, getActivity, getActivityType, createActivity, editActivity, abstactActivityClassroom, abstactActivityFilterByRoom, generateLinkActivityForQR } from "../controllers/activitiesController.js";
 import {getAttendenceBySubject,getAttendenceByDate,getAttendenceSummaryByClassroom, getAttendenceSummaryBySubjectIsExam} from "../controllers/attendenceController.js";
 import { getAllLeaveRequestForAdmin, getLeaveRequestForAdminByLeaveId } from "../controllers/leaverequestController.js";
 
@@ -39,6 +40,7 @@ router.post('/student', createStudent);
 router.put('/student',updateStudent);
 router.post('/students/bulk', createStudentWithFile);
 router.get('/students/withoutClassroom', getStudentwithoutClassroom);
+router.get('/students/foraddmemberinclassroom', getStudentforaddmemberinclassroom); // ดึงข้อมูลนักเรียนที่ยังไม่มีห้องเรียน
 
 // teacher Management
 router.get('/teacher/:uuid', getTeacher); // ดึงข้อมูล teacher
@@ -122,6 +124,7 @@ router.get('/activityType', getActivityType);
 router.put('/activity/:uuid', editActivity);
 router.get('/activity/abstact/byclassroom/:activityId/:classId',abstactActivityClassroom);
 router.get('/activity/abstact/:activityId',abstactActivityFilterByRoom);
+router.post('/activity/generate-qr', generateLinkActivityForQR); // generate link for QR code
 
 //Attendence
 router.get('/attendence/:subjectId/:classroomId', getAttendenceBySubject);

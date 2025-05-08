@@ -2,6 +2,7 @@ import { daybetween } from '../helper/helper.js';
 import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
 import { pushMessageToLine } from '../helper/line.js';
+import { generateToken, decodeToken, verifyToken } from '../helper/jwt.js';
 
 const zone = process.env.TIME_ZONE || 'Asia/Bangkok';
 
@@ -19,7 +20,7 @@ export const getAllActivitiesByType = async (req, res) => {
                 actTypeName: acttype
             },
             include: {
-                activity : {
+                activity: {
                     include: {
                         teacher: true,
                     }
@@ -35,11 +36,11 @@ export const getAllActivitiesByType = async (req, res) => {
 
 export const getActivity = async (req, res) => {
     const uuid = req.params.uuid;
-    const { date } = req.query;
-        
+    const { date, classId } = req.query;
+
     try {
         let actParticipateFilter = {};
-        
+
         // If date is provided in query, filter actParticipate by date
         if (date) {
             const filterDate = DateTime.fromISO(date);
@@ -52,7 +53,17 @@ export const getActivity = async (req, res) => {
                 }
             };
         }
-        
+
+        // If classId is provided in query, filter actParticipate by classId
+        if (classId) {
+            actParticipateFilter = {
+                ...actParticipateFilter,
+                where: {
+                    ...actParticipateFilter.where,
+                    classId: classId
+                }
+            }
+        }
         const activity = await db.activity.findUnique({
             where: {
                 actId: uuid
@@ -139,7 +150,7 @@ export const createActivity = async (req, res) => {
                                 actId: activity.actId
                             }
                         },
-                        teacher : {
+                        teacher: {
                             connect: {
                                 tchId: tch.tchId
                             }
@@ -208,7 +219,7 @@ export const editActivity = async (req, res) => {
                                 actId: activity.actId
                             }
                         },
-                        teacher : {
+                        teacher: {
                             connect: {
                                 tchId: tch.tchId
                             }
@@ -293,13 +304,13 @@ export const paticipatedActivityByteacher = async (req, res) => {
                 tchId: req.user.id
             }
         });
-        
+
         // Use the provided date or current date
         let targetDate = DateTime.now();
         if (date) {
             targetDate = DateTime.fromISO(date);
         }
-        
+
         const activityPaticipate = await db.activityParticipate.findFirst({
             where: {
                 actId: actId,
@@ -310,7 +321,7 @@ export const paticipatedActivityByteacher = async (req, res) => {
                 }
             }
         });
-       
+
         // const activityParticipateCount = await db.activityParticipate.count({
         //     where: {
         //         actId: actId,
@@ -322,7 +333,7 @@ export const paticipatedActivityByteacher = async (req, res) => {
         // });
 
         if (activityPaticipate) {
-            if(status == "ABSENT"){
+            if (status == "ABSENT") {
                 await db.activityParticipate.delete({
                     where: {
                         actParticipateId: activityPaticipate.actParticipateId
@@ -342,7 +353,7 @@ export const paticipatedActivityByteacher = async (req, res) => {
                 return res.json({ message: 'success' });
             }
         } else {
-            if(activity.joinLimit && activity.joinLimitNumber > 0){
+            if (activity.joinLimit && activity.joinLimitNumber > 0) {
                 //count activityparticipate
                 const countActParticipate = await db.activityParticipate.count({
                     where: {
@@ -354,7 +365,7 @@ export const paticipatedActivityByteacher = async (req, res) => {
                     }
                 });
                 // console.log(countActParticipate);
-                if(countActParticipate >= activity.joinLimitNumber){
+                if (countActParticipate >= activity.joinLimitNumber) {
                     return res.status(400).json({ message: 'จำนวนนักเรียนเต็มแล้ว' });
                 }
             }
@@ -399,9 +410,9 @@ export const paticipatedActivityByteacher = async (req, res) => {
                     await pushMessageToLine(p.parent.lineId, message);
                 });
             } else {
-                console.log("No parent found for this student.");  
+                console.log("No parent found for this student.");
             }
-        
+
             return res.json({ message: 'success' });
         }
     } catch (error) {
@@ -413,122 +424,122 @@ export const paticipatedActivityByteacher = async (req, res) => {
 export const abstactActivityClassroom = async (req, res) => {
     const activityId = req.params.activityId;
     const classroomId = req.params.classId;
-    if(!activityId && !classroomId) return res.status(401).json({message: "Something error on Client side"});
-    if(classroomId === "all");
+    if (!activityId && !classroomId) return res.status(401).json({ message: "Something error on Client side" });
+    if (classroomId === "all");
     const activities = await db.activity.findFirst({
-        where:{
+        where: {
             actId: activityId
         }
     });
     const classroomMember = await db.classroomMember.findMany({
-        where:{
+        where: {
             classId: classroomId
         },
-        include:{
-            student:true
+        include: {
+            student: true
         }
     });
-    const actDateStart = DateTime.fromISO(activities.actDate.toISOString(), { zone : 'UTC' }).setZone(zone);
-    const actDateEnd = DateTime.fromISO(activities.actDateEnd.toISOString(), { zone: 'UTC'}).setZone(zone);
+    const actDateStart = DateTime.fromISO(activities.actDate.toISOString(), { zone: 'UTC' }).setZone(zone);
+    const actDateEnd = DateTime.fromISO(activities.actDateEnd.toISOString(), { zone: 'UTC' }).setZone(zone);
     const dayBetween = daybetween(
-        actDateStart.toString().split('T')[0], 
+        actDateStart.toString().split('T')[0],
         actDateEnd.toString().split('T')[0]
     );
     const abstact = await dayBetween.reduce(async (accPromise, curr) => {
         const acc = await accPromise;
         const studentPaticipate = await Promise.all(classroomMember.map(async (member) => {
             const lteDate = DateTime.fromISO(`${curr}T${activities.actEndTime}:00Z`)
-                                .setZone('UTC')
-                                .minus({hour:7});
+                .setZone('UTC')
+                .minus({ hour: 7 });
             const gteDate = DateTime.fromISO(`${curr}T${activities.actStartTime}:00Z`)
-                                .setZone('UTC')
-                                .minus({hour:7});
+                .setZone('UTC')
+                .minus({ hour: 7 });
             const paticipate = await db.activityParticipate.findFirst({
-                where:{
-                    AND:{
+                where: {
+                    AND: {
                         stdId: member.stdId,
                         actId: activityId,
-                        joinTimestamp:{
+                        joinTimestamp: {
                             lte: lteDate,
                             gte: gteDate
                         }
                     }
                 },
-                include:{
-                    student:true
+                include: {
+                    student: true
                 }
             });
-            if(paticipate){
+            if (paticipate) {
                 return { ...paticipate, isJoin: true };
-            }else{
-                
+            } else {
+
             }
-            return { stdId: member.stdId , student:{fName:member.student.fName,lName:member.student.lName,title:member.student.title} ,isJoin: false };
+            return { stdId: member.stdId, student: { fName: member.student.fName, lName: member.student.lName, title: member.student.title }, isJoin: false };
         }));
-        acc[curr] = studentPaticipate.sort((a,b) => a.stdId.localeCompare(b.stdId));
+        acc[curr] = studentPaticipate.sort((a, b) => a.stdId.localeCompare(b.stdId));
         return acc;
     }, Promise.resolve({}));
     return res.status(200).json(abstact);
 }
 
-export const abstactActivityFilterByRoom = async(req, res) => {
-    
+export const abstactActivityFilterByRoom = async (req, res) => {
+
     const activityId = req.params.activityId;
-    
-    try{
+
+    try {
         const activitys = await db.activity.findFirst({
             where: {
-                actId:activityId
+                actId: activityId
             }
         });
         // console.log(activitys);
         //หาว่ากิจกรรมที่ต้องการ insert นั้นอยู่ระหว่างช่วงเทอมไหน
         const dateTimeNow = DateTime.fromISO(activitys.actDate.toISOString()).setZone(zone);
         const dateActivityStart = dateTimeNow.toString().split("T")[0];
-        function isSchoolOpen(dateStr){
-            const startDate = DateTime.fromJSDate(dateStr.termStart, {zone: 'UTC'}); // วันที่เริ่มเปิดเทอม
-            const endDate = DateTime.fromJSDate(dateStr.termEnd, {zone: 'UTC'});   // วันที่ปิดเทอม
-            const checkDate = DateTime.fromISO(dateActivityStart, {zone: 'UTC'});      // วันที่ที่ต้องการตรวจสอบ
+        function isSchoolOpen(dateStr) {
+            const startDate = DateTime.fromJSDate(dateStr.termStart, { zone: 'UTC' }); // วันที่เริ่มเปิดเทอม
+            const endDate = DateTime.fromJSDate(dateStr.termEnd, { zone: 'UTC' });   // วันที่ปิดเทอม
+            const checkDate = DateTime.fromISO(dateActivityStart, { zone: 'UTC' });      // วันที่ที่ต้องการตรวจสอบ
             // console.log(startDate);
-            if(checkDate >= startDate && checkDate <= endDate){
+            if (checkDate >= startDate && checkDate <= endDate) {
                 return true;
-            }else{
+            } else {
                 return false;
             };
         }
         // console.log(dateActivityStart);
-    
+
         const termLists = await db.academicTerms.findMany({});
         let termId;
-        for(const term of termLists) {
-            if(isSchoolOpen(term)){
+        for (const term of termLists) {
+            if (isSchoolOpen(term)) {
                 termId = term.termId;
             }
         };
         // console.log(termId);
-    
-        const actDateStart = DateTime.fromISO(activitys.actDate.toISOString(), { zone : 'UTC' }).setZone(zone);
-        const actDateEnd = DateTime.fromISO(activitys.actDateEnd.toISOString(), { zone: 'UTC'}).setZone(zone);
+
+        const actDateStart = DateTime.fromISO(activitys.actDate.toISOString(), { zone: 'UTC' }).setZone(zone);
+        const actDateEnd = DateTime.fromISO(activitys.actDateEnd.toISOString(), { zone: 'UTC' }).setZone(zone);
         const paticipateCount = daybetween(
-            actDateStart.toString().split('T')[0], 
+            actDateStart.toString().split('T')[0],
             actDateEnd.toString().split('T')[0]
         ).length;
-        
-    
+
+
         const classroomsHasMembers = await db.classrooms.findMany({
-            where:{
+            where: {
                 termId: termId
             },
-            include:{
-                classroomMembers:{
-                    include:{
-                        student:true
+            include: {
+                classroomMembers: {
+                    include: {
+                        student: true
                     }
                 }
             },
-            orderBy:[
-                { classLevel : 'asc'},
-                { classRoom: 'asc'}
+            orderBy: [
+                { classLevel: 'asc' },
+                { classRoom: 'asc' }
             ]
         });
 
@@ -540,18 +551,18 @@ export const abstactActivityFilterByRoom = async(req, res) => {
         // console.log(termId);
 
         // console.log(classroomsHasMembers);
-        
-        const abstactFilterByClassroom = await  classroomsHasMembers.reduce(async (prev, curr) => {
+
+        const abstactFilterByClassroom = await classroomsHasMembers.reduce(async (prev, curr) => {
             const acc = await prev;
             const participateMember = Promise.all(curr.classroomMembers.map(async (member) => {
                 const participate = await db.activityParticipate.findMany({
-                    where:{
-                        AND:{
-                            stdId:member.stdId,
-                            actId:activitys.actId,
-                            student:{
-                                classroomMembers:{
-                                    some:{
+                    where: {
+                        AND: {
+                            stdId: member.stdId,
+                            actId: activitys.actId,
+                            student: {
+                                classroomMembers: {
+                                    some: {
                                         classId: curr.classId
                                     }
                                 }
@@ -566,19 +577,519 @@ export const abstactActivityFilterByRoom = async(req, res) => {
                     fName: member.student.fName,
                     lName: member.student.lName,
                     stdNo: parseInt(member.stdNo),
-                    participateCount :participate.length
+                    participateCount: participate.length
                 }
                 return objectDraft;
             }));
             const participateMemberSortByStdNo = (await participateMember).sort((a, b) => a.stdNo - b.stdNo);
-            
-            acc[`${curr.classLevel}/${curr.classRoom}`] =  participateMemberSortByStdNo;
-            
+
+            acc[`${curr.classLevel}/${curr.classRoom}`] = participateMemberSortByStdNo;
+
             return acc;
-        },Promise.resolve({}))
+        }, Promise.resolve({}))
         return res.status(200).send(abstactFilterByClassroom);
-    }catch(error){
+    } catch (error) {
         return res.status(500).send("message: something happening");
     }
-    
+
 }
+
+export const generateLinkActivityForQR = async (req, res) => {
+    const { activityId } = req.body;
+    if (activityId) {
+        try {
+            //เวลาหมดอายุ Token เท่ากับวันที่สิ้นสุดกิจกรรม
+            const activity = await db.activity.findFirst({
+                where: {
+                    actId: activityId
+                }
+            });
+            if (!activity) return res.status(400).send({ message: "activity not found" });
+            const now = DateTime.now().setZone(zone);
+            const activityDateEnd = DateTime.fromISO(activity.actDateEnd.toISOString(), { zone: 'UTC' }).setZone(zone).endOf('day');
+
+            // เวลาหมดอายุ Token โดยเริมนับจากเวลาปัจจุบันถึงเวลาสิ้นสุดกิจกรรม
+            const diff = activityDateEnd.diff(now, ['days', 'hours', 'minutes', 'seconds']);
+            console.log(diff.toObject());
+
+            // Calculate expiry time in seconds
+            const expirySeconds = Math.floor((diff.toObject().days * 24 * 60 * 60) +
+                (diff.toObject().hours * 60 * 60) +
+                (diff.toObject().minutes * 60) +
+                (diff.toObject().seconds));
+
+            const token = generateToken({
+                activityId: activity.actId
+            }, expirySeconds);
+            const link = `${process.env.STUDENT_WEB_CLIENT}/activity/qr/${token}`;
+            res.status(200).json({ link });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).send("message: something happening");
+        };
+    } else {
+        return res.status(400).send({ message: "bad requset" });
+    }
+}
+
+export const saveActivityByStudentWithQR = async (req, res) => {
+    const { qrToken: token } = req.body;
+
+    if (token) {
+        try {
+            const verify = verifyToken(token);
+            // console.log(verify);
+            const activity = await db.activity.findFirst({
+                where: {
+                    actId: verify.activityId
+                },
+                include: {
+                    classroom: {
+                        include: {
+                            classroom: true
+                        }
+                    }
+                }
+            });
+            // ถ้าไม่อยู่ในวันที่และเวลาจัดกิจกรรมไม่สามารถเข้าร่วมได้
+            const activityDate = DateTime.fromISO(activity.actDate.toISOString(), { zone: 'UTC' }).setZone(zone).startOf('day');
+            const activityDateEnd = DateTime.fromISO(activity.actDateEnd.toISOString(), { zone: 'UTC' }).setZone(zone).endOf('day');
+            // Check if current date is within activity date range
+            // console.log(activityDate.toString(), activityDateEnd.toString());
+            const now = DateTime.now().setZone(zone);
+            // console.log(now.toString());
+            if (now < activityDate || now > activityDateEnd) {
+                return res.status(400).json({ message: "activity is not in date" });
+            }
+
+            // Compare just the time portions
+            const currentTime = now.toFormat('HH:mm');
+            const startTime = activity.actStartTime;
+            const endTime = activity.actEndTime;
+
+            if (currentTime < startTime || currentTime > endTime) {
+                return res.status(400).json({ message: "activity is not in time" });
+            }
+            // check activity is full
+            if (activity.joinLimitNumber) {
+                const count = await db.activityParticipate.count({
+                    where: {
+                        actId: activity.actId
+                    }
+                });
+                if (count >= activity.joinLimitNumber) {
+                    return res.status(400).json({ message: "activity is full" });
+                }
+            }
+            // ตรวจสอบว่าเป็นนักเรียนในห้องเรียนที่สามารถเข้าร่วมกิจกรรมได้หรือไม่ถ้ามีการกำหนด
+            if (activity.joinLimit) {
+                const classroom = await db.classroomCanjoinActivity.findMany({
+                    where: {
+                        activity: {
+                            actId: activity.actId
+                        },
+                        classroom: {
+                            classId: {
+                                in: activity.classroom.map((classroom) => classroom.classId)
+                            }
+                        }
+                    }
+                });
+                // console.log(classroom);
+                // search for student in classroom
+                if (classroom) {
+                    const student = await db.classroomMember.findFirst({
+                        where: {
+                            stdId: req.user.id,
+                            classId: {
+                                in: classroom.map((classroom) => classroom.classId)
+                            }
+                        }
+                    });
+                    if (!student) {
+                        return res.status(400).json({ message: "you are not in classroom that can join this activity" });
+                    }
+                }
+            }
+
+            // check if student already joined the activity
+            const activityParticipate = await db.activityParticipate.findFirst({
+                where: {
+                    AND: {
+                        stdId: req.user.id,
+                        actId: activity.actId
+                    }
+                }
+            });
+            if (activityParticipate) {
+                return res.status(200).json({ message: "join activity success", activity, joinTimestamp: now.toJSDate() });
+            }
+            else {
+                await db.activityParticipate.create({
+                    data: {
+                        actId: activity.actId,
+                        stdId: req.user.id,
+                        joinTimestamp: DateTime.fromISO(activity.actDate.toISOString(), { zone: 'UTC' }).setZone(zone),
+                        operateBy: "student",
+                    }
+                });
+                return res.status(200).json({ message: "join activity success", activity, joinTimestamp: now.toJSDate() });
+            }
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: "something happening", error });
+        };
+    } else {
+        return res.status(400).json({ message: "bad requset" });
+    }
+}
+
+export const getActivityByLeader = async (req, res) => {
+    const { classId } = req.query;
+    console.log(classId);
+    // ดึง activity ทั้งหมด ถ้ากิจกรรมไหนมีการจำกัดตามห้องเรียนให้ filter ตามห้องเรียนที่ไม่เกี่ยวข้องออกไป
+    try {
+        const activities = await db.activity.findMany({
+            include: {
+                activityType: true,
+                teacher: {
+                    include: {
+                        teacher: true
+                    }
+                },
+                actParticipate: true,
+                classroom: {
+                    include: {
+                        classroom: {
+                            include: {
+                                term: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        // filter เอาห้องเรียนที่ไม่เกี่ยวข้องออก
+        const filteredActivities = activities.filter(activity => {
+            if (activity.classroom && activity.classroom.length > 0) {
+                return activity.classroom.some(classroom => classroom.classId === classId);
+            }
+            return true; // Include activities without classroom restrictions
+        }
+        );
+        return res.json(filteredActivities);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Failed to fetch activities', error: error.message });
+    }
+}
+
+export const paticipatedActivityByLeader = async (req, res) => {
+    const { actId } = req.params;
+    const { stdId, status, note, date } = req.body;
+    try {
+        const activity = await db.activity.findFirst({
+            where: {
+                actId: actId
+            }
+        });
+        const teacher = await db.teacher.findFirst({
+            where: {
+                tchId: req.user.id
+            }
+        });
+
+        // Use the provided date or current date
+        let targetDate = DateTime.now();
+        if (date) {
+            targetDate = DateTime.fromISO(date);
+        }
+
+        // get Leader by stdId
+        const leader = await db.leader.findFirst({
+            where: {
+                stdId: req.user.id
+            }
+        });
+
+        const activityPaticipate = await db.activityParticipate.findFirst({
+            where: {
+                actId: actId,
+                stdId: stdId,
+                joinTimestamp: {
+                    gte: targetDate.startOf('day').toUTC().toJSDate(),
+                    lte: targetDate.endOf('day').toUTC().toJSDate()
+                }
+            }
+        });
+
+        // const activityParticipateCount = await db.activityParticipate.count({
+        //     where: {
+        //         actId: actId,
+        //         joinTimestamp: {
+        //             gte: targetDate.startOf('day').toUTC().toJSDate(),
+        //             lte: targetDate.endOf('day').toUTC().toJSDate()
+        //         }
+        //     }
+        // });
+
+        if (activityPaticipate) {
+            if (status == "ABSENT") {
+                await db.activityParticipate.delete({
+                    where: {
+                        actParticipateId: activityPaticipate.actParticipateId
+                    }
+                });
+                return res.json({ message: 'success' });
+            } else {
+                // console.log(DateTime.now().toUTC().toJSDate());
+                await db.activityParticipate.update({
+                    where: {
+                        actParticipateId: activityPaticipate.actParticipateId
+                    },
+                    data: {
+                        note,
+                    }
+                });
+                return res.json({ message: 'success' });
+            }
+        } else {
+            if (activity.joinLimit && activity.joinLimitNumber > 0) {
+                //count activityparticipate
+                const countActParticipate = await db.activityParticipate.count({
+                    where: {
+                        actId: actId,
+                        joinTimestamp: {
+                            gte: targetDate.startOf('day').toUTC().toJSDate(),
+                            lte: targetDate.endOf('day').toUTC().toJSDate()
+                        }
+                    }
+                });
+                // console.log(countActParticipate);
+                if (countActParticipate >= activity.joinLimitNumber) {
+                    return res.status(400).json({ message: 'จำนวนนักเรียนเต็มแล้ว' });
+                }
+            }
+            // Create with the target date instead of current date if date is provided
+            await db.activityParticipate.create({
+                data: {
+                    activity: {
+                        connect: {
+                            actId: actId
+                        }
+                    },
+                    student: {
+                        connect: {
+                            stdId: stdId
+                        }
+                    },
+                    note: note,
+                    operateBy: "LEADER",
+                    leader: {
+                        connect: {
+                            ldrId: leader.ldrId
+                        }
+                    },
+                    joinTimestamp: DateTime.now().toUTC().toJSDate()
+                }
+            });
+            // Send LINE notification
+            const parent = await db.studentParent.findMany({
+                where: {
+                    student: {
+                        stdId: stdId
+                    }
+                },
+                include: {
+                    parent: true,
+                    student: true
+                }
+            });
+            if (parent.length > 0) {
+                parent.map(async (p) => {
+                    const message = `เรียนผู้ปกครอง ${p.parent.name} นักเรียน ${p.student.fName} ${p.student.lName} ได้เข้าร่วมกิจกรรม ${activity.actName} วันที่ ${DateTime.fromJSDate(activity.actDate).setZone(zone).toFormat('dd/LL/yyyy')}\n\n\nบันทึกการเข้าร่วมกิจกรรมโดยหัวหน้าห้อง`;
+                    await pushMessageToLine(p.parent.lineId, message);
+                });
+            } else {
+                console.log("No parent found for this student.");
+            }
+
+            return res.json({ message: 'success' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal server error' });
+    };
+}
+
+export const getActivityStudent = async (req, res) => {
+    const studnetId = req.user.id;
+    if (studnetId) {
+        try {
+            const studentClassroomMember = await db.classroomMember.findMany({
+                where: {
+                    stdId: studnetId
+                },
+                include: {
+                    classroom: {
+                        include: {
+                            term: true
+                        }
+                    },
+                }
+            });
+            // console.log(studentClassroomMember);
+            const arrayOfClassID = studentClassroomMember.map((stdclassMemeber) => stdclassMemeber.classId);
+            if (studentClassroomMember.length < 0) {
+                console.error('นักเรียนคนนี้ไม่มีห้องที่อยู่');
+                return res.status(500).json({ message: 'Internal server error' });
+            }
+            const terms = studentClassroomMember.reduce((accumulator, currentValue) => {
+                const term = currentValue.classroom.term;
+                if (!accumulator.includes(term)) {
+                    accumulator.push(term);
+                };
+                return accumulator;
+            }, []).sort((a, b) => a.termStart - b.termStart);
+            if (terms.length < 0) {
+                console.error('ไม่มีเทอม');
+                return res.status(500).json({ message: 'Internal server error' });
+            };
+            const firstTermStartDate = DateTime.fromJSDate(terms[0].termStart).setZone('UTC');
+            const lastTermStartDate = DateTime.fromJSDate(terms[terms.length - 1].termEnd).setZone('UTC');
+            const activity = await db.activity.findMany({
+                where: {
+                    AND: [
+                        { actDate: { gte: firstTermStartDate } },
+                        { actDateEnd: { lte: lastTermStartDate } }
+                    ]
+                },
+                include: {
+                    classroom: true,
+                    activityType: true
+                }
+            });
+            const filterActivity = activity.reduce((accumulator, item) => {
+                if (item.classroom.length > 0) {
+                    item.classroom.map((classCanJoin) => {
+                        if (arrayOfClassID.includes(classCanJoin.classId)) {
+                            accumulator.push(item);
+                        }
+                    });
+                } else {
+                    accumulator.push(item);
+                };
+                return accumulator;
+            }, []);
+            return res.status(200).json(filterActivity);
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Internal server error' })
+        }
+    } else {
+        console.error(error);
+        return res.status(400).json({ message: 'Bad requset' })
+    }
+};
+
+export const activityCheckIn = async (req, res) => {
+    const { activity } = req.body;
+    // console.log(activity.actId);
+    const studentId = req.user.id;
+    const dtNow = DateTime.now().setZone('Asia/Bangkok');
+    if (activity && studentId) {
+        try {
+            const createActivityPaticipate = await db.activityParticipate.create({
+                data: {
+                    activity: {
+                        connect: {
+                            actId: activity.actId
+                        }
+                    },
+                    student: {
+                        connect: {
+                            stdId: studentId
+                        }
+                    },
+                    note: "-",
+                    joinTimestamp: dtNow,
+                    operateBy: 'student',
+                }
+            });
+            return res.status(200).json({ status: 1 });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Internal server error' });
+        };
+    } else {
+        console.error('Bad reqsuet');
+        return res.status(400).json({ message: 'Bad requset' });
+    };
+};
+
+export const isActivityThisTimeCheckIn = async (req, res) => {
+    const { activityId } = req.params;
+    const studentId = req.user.id;
+    const dtNowStartDay = DateTime.now().setZone('Asia/Bangkok').startOf('day');
+    const dtNowEndDay = DateTime.now().setZone('Asia/Bangkok').endOf('day');
+    console.log(dtNowEndDay.toUTC().toString());
+    if (activityId && studentId) {
+        try {
+            const isActivityPaticipate = await db.activityParticipate.findFirst({
+                where: {
+                    AND: [
+                        { actId: activityId },
+                        { stdId: studentId },
+                        {
+                            joinTimestamp: {
+                                gte: dtNowStartDay,
+                                lte: dtNowEndDay
+                            }
+                        }
+                    ]
+                }
+            });
+            if (isActivityPaticipate) {
+                return res.status(200).json({ isFound: true });
+            } else {
+                return res.status(200).json({ isFound: false });
+            }
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+    } else {
+        console.error('Bad reqsuet');
+        return res.status(400).json({ message: 'Bad requset' });
+    }
+}
+
+export const activityHistoryStudent = async (req, res) => {
+    const studnetId = req.user.id;
+    const { activityId } = req.params;
+    if (activityId && studnetId) {
+        try{
+            const activityPaticipate = await db.activityParticipate.findMany({
+                where: {
+                    stdId: studnetId,
+                    actId: activityId
+                },
+                include: {
+                    teacher:true,
+                    leader:{
+                        include:{
+                            student:true
+                        }
+                    }
+                }
+            });
+            return res.status(200).json(activityPaticipate);
+        }catch(error) { 
+            console.error(error);
+            return res.status(500).json({ message: 'Internal server error' });
+        };
+    } else {
+        console.error('Bad requset');
+        return res.status(400).json({ message: 'Bad requset' })
+    };
+};

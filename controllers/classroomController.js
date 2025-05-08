@@ -41,12 +41,14 @@ export const createClassroom = async (req,res) => {
                 }
             })
             body.teacherIds?.forEach(async (teacherId) => {
-                await db.teacher.update({
-                    where:{
-                        tchId:teacherId
-                    },
+                await db.classroomTeacher.create({
                     data:{
-                        classId:classroom.classId
+                        teacher:{
+                            connect: {tchId:teacherId}
+                        },
+                        classroom:{
+                            connect: {classId:classroom.classId}
+                        }
                     }
                 })
             }
@@ -103,13 +105,22 @@ export const updateClassroom = async (req,res) => {
                 }
             })
             body.teacherIds?.forEach(async (teacherId) => {
-                await db.teacher.update({
+                await db.classroomTeacher.upsert({
                     where:{
-                        tchId:teacherId
+                        classId_tchId:{
+                            classId:body.classId,
+                            tchId:teacherId
+                        }
                     },
-                    data:{
-                        classId:classroom.classId
-                    }
+                    create:{
+                        teacher:{
+                            connect: {tchId:teacherId}
+                        },
+                        classroom:{
+                            connect: {classId:body.classId}
+                        }
+                    },
+                    update:{}
                 })
             });
             return res.json({message:"Update Classroom Success"})
@@ -150,7 +161,12 @@ export const getAllClassroom = async (req,res) => {
                         student:true
                     }
 
-                }
+                },
+                classTeacher: {
+                    include: {
+                        teacher: true
+                    }
+                },
             },
             orderBy:[{
                 classLevel:"asc"},
@@ -183,7 +199,11 @@ export const getClassroom = async (req,res) => {
                         student: true
                     }
                 },
-                teacher: true,
+                classTeacher: {
+                    include: {
+                        teacher: true
+                    }
+                },
                 leader: {
                     include: {
                         student:true
@@ -359,7 +379,11 @@ export const getClassroomByAcademicYearTerm = async (req, res) => {
                             student: true
                         }
                     },
-                    teacher: true,
+                    classTeacher: {
+                        include: {
+                            teacher: true
+                        }
+                    },
                     leader: true,
                     timetable: {
                         where: {
@@ -451,9 +475,18 @@ export const getTeacherAdvisorClassroom = async (req, res) => {
             where: {
                 tchId: user.id
             },
+            include: {
+                classTeacher: true
+            }
         });
-        // console.log(advisorList);
-        const classroomsIds = advisorList.map((advisor) => advisor.classId);
+        console.log(advisorList[0].classTeacher);
+        if(advisorList.length === 0) return res.json({not_found:"ไม่มีห้องที่เป็นที่ปรึกษา"});
+        const classroomsIds = advisorList.map((arrVal) => {
+            return arrVal.classTeacher.map((arrVal) => {
+                return arrVal.classId
+            })
+        }
+        ).flat(1);
         if(classroomsIds.some((arrVal) => arrVal === null)) return res.json({not_found:"ไม่มีห้องที่เป็นที่ปรึกษา"});
         const orderByClassrooms = await db.classrooms.findMany({
             where :{
@@ -510,8 +543,9 @@ export const getClassroomByClassAndSubject = async (req, res) => {
             },
             include:{
                 classroomType:true,
-                teacher:true,
-                term:true
+                // teacher:true,
+                term:true,
+                classTeacher:true
             },
             orderBy: [
                 {classLevel: 'asc'},
@@ -519,9 +553,7 @@ export const getClassroomByClassAndSubject = async (req, res) => {
             ]
             
         });
-        console.log(classrooms);
         res.status(200).json(classrooms);
-
     }catch(error){
         res.status(501).json("เกิดข้อผิดพลาดบางอย่างบน Server");
         console.error(error);

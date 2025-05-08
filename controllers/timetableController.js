@@ -604,8 +604,10 @@ export const getTimeTable = async (req, res) => { // ใช้สำหรับ
 
 export const getTimetableRoleStudent = async (req, res) => {
     const studentId = req.user.id;
+    // console.log(studentId);
     const dtNow = DateTime.now();
     const dtNowString = dtNow.toString();
+    // console.log(dtNowString);
     const termSerach = DateTime.fromISO(`${dtNowString.split("T")[0]}T00:00:00`).setZone(zone);
     const studyTimeStart = DateTime.fromISO(`${dtNowString.split("T")[0]}T08:40:00`).setZone('UTC');
     const studyTimeEnd = DateTime.fromISO(`${dtNowString.split("T")[0]}T15:30:00`).setZone('UTC');
@@ -634,7 +636,6 @@ export const getTimetableRoleStudent = async (req, res) => {
                     }
                 });
             }
-            // console.log(termSerach)
 
             const classroom = await db.classroomMember.findFirst({
                 where: {
