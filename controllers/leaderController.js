@@ -64,7 +64,11 @@ export async function getClassroomMembersByClassroomId(req, res) {
                 student: true,
                 classroom: {
                     include: {
-                        teacher: true,
+                        classTeacher: {
+                            include: {
+                                teacher: true
+                            }
+                        },
                         term: true,
                         classroomType: true,
                     }
