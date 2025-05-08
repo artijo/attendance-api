@@ -34,7 +34,11 @@ export async function getClassroomBystdId(req, res) {
                         classroomType: true,
                         term: true,
                         classroomMembers: true,
-                        teacher: true
+                        classTeacher: {
+                            include: {
+                                teacher: true
+                            }
+                        }
                     }
                 }
             }
