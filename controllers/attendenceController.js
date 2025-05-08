@@ -450,6 +450,7 @@ export const getAttendenceSummaryByClassroom = async (req, res) => {
 export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
     const classroomId = req.params.classroomId;
     const subjectId = req.params.subjectId;
+    console.log(classroomId);
     if (classroomId) {
         try {
             const timetables = await db.timetable.findMany({
@@ -467,15 +468,18 @@ export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
                 studyCount += timetables[timetableIndex].studyTime.length;
             }
             const studyTimeIdArray = timetables.map((timetable) => timetable.studyTime.map((studyTime) => studyTime.studyTimeId)).flat();
-
-
+            // console.log(studyTimeIdArray);
             const oldStudent = await db.classroomMember.findMany({
                 where: {
                     classId: classroomId,
-                    student: {
-                        attendance: {
+                    classroom: {
+                        timetable: {
                             some: {
-                                studingTimeId: { in: studyTimeIdArray }
+                                studyTime: {
+                                    some:{
+                                        studyTimeId: {in: studyTimeIdArray}
+                                    }
+                                }
                             }
                         }
                     }
@@ -514,7 +518,7 @@ export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
                     stdNo: 'asc',
                 }
             })
-
+            // console.log(oldStudent);
             const student = oldStudent.map((std, index) => {
                 const attendance = std.student.attendance.filter((att) => studyTimeIdArray.includes(att.studingTimeId));
                 return (
@@ -530,12 +534,7 @@ export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
                     }
                 )
             })
-            // console.log(student.student);
             const summaryList = student.map((std) => {
-                // for(const wow of std.student.attendance){
-                //     console.log(wow.studingTime.timetable.subject.subNameThai)
-                // }
-
                 const attendenceCount = std.student.attendance.filter((att) => att.attStatus === 'PRESENT').length;
                 const attendenceLateCount = std.student.attendance.filter((att) => att.attStatus === 'LATE').length;
                 const attendenceLeaveCount = std.student.attendance.filter((att) => att.attStatus === 'LEAVE').length;
@@ -1286,6 +1285,8 @@ export const summarzieAttendenceByDateStudent = async (req, res) => {
                 }
             });
 
+            console.log(studytime);
+
             const studytimeFilter = studytime.map((st) => {
                 const filterAttendence = st.attendance.filter((att) => att.stdId === studentId);
                 const newObject = {
@@ -1321,7 +1322,8 @@ export const summarzieAttendenceBySubject = async (req, res) => {
             const stduytime = await db.studingTime.findMany({
                 where: {
                     timetable: {
-                        subId: subjectId
+                        subId: subjectId,
+                        classId: classroomMember.classId
                     },
                 },
                 include: {
