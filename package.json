@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "npx prsima db push && npx prisma generate && node index.js",
+    "start": "npx prisma db push && npx prisma generate && node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
