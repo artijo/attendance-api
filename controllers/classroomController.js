@@ -545,7 +545,11 @@ export const getClassroomByClassAndSubject = async (req, res) => {
                 classroomType:true,
                 // teacher:true,
                 term:true,
-                classTeacher:true
+                classTeacher:{
+                    include:{
+                        teacher:true
+                    }
+                }
             },
             orderBy: [
                 {classLevel: 'asc'},
