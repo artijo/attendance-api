@@ -326,7 +326,15 @@ export async function getTeacherInfo (req, res) {
             },
             include: {
                 department: true,
-                classroom: true,
+                classTeacher: {
+                    include: {
+                        classroom: {
+                            include: {
+                                term: true,
+                            }
+                        }
+                    }
+                },
                 subject: true,
                 activity: true
             }
