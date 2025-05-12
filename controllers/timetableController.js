@@ -604,37 +604,35 @@ export const getTimeTable = async (req, res) => { // ใช้สำหรับ
 
 export const getTimetableRoleStudent = async (req, res) => {
     const studentId = req.user.id;
-    // console.log(studentId);
     const dtNow = DateTime.now();
     const dtNowString = dtNow.toString();
-    // console.log(dtNowString);
-    const termSerach = DateTime.fromISO(`${dtNowString.split("T")[0]}T00:00:00`).setZone(zone);
     const studyTimeStart = DateTime.fromISO(`${dtNowString.split("T")[0]}T08:40:00`).setZone('UTC');
     const studyTimeEnd = DateTime.fromISO(`${dtNowString.split("T")[0]}T15:30:00`).setZone('UTC');
     if(studentId != undefined) {
         try{
-            let term = await db.academicTerms.findFirst({
+            const dtSearchStart = dtNow.startOf('year').minus({ year : 2 });
+            const dtSearchEnd = dtNow.endOf('year'); 
+            const termList = await db.academicTerms.findMany({
                 where:{
-                    OR: [
-                        {termStart: {
-                            gte: termSerach,
-                            lte: termSerach,
-                        }},
-                        {termEnd: {
-                            gte: termSerach,
-                            lte: termSerach,
-                        }}
-                    ]
+                    termStart:{
+                        gte:dtSearchStart
+                    },
+                    termEnd: {
+                        lte: dtSearchEnd
+                    }
                 }
             });
+           
+            const term = termList.find((term) => {
+                const termStart = DateTime.fromJSDate(term.termStart).setZone('Asia/Bangkok');
+                const termEnd = DateTime.fromJSDate(term.termEnd).setZone('Asia/Bangkok');
+                return dtNow >= termStart && dtNow <= termEnd;
+            });
 
-            // if term is null get latest term
-            if(!term){
-                 term = await db.academicTerms.findFirst({
-                    orderBy:{
-                        termStart: 'desc'
-                    }
-                });
+            // console.log(term);
+
+            if(term == undefined) {
+                return res.status(500).json('Internal server-side error');
             }
 
             const classroom = await db.classroomMember.findFirst({

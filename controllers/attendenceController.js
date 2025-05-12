@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import { pushMessageToLine } from '../helper/line.js';
 import { formatTitle } from '../helper/helper.js';
 import { generateToken, decodeToken, verifyToken } from '../helper/jwt.js';
+import { locationCalculate } from '../locationCalculate.js';
 
 const zone = process.env.TIME_ZONE || 'Asia/Bangkok';
 
@@ -159,8 +160,6 @@ export const getAttendenceBySubject = async (req, res) => {
 
 export const getAttendenceByDateAndStudnet = async (req, res) => {
     const { date, classroom, student } = req.body;
-    // console.log(classroom);
-    // console.log(student);
     if (date && classroom && student) {
         try {
             const getStudent = await db.student.findFirst({
@@ -1023,8 +1022,8 @@ export const abstactAttendenceBySubject = async (req, res) => {
 
 export const studentAttendenceEnrollment = async (req, res) => {
     const { enrollmentInfo, location } = req.body;
+    const isLocationInsider = locationCalculate(location);
     const studentId = req.user.id;
-
     function statusEnrollment(sTime, lTime, enrollmentTime) {
         const startTime = DateTime.fromISO(sTime).setZone(zone);
         const lateTime = DateTime.fromISO(lTime).setZone(zone);
@@ -1035,12 +1034,12 @@ export const studentAttendenceEnrollment = async (req, res) => {
         } else if (enrollmentMinute > lateMinute) {
             return "LATE";
         }
-    }
-    // console.log(enrollmentInfo);
-    if (enrollmentInfo && location && studentId) {
-        // console.log(enrollmentInfo);
-        // console.log(studentId);
-        // console.log(location);
+    };
+
+    
+    if(!isLocationInsider) return res.status(400).json({ message: "user location isn't in inside area"});
+
+    if (enrollmentInfo && location && studentId && isLocationInsider) {
         try {
             const dtNow = DateTime.now().setZone(zone);
 
