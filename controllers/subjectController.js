@@ -235,35 +235,45 @@ export const getSubjectByStudent = async (req, res) => {
     const studentId = req.user.id;
     const { termId } = req.params;
     // console.log(termId);
-    if(studentId && termId){
-        try{
+    if (studentId && termId) {
+        try {
             const classroomMember = await db.classroomMember.findFirst({
                 where: {
-                    stdId:studentId,
+                    stdId: studentId,
                     classroom: {
                         termId: termId
                     }
-                }
-            });
-            
-            const subjectList = await db.subject.findMany({
-                where:{
-                    timetable: {
-                        every: {
-                            classId: classroomMember.classId
-                        }
-                    }
                 },
                 include: {
-                    teacher:true
+                    classroom: {
+                        include: {
+                            timetable: {
+                                include: {
+                                    subject: {
+                                        include: {
+                                            teacher:true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             });
+
+            const subjectList = classroomMember.classroom.timetable.reduce((accumulator,item) => {
+                const itemfind = accumulator.find((acc) =>  acc.subId === item.subject.subId);
+                if(!itemfind) {
+                    accumulator.push(item.subject);
+                };
+                return accumulator
+            },[]);
             res.status(200).json(subjectList);
-        }catch(error) {
+        } catch (error) {
             console.error(error);
-            return res.status(500).json({message: 'something happen on server-side'})
+            return res.status(500).json({ message: 'something happen on server-side' })
         }
-    }else{
-        return res.status(400).json({message:'bad requset'})
+    } else {
+        return res.status(400).json({ message: 'bad requset' })
     }
 }

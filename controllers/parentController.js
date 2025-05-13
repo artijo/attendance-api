@@ -204,3 +204,37 @@ export async function updateParent(req, res) {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+export async function getAllParent(req, res) {
+    try {
+        const parents = await db.parent.findMany({
+            include: {
+                student: true
+            },
+        });
+        res.status(200).json(parents);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+export async function getParentById(req, res) {
+    const { id } = req.params;
+    try {
+        const parent = await db.parent.findUnique({
+            where: {
+                prntId: id,
+            },
+            include: {
+                student: true,
+            },
+        });
+        if (!parent) {
+            return res.status(404).json({ message: 'Parent not found' });
+        }
+        res.status(200).json(parent);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}

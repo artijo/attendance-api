@@ -199,9 +199,9 @@ export const getTermByStudent =  async (req, res) => {
                             }
                         }
                     }
-                }
+                },
             });
-            const termList = classRoomMember.map((classroomMember) => classroomMember.classroom.term);
+            const termList = classRoomMember.map((classroomMember) => classroomMember.classroom.term).sort((a, b) => a.termStart - b.termStart);
             res.status(200).json(termList);
         }catch(error) {
             res.status(500).json({ message: "something happen!"});

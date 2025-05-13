@@ -30,6 +30,7 @@ import { getFullCalendarStudyTime} from "../controllers/stuyingTimeController.js
 import { getAllActivitiesByType, getActivity, getActivityType, createActivity, editActivity, abstactActivityClassroom, abstactActivityFilterByRoom, generateLinkActivityForQR } from "../controllers/activitiesController.js";
 import {getAttendenceBySubject,getAttendenceByDate,getAttendenceSummaryByClassroom, getAttendenceSummaryBySubjectIsExam} from "../controllers/attendenceController.js";
 import { getAllLeaveRequestForAdmin, getLeaveRequestForAdminByLeaveId } from "../controllers/leaverequestController.js";
+import { getAllParent, getParentById } from "../controllers/parentController.js";
 
 const router = Router();
 
@@ -135,5 +136,9 @@ router.get('/atttendence/abstract/:classroomId/:subjectId', getAttendenceSummary
 // LeaveRequest
 router.get('/leave-requests', getAllLeaveRequestForAdmin); // get leave request for admin
 router.get('/leave-requests/:id', getLeaveRequestForAdminByLeaveId); // get leave request for admin by leave id
+
+// Parent
+router.get('/parents', getAllParent); // get all parent
+router.get('/parent/:id', getParentById); // get parent by userId
 
 export default router;

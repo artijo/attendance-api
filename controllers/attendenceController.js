@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import { pushMessageToLine } from '../helper/line.js';
 import { formatTitle } from '../helper/helper.js';
 import { generateToken, decodeToken, verifyToken } from '../helper/jwt.js';
+import { locationCalculate } from '../locationCalculate.js';
 
 const zone = process.env.TIME_ZONE || 'Asia/Bangkok';
 
@@ -159,8 +160,6 @@ export const getAttendenceBySubject = async (req, res) => {
 
 export const getAttendenceByDateAndStudnet = async (req, res) => {
     const { date, classroom, student } = req.body;
-    // console.log(classroom);
-    // console.log(student);
     if (date && classroom && student) {
         try {
             const getStudent = await db.student.findFirst({
@@ -450,6 +449,7 @@ export const getAttendenceSummaryByClassroom = async (req, res) => {
 export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
     const classroomId = req.params.classroomId;
     const subjectId = req.params.subjectId;
+    console.log(classroomId);
     if (classroomId) {
         try {
             const timetables = await db.timetable.findMany({
@@ -467,15 +467,18 @@ export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
                 studyCount += timetables[timetableIndex].studyTime.length;
             }
             const studyTimeIdArray = timetables.map((timetable) => timetable.studyTime.map((studyTime) => studyTime.studyTimeId)).flat();
-
-
+            // console.log(studyTimeIdArray);
             const oldStudent = await db.classroomMember.findMany({
                 where: {
                     classId: classroomId,
-                    student: {
-                        attendance: {
+                    classroom: {
+                        timetable: {
                             some: {
-                                studingTimeId: { in: studyTimeIdArray }
+                                studyTime: {
+                                    some:{
+                                        studyTimeId: {in: studyTimeIdArray}
+                                    }
+                                }
                             }
                         }
                     }
@@ -514,7 +517,7 @@ export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
                     stdNo: 'asc',
                 }
             })
-
+            // console.log(oldStudent);
             const student = oldStudent.map((std, index) => {
                 const attendance = std.student.attendance.filter((att) => studyTimeIdArray.includes(att.studingTimeId));
                 return (
@@ -530,12 +533,7 @@ export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
                     }
                 )
             })
-            // console.log(student.student);
             const summaryList = student.map((std) => {
-                // for(const wow of std.student.attendance){
-                //     console.log(wow.studingTime.timetable.subject.subNameThai)
-                // }
-
                 const attendenceCount = std.student.attendance.filter((att) => att.attStatus === 'PRESENT').length;
                 const attendenceLateCount = std.student.attendance.filter((att) => att.attStatus === 'LATE').length;
                 const attendenceLeaveCount = std.student.attendance.filter((att) => att.attStatus === 'LEAVE').length;
@@ -1024,8 +1022,8 @@ export const abstactAttendenceBySubject = async (req, res) => {
 
 export const studentAttendenceEnrollment = async (req, res) => {
     const { enrollmentInfo, location } = req.body;
+    const isLocationInsider = locationCalculate(location);
     const studentId = req.user.id;
-
     function statusEnrollment(sTime, lTime, enrollmentTime) {
         const startTime = DateTime.fromISO(sTime).setZone(zone);
         const lateTime = DateTime.fromISO(lTime).setZone(zone);
@@ -1036,12 +1034,12 @@ export const studentAttendenceEnrollment = async (req, res) => {
         } else if (enrollmentMinute > lateMinute) {
             return "LATE";
         }
-    }
-    // console.log(enrollmentInfo);
-    if (enrollmentInfo && location && studentId) {
-        // console.log(enrollmentInfo);
-        // console.log(studentId);
-        // console.log(location);
+    };
+
+    
+    if(!isLocationInsider) return res.status(400).json({ message: "user location isn't in inside area"});
+
+    if (enrollmentInfo && location && studentId && isLocationInsider) {
         try {
             const dtNow = DateTime.now().setZone(zone);
 
@@ -1286,6 +1284,8 @@ export const summarzieAttendenceByDateStudent = async (req, res) => {
                 }
             });
 
+            console.log(studytime);
+
             const studytimeFilter = studytime.map((st) => {
                 const filterAttendence = st.attendance.filter((att) => att.stdId === studentId);
                 const newObject = {
@@ -1321,7 +1321,8 @@ export const summarzieAttendenceBySubject = async (req, res) => {
             const stduytime = await db.studingTime.findMany({
                 where: {
                     timetable: {
-                        subId: subjectId
+                        subId: subjectId,
+                        classId: classroomMember.classId
                     },
                 },
                 include: {
