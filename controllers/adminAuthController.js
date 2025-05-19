@@ -1,4 +1,4 @@
-import { comparePassword } from "../helper/bcrypt.js";
+import { comparePassword, hashPassword } from "../helper/bcrypt.js";
 import { generateToken, verifyToken } from "../helper/jwt.js";
 import db from '../prisma/client.js';
 
