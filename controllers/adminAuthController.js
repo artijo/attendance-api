@@ -124,6 +124,7 @@ export async function changePassword(req, res) {
         });
         return res.json({ status: 'success', message: 'Password changed successfully' });
     }catch(err){
+        res.status(401).json({ err });
         console.error(err);
     }
 }
