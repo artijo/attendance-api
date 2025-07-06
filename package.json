@@ -23,26 +23,26 @@
   },
   "homepage": "https://github.com/artijo/student_attendance_api#readme",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.802.0",
-    "@aws-sdk/s3-request-presigner": "^3.802.0",
-    "@prisma/client": "^6.7.0",
+    "@aws-sdk/client-s3": "^3.842.0",
+    "@aws-sdk/s3-request-presigner": "^3.842.0",
+    "@prisma/client": "^6.11.1",
     "@vinejs/vine": "^3.0.1",
-    "axios": "^1.9.0",
+    "axios": "^1.10.0",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
+    "dotenv": "^17.0.1",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "luxon": "^3.6.1",
     "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.2",
-    "resend": "^4.5.0",
+    "multer": "^2.0.1",
+    "resend": "^4.6.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.10",
-    "prisma": "^6.7.0"
+    "prisma": "^6.11.1"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
