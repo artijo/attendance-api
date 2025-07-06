@@ -1,4 +1,4 @@
-import { comparePassword } from "../helper/bcrypt.js";
+import { comparePassword, hashPassword } from "../helper/bcrypt.js";
 import { generateToken, verifyToken } from "../helper/jwt.js";
 import db from '../prisma/client.js';
 
@@ -84,6 +84,45 @@ export async function checkAuth(req, res) {
             return res.status(404).json({ message: 'User not found' });
         }
         return res.json({status: 'logged in'});
+    }catch(err){
+        res.status(401).json({ err });
+        console.error(err);
+    }
+}
+
+export async function changePassword(req, res) {
+    const { oldPassword, newPassword } = req.body;
+    const token = req.headers['authorization'].split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'Token not found' });
+    }
+    try{
+        const decoded = verifyToken(token);
+        if (!decoded) {
+            return res.status(401).json({ message: 'Invalid token' });
+        }
+        const user = await db.admin.findUnique({
+            where: {
+                username: decoded.username
+            }
+        });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const isPasswordMatch = await comparePassword(oldPassword, user.password);
+        if (!isPasswordMatch) {
+            return res.status(400).json({ message: 'Invalid password' });
+        }
+        const hashedPassword = await hashPassword(newPassword);
+        await db.admin.update({
+            where: {
+                username: decoded.username
+            },
+            data: {
+                password: hashedPassword
+            }
+        });
+        return res.json({ status: 'success', message: 'Password changed successfully' });
     }catch(err){
         res.status(401).json({ err });
         console.error(err);

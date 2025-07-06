@@ -54,9 +54,9 @@ async function  main() {
         //     data:departmentList
         // });
         //Create ClassroomType Base
-        // const classroomTypeCreate = await db.classroomType.createMany({
-        //     data:classroomTypeList
-        // });
+        const classroomTypeCreate = await db.classroomType.createMany({
+            data:classroomTypeList
+        });
         //Create Classroom Base
         // const classroomCreate = await db.classrooms.createMany({
         //     data:classroomList

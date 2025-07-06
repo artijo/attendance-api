@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 // if the DATABASE_URL env var is set, we connect to the production database
@@ -39,7 +40,7 @@ model Student {
 
 model Leader {
   ldrId          String                    @id @default(uuid())
-  stdId          String                   
+  stdId          String
   student       Student                   @relation(fields: [stdId], references: [stdId])
   classroom      Classrooms[]
   attendance     Attendance[]
@@ -157,8 +158,8 @@ model ClassroomMember {
   stdId     String
   classroom Classrooms  @relation(fields: [classId], references: [classId])
   student   Student     @relation(fields: [stdId], references: [stdId])
-  stdNo     String    
-  behaviourScore    Int   @default(100)  
+  stdNo     String
+  behaviourScore    Int   @default(100)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   deletedAt DateTime?
@@ -179,7 +180,7 @@ model ClassroomType {
 model Timetable {
   timetableId String        @id @default(uuid())
   subId       String
-  classId     String        
+  classId     String
   // tchId       String
   timeStart   String
   timeEnd     String
@@ -322,7 +323,7 @@ model ActivityTeacher {
 
 model ClassroomCanjoinActivity {
   classCanjoinId String  @id @default(uuid())
-  classId   String 
+  classId   String
   actId     String
   classroom Classrooms @relation(fields: [classId], references: [classId])
   activity  Activity   @relation(fields: [actId], references: [actId])
@@ -353,7 +354,7 @@ model Holiday{
   holidayId String @id @default(uuid())
   startHolidayDate DateTime
   endHolidayDate DateTime
-  holidayName  String 
+  holidayName  String
   type holidayType
   termId String
   term AcademicTerms @relation(fields: [termId], references: [termId])

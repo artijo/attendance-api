@@ -166,7 +166,11 @@ export const getSubject = async (req, res) => {
                     teacher: true,
                     timetable: {
                         include: {
-                            classroom: true,
+                            classroom: {
+                                include: {
+                                    term: true,
+                                }
+                            },
                             studyTime: {
                                 include: {
                                     attendance: true
