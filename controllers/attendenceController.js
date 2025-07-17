@@ -1051,7 +1051,6 @@ export const studentAttendenceEnrollment = async (req, res) => {
                     attMethodId: true
                 }
             });
-
             const createAttendance = await db.attendance.create({
                 data: {
                     stdId: studentId,
@@ -1067,7 +1066,7 @@ export const studentAttendenceEnrollment = async (req, res) => {
                     leaderId: null,
                 }
             });
-            res.status(200).json({ message: 1 });
+            res.status(200).json({ message: 'ลงชื่อเข้าเรียนสำเร็จ' });
 
         } catch (error) {
             console.error(error);
