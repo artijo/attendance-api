@@ -1,3 +1,4 @@
+import * as turf from '@turf/turf';
 export function locationVerify(userLocation) {
     const polygonSchool = turf.polygon([[
         [102.85264543866062, 16.701971672148147], 

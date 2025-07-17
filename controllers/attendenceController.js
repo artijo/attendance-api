@@ -1037,7 +1037,7 @@ export const studentAttendenceEnrollment = async (req, res) => {
         }
     };
  
-    if(!isLocationInsider) return res.status(400).json({ message: "user location isn't in inside area"});
+    if(!isLocationInsider) return res.status(400).json({ message: "ไม่สามารถลงชื่อเข้าเรียนได้เนื่องจากนักเรียนไม่ได้อยู่ในพื่นที่โรงเรียน"});
 
     if (enrollmentInfo && location && studentId && isLocationInsider) {
         try {
