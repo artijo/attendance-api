@@ -1,9 +1,10 @@
 import db from '../prisma/client.js';
 import { DateTime } from 'luxon';
+import { locationVerify } from '../helper/locationManage.js';
 import { pushMessageToLine } from '../helper/line.js';
 import { formatTitle } from '../helper/helper.js';
 import { generateToken, decodeToken, verifyToken } from '../helper/jwt.js';
-import { locationCalculate } from '../locationCalculate.js';
+// import { locationCalculate } from '../locationCalculate.js';
 
 const zone = process.env.TIME_ZONE || 'Asia/Bangkok';
 
@@ -1022,7 +1023,7 @@ export const abstactAttendenceBySubject = async (req, res) => {
 
 export const studentAttendenceEnrollment = async (req, res) => {
     const { enrollmentInfo, location } = req.body;
-    const isLocationInsider = locationCalculate(location);
+    const isLocationInsider = locationVerify(location);
     const studentId = req.user.id;
     function statusEnrollment(sTime, lTime, enrollmentTime) {
         const startTime = DateTime.fromISO(sTime).setZone(zone);
@@ -1035,8 +1036,7 @@ export const studentAttendenceEnrollment = async (req, res) => {
             return "LATE";
         }
     };
-
-    
+ 
     if(!isLocationInsider) return res.status(400).json({ message: "user location isn't in inside area"});
 
     if (enrollmentInfo && location && studentId && isLocationInsider) {
