@@ -1021,9 +1021,9 @@ export const abstactAttendenceBySubject = async (req, res) => {
 }
 
 
-export const studentAttendenceEnrollment = async (req, res) => {
+export const studentAttendenceEnrollment = async (req, res) => { 
     const { enrollmentInfo, location } = req.body;
-    const isLocationInsider = locationVerify(location);
+    const isLocationInsider = locationVerify(location); // Call locationVerify function to check user location
     const studentId = req.user.id;
     function statusEnrollment(sTime, lTime, enrollmentTime) {
         const startTime = DateTime.fromISO(sTime).setZone(zone);
