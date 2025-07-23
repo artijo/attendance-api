@@ -17,3 +17,11 @@ export function decoreteBehaviourScore(behaviourScore, attendanceStatus) {
     reason: "No attendance issues, score remains unchanged.",
   };
 }
+
+export function incrementBehaviourScore(behaviourScore) {
+  return {
+    ...behaviourScore,
+    score: behaviourScore.score + 1,
+    reason: "Behaviour score incremented by 1.",
+  };
+}
