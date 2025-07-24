@@ -1449,7 +1449,16 @@ export const summarzieAttendenceByDateStudent = async (req, res) => {
           },
         },
         include: {
-          attendance: true,
+          attendance: {
+            include:{
+              teacher:true,
+              leader:{
+                include:{
+                  student:true
+                }
+              }
+            }
+          },
           timetable: {
             include: {
               subject: {
