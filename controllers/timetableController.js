@@ -457,6 +457,7 @@ export const getTimeTableByRoom = async (req, res) => {
 
 export const deleteTimetable = async (req, res) => {
     const timetableId = req.params.timetableId;
+    // console.log(timetableId);
     if (timetableId) {
         try {
             const studyingTime = await db.studingTime.findMany({
@@ -464,29 +465,35 @@ export const deleteTimetable = async (req, res) => {
                     timetableId: timetableId
                 }
             });
-
-            const studyTimeId = studyingTime.map((item) => item.studyTimeId);
-
-            const attendance = await db.attendance.deleteMany({
-                where: {
-                    studingTimeId: {
-                        in: studyTimeId
+            if(studyingTime.length > 0) {
+                const studyTimeId = studyingTime.map((item) => item.studyTimeId);
+                
+                const leaveRequest = await db.leaveRequestStudingTime.deleteMany({
+                    where: {
+                        studyTimeId:{
+                            in:studyingTime
+                        }
                     }
-                }
-            })
+                })
 
-            const studyingTimeDelete = await db.studingTime.deleteMany({
-                where: {
-                    timetableId: timetableId
-                }
-            });
-
+                const attendance = await db.attendance.deleteMany({
+                    where : {
+                        studingTimeId : {
+                            in:studyTimeId
+                        }
+                    }
+                })
+                const studyingTimeDelete = await db.studingTime.deleteMany({
+                    where: {
+                        timetableId: timetableId
+                    }
+                });
+            }
             const timetable = await db.timetable.delete({
                 where: {
                     timetableId: timetableId
                 }
             });
-
             res.json("delete successfully!");
         } catch (err) {
             console.error(err);
