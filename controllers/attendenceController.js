@@ -771,7 +771,7 @@ export const saveAttendenceByTeacher = async (req, res) => {
               existingAttendance.attStatus,
               item.attStatus
             );
-            console.log("updatedBehaviourScore", updatedBehaviourScore);
+            // console.log("updatedBehaviourScore", updatedBehaviourScore);
             // console.log("increment behaviour score");
             if (updatedBehaviourScore.incremented) {
               await db.classroomMember.update({
@@ -819,7 +819,7 @@ export const saveAttendenceByTeacher = async (req, res) => {
                 studingTime: {
                   connect: { studyTimeId: item.studingTimeId },
                 },
-                score: 1,
+                score: item.attStatus === "ABSENT" ? 1 : 0.5,
               },
             });
           }
@@ -883,7 +883,7 @@ export const saveAttendenceByTeacher = async (req, res) => {
                 studingTime: {
                   connect: { studyTimeId: item.studingTimeId },
                 },
-                score: 1,
+                score: item.attStatus === "ABSENT" ? 1 : 0.5,
               },
             });
           }
@@ -1450,14 +1450,14 @@ export const summarzieAttendenceByDateStudent = async (req, res) => {
         },
         include: {
           attendance: {
-            include:{
-              teacher:true,
-              leader:{
-                include:{
-                  student:true
-                }
-              }
-            }
+            include: {
+              teacher: true,
+              leader: {
+                include: {
+                  student: true,
+                },
+              },
+            },
           },
           timetable: {
             include: {
