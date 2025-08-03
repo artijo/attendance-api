@@ -388,3 +388,86 @@ export const getBehaviorScoreTransaction = async (req, res) => {
     res.status(400).json({ message: "ไม่พบรหัสนักเรียน" });
   }
 };
+
+export const getDashboardData = async (req, res) => {
+  const stdId = req.user?.id;
+  if (stdId) {
+    try {
+      const student = await db.student.findFirst({
+        where: {
+          stdId: stdId,
+        },
+        include: {
+          classroomMembers: {
+            include: {
+              classroom: {
+                include: {
+                  term: true,
+                  classroomType: true,
+                  classTeacher: {
+                    include: {
+                      teacher: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!student) {
+        return res.status(404).json({ message: "ไม่พบข้อมูลนักเรียน" });
+      }
+
+      // ใบลาค้าง
+      const pendingLeaves = await db.leaveRequest.count({
+        where: {
+          student: {
+            stdId: stdId,
+          },
+          studingTime: {
+            every: {
+              leaveStatus: "WAITING",
+            },
+          },
+        },
+      });
+
+      const studentdata = {
+        stdId: student.stdId,
+        title: student.title,
+        fName: student.fName,
+        lName: student.lName,
+        email: student.email,
+        tel: student.tel,
+        classroomMembers: student.classroomMembers.map((member) => ({
+          classId: member.classroom.classId,
+          classLevel: member.classroom.classLevel,
+          classRoom: member.classroom.classRoom,
+          stdNo: member.stdNo,
+          term: member.classroom.term,
+          classroomType: member.classroom.classroomType,
+          classTeacher: member.classroom.classTeacher
+            ? member.classroom.classTeacher.map((ct) => ({
+                teacherId: ct.teacher.teacherId,
+                teacherName: `${ct.teacher.fName} ${ct.teacher.lName}`,
+              }))
+            : null,
+          behaviorScore: member.classroom.behaviorScore,
+          pendingLeaves: pendingLeaves,
+        })),
+      };
+
+      res.json(studentdata);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "เกิดข้อผิดพลาดในการดึงข้อมูลนักเรียน",
+        error: error.message,
+      });
+    }
+  } else {
+    res.status(400).json({ message: "ไม่พบรหัสนักเรียน" });
+  }
+};

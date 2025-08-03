@@ -41,7 +41,12 @@ import {
   isActivityThisTimeCheckIn,
   activityHistoryStudent,
 } from "../controllers/activitiesController.js";
-import { getBehaviorScoreTransaction } from "../controllers/studentController.js";
+import {
+  getBehaviorScoreTransaction,
+  getDashboardData,
+} from "../controllers/studentController.js";
+
+router.get("/dashboard", getDashboardData); // ข้อมูล Dashboard ของนักเรียน
 
 //timetable
 router.get("/timetable", getTimetableRoleStudent);
