@@ -1280,7 +1280,7 @@ export const saveAttendenceByStudentWithQR = async (req, res) => {
 
       const AttMethodId = await db.attendanceMethod.findFirst({
         where: {
-          attMethodName: "เช็คชื่อด้วยด้วย QR Code",
+          attMethodName: "เช็คชื่อด้วยระบบ QR Code",
         },
         select: {
           attMethodId: true,
