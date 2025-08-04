@@ -454,7 +454,7 @@ export const getDashboardData = async (req, res) => {
                 teacherName: `${ct.teacher.fName} ${ct.teacher.lName}`,
               }))
             : null,
-          behaviorScore: member.classroom.behaviorScore,
+          behaviourScore: member.behaviourScore,
           pendingLeaves: pendingLeaves,
         })),
       };
