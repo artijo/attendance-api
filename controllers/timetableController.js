@@ -471,7 +471,7 @@ export const deleteTimetable = async (req, res) => {
                 const leaveRequest = await db.leaveRequestStudingTime.deleteMany({
                     where: {
                         studyTimeId:{
-                            in:studyingTime
+                            in:studyTimeId
                         }
                     }
                 })
