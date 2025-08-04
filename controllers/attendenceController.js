@@ -2,7 +2,7 @@ import db from "../prisma/client.js";
 import { DateTime } from "luxon";
 import { locationVerify } from "../helper/locationManage.js";
 import { pushMessageToLine } from "../helper/line.js";
-import { formatTitle } from "../helper/helper.js";
+import { formatTitle, formateAttendanceStatus } from "../helper/helper.js";
 import { generateToken, decodeToken, verifyToken } from "../helper/jwt.js";
 import {
   incrementBehaviourScore,
@@ -829,7 +829,7 @@ export const saveAttendenceByTeacher = async (req, res) => {
             student.map(async (std) => {
               const lineId = std.parent.lineId;
               if (lineId) {
-                const message = `เรียนผู้ปกครอง ${std.parent.name} \n${formatTitle(std.student.title)}${std.student.fName} ${std.student.lName} ได้ทำการแก้ไขเช็คชื่อเรียนวิชา ${studyTime.timetable.subject.subNameThai} (${studyTime.timetable.subject.subNameEng})\nสอนโดยคุณครู: ${studyTime.timetable.subject.teacher.fName} ${studyTime.timetable.subject.teacher.lName}\nสถานะการเข้าเรียน: ${item.attStatus} \nเวลา: ${dtNow.toFormat("yyyy-MM-dd HH:mm:ss")} หมายเหตุ: ${item.note}\n\n\nการบันทึกนี้ถูกบันทึกโดยคุณครูประจำวิชา`;
+                const message = `เรียนผู้ปกครอง ${std.parent.name} \n${formatTitle(std.student.title)}${std.student.fName} ${std.student.lName} ได้ทำการแก้ไขเช็คชื่อเรียนวิชา ${studyTime.timetable.subject.subNameThai} (${studyTime.timetable.subject.subNameEng})\nสอนโดยคุณครู: ${studyTime.timetable.subject.teacher.fName} ${studyTime.timetable.subject.teacher.lName}\nสถานะการเข้าเรียน: ${formateAttendanceStatus(item.attStatus)} \nเวลา: ${dtNow.toFormat("yyyy-MM-dd HH:mm:ss")} หมายเหตุ: ${item.note}\n\n\nการบันทึกนี้ถูกบันทึกโดยคุณครูประจำวิชา`;
                 await pushMessageToLine(lineId, message);
               }
             });
@@ -893,7 +893,7 @@ export const saveAttendenceByTeacher = async (req, res) => {
             student.map(async (std) => {
               const lineId = std.parent.lineId;
               if (lineId) {
-                const message = `เรียนผู้ปกครอง ${std.parent.name} \n${formatTitle(std.student.title)}${std.student.fName} ${std.student.lName} ได้ทำการเช็คชื่อเรียนวิชา ${studyTime.timetable.subject.subNameThai} (${studyTime.timetable.subject.subNameEng})\nสอนโดยคุณครู: ${studyTime.timetable.subject.teacher.fName} ${studyTime.timetable.subject.teacher.lName}\nสถานะการเข้าเรียน: ${item.attStatus} \nเวลา: ${dtNow.toFormat("yyyy-MM-dd HH:mm:ss")} หมายเหตุ: ${item.note}\n\n\nการบันทึกนี้ถูกบันทึกโดยคุณครูประจำวิชา`;
+                const message = `เรียนผู้ปกครอง ${std.parent.name} \n${formatTitle(std.student.title)}${std.student.fName} ${std.student.lName} ได้ทำการเช็คชื่อเรียนวิชา ${studyTime.timetable.subject.subNameThai} (${studyTime.timetable.subject.subNameEng})\nสอนโดยคุณครู: ${studyTime.timetable.subject.teacher.fName} ${studyTime.timetable.subject.teacher.lName}\nสถานะการเข้าเรียน: ${formateAttendanceStatus(item.attStatus)} \nเวลา: ${dtNow.toFormat("yyyy-MM-dd HH:mm:ss")} หมายเหตุ: ${item.note}\n\n\nการบันทึกนี้ถูกบันทึกโดยคุณครูประจำวิชา`;
                 await pushMessageToLine(lineId, message);
               }
             });
@@ -1002,7 +1002,7 @@ export const saveAttendenceByLeader = async (req, res) => {
             student.map(async (std) => {
               const lineId = std.parent.lineId;
               if (lineId) {
-                const message = `เรียนผู้ปกครอง ${std.parent.name} \n${formatTitle(std.student.title)}${std.student.fName} ${std.student.lName} ได้ทำการแก้ไขเช็คชื่อเรียนวิชา ${studyTime.timetable.subject.subNameThai} (${studyTime.timetable.subject.subNameEng})\nสอนโดยคุณครู: ${studyTime.timetable.subject.teacher.fName} ${studyTime.timetable.subject.teacher.lName}\nสถานะการเข้าเรียน: ${item.attStatus} \nเวลา: ${dtNow.toFormat("yyyy-MM-dd HH:mm:ss")} หมายเหตุ: ${item.note}\n\n\nการบันทึกนี้ถูกบันทึกโดยหัวหน้าห้อง`;
+                const message = `เรียนผู้ปกครอง ${std.parent.name} \n${formatTitle(std.student.title)}${std.student.fName} ${std.student.lName} ได้ทำการแก้ไขเช็คชื่อเรียนวิชา ${studyTime.timetable.subject.subNameThai} (${studyTime.timetable.subject.subNameEng})\nสอนโดยคุณครู: ${studyTime.timetable.subject.teacher.fName} ${studyTime.timetable.subject.teacher.lName}\nสถานะการเข้าเรียน: ${formateAttendanceStatus(item.attStatus)} \nเวลา: ${dtNow.toFormat("yyyy-MM-dd HH:mm:ss")} หมายเหตุ: ${item.note}\n\n\nการบันทึกนี้ถูกบันทึกโดยหัวหน้าห้อง`;
                 await pushMessageToLine(lineId, message);
               }
             });
@@ -1036,7 +1036,7 @@ export const saveAttendenceByLeader = async (req, res) => {
             student.map(async (std) => {
               const lineId = std.parent.lineId;
               if (lineId) {
-                const message = `เรียนผู้ปกครอง ${std.parent.name} \n${formatTitle(std.student.title)}${std.student.fName} ${std.student.lName} ได้ทำการเช็คชื่อเรียนวิชา ${studyTime.timetable.subject.subNameThai} (${studyTime.timetable.subject.subNameEng})\nสอนโดยคุณครู: ${studyTime.timetable.subject.teacher.fName} ${studyTime.timetable.subject.teacher.lName}\nสถานะการเข้าเรียน: ${item.attStatus} \nเวลา: ${dtNow.toFormat("yyyy-MM-dd HH:mm:ss")} หมายเหตุ: ${item.note}\n\n\nการบันทึกนี้ถูกบันทึกโดยหัวหน้าห้อง`;
+                const message = `เรียนผู้ปกครอง ${std.parent.name} \n${formatTitle(std.student.title)}${std.student.fName} ${std.student.lName} ได้ทำการเช็คชื่อเรียนวิชา ${studyTime.timetable.subject.subNameThai} (${studyTime.timetable.subject.subNameEng})\nสอนโดยคุณครู: ${studyTime.timetable.subject.teacher.fName} ${studyTime.timetable.subject.teacher.lName}\nสถานะการเข้าเรียน: ${formateAttendanceStatus(item.attStatus)} \nเวลา: ${dtNow.toFormat("yyyy-MM-dd HH:mm:ss")} หมายเหตุ: ${item.note}\n\n\nการบันทึกนี้ถูกบันทึกโดยหัวหน้าห้อง`;
                 await pushMessageToLine(lineId, message);
               }
             });
