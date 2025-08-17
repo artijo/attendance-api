@@ -3,6 +3,7 @@ import {
   inputStudentForm,
   handdleErrorDuplicateKeyStudent,
 } from "../validator.js";
+import { getLastestTerm } from "../helper/helper.js";
 
 export const createStudent = async (req, res) => {
   // สร้างรายชื่อนักเรียนรายบุคคล
@@ -48,7 +49,7 @@ export const createStudentWithFile = async (req, res) => {
         !item.no ||
         !item.title ||
         !item.firstName ||
-        !item.lastName
+        !item.lastName,
     );
 
   try {
@@ -62,7 +63,7 @@ export const createStudentWithFile = async (req, res) => {
     const student = await db.student.createMany({
       data: allStudents
         .filter(
-          (item) => item.studentId && item.studentId.toString().trim() !== ""
+          (item) => item.studentId && item.studentId.toString().trim() !== "",
         )
         .map((item) => ({
           stdId: item.studentId.toString(),
@@ -143,7 +144,7 @@ export const createStudentWithFile = async (req, res) => {
 
     const classroomMembers = allStudents
       .filter(
-        (item) => item.studentId && item.studentId.toString().trim() !== ""
+        (item) => item.studentId && item.studentId.toString().trim() !== "",
       )
       .map((item) => {
         const key = `${parseInt(item.class)}-${parseInt(item.room)}`;
@@ -393,12 +394,20 @@ export const getDashboardData = async (req, res) => {
   const stdId = req.user?.id;
   if (stdId) {
     try {
+      let term = await db.academicTerms.findMany();
+      term = getLastestTerm(term);
+
       const student = await db.student.findFirst({
         where: {
           stdId: stdId,
         },
         include: {
           classroomMembers: {
+            where: {
+              classroom: {
+                termId: term.termId,
+              },
+            },
             include: {
               classroom: {
                 include: {
