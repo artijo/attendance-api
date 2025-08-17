@@ -18,7 +18,7 @@ export const locationCalculate = (userLocation) => { // ใช้ polygon ใน
     return inside;
 };
 
-// locationCalculate();
+
 
 
 

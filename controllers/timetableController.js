@@ -6,7 +6,7 @@ const zone = process.env.TIME_ZONE || 'Asia/Bangkok';
 
 export const createTimetableByAddSubject = async (req, res) => {
     const { classroom, timetable, schedule, weekday } = req.body;
-    // console.log(classroom);
+    // console.log(schedule);
     if (classroom && timetable && schedule && weekday) {
         try {
             const findPeriod = await db.timetable.findFirst({
@@ -44,7 +44,10 @@ export const createTimetableByAddSubject = async (req, res) => {
                     }
                 });
                 const subjectExistsInPeriod = subjectOnTimetable.find(({ timeStart, timeEnd, dayOfWeek, subId }) => String(timeStart) === schedule.startDatabaseFormat && String(timeEnd) === schedule.endDatabaseFormat && dayOfWeek === Number(weekday));
-                if (subjectExistsInPeriod != undefined) return res.status(400).json({ message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${periodtime.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}` });
+                if (subjectExistsInPeriod != undefined) { 
+                    // console.log('400 kub');
+                    return res.status(400).json({ message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${schedule.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}` })
+                };
                 // console.log(subjectExistsInPeriod);
                 const createTimetable = await db.timetable.create({
                     data: {
@@ -124,7 +127,7 @@ export const createTimetableBySwitchPeriod = async (req, res) => {
                 }
             });
             const subjectExistsInPeriod = subjectOnTimetable.find(({ timeStart, timeEnd, dayOfWeek, subId }) => String(timeStart) === schedule.startDatabaseFormat && String(timeEnd) === schedule.endDatabaseFormat && dayOfWeek === Number(timetable.dayOfWeek));
-            if (subjectExistsInPeriod != undefined) return res.status(400).json({ message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${periodtime.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}` });
+            if (subjectExistsInPeriod != undefined) return res.status(400).json({ message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${schedule.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}` });
 
             const swtichPeriod = await db.timetable.update({
                 where: {
@@ -244,8 +247,10 @@ export const createTimetableBySwitchSubjectAndSubject = async (req, res) => {
 }
 
 export const createTimetable = async (req, res) => {
-    const { subject, timelate, periodtime, classroom, day } = req.body;
-    if (subject && timelate && periodtime && classroom && day) {
+    const { subject, timelate, schedule, classroom, day } = req.body;
+    // console.log(periodtime);
+    // console.log('work');
+    if (subject && timelate && schedule && classroom && day) {
         try {
             const subjectOnTimetable = await db.timetable.findMany({
                 where: {
@@ -265,16 +270,16 @@ export const createTimetable = async (req, res) => {
                     classroom: true,
                 }
             });
-            const subjectExistsInPeriod = subjectOnTimetable.find(({ timeStart, timeEnd, dayOfWeek, subId }) => String(timeStart) === periodtime.startDatabaseFormat && String(timeEnd) === periodtime.endDatabaseFormat && dayOfWeek === Number(day));
+            const subjectExistsInPeriod = subjectOnTimetable.find(({ timeStart, timeEnd, dayOfWeek, subId }) => String(timeStart) === schedule.startDatabaseFormat && String(timeEnd) === schedule.endDatabaseFormat && dayOfWeek === Number(day));
             if (subjectExistsInPeriod != undefined) return res.status(400).json({ message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${periodtime.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}` });
-            const timelateDatetime = DateTime.fromISO(periodtime.startDatabaseFormat).setZone(zone).plus({ minutes: timelate });
+            const timelateDatetime = DateTime.fromISO(schedule.startDatabaseFormat).setZone(zone).plus({ minutes: timelate });
             const timelateDatabaseFormat = timelateDatetime.toFormat('HH:mm:ss');
             const timetable = await db.timetable.create({
                 data: {
                     subId: subject.subId,
                     classId: classroom.classId,
-                    timeStart: periodtime.startDatabaseFormat,
-                    timeEnd: periodtime.endDatabaseFormat,
+                    timeStart: schedule.startDatabaseFormat,
+                    timeEnd: schedule.endDatabaseFormat,
                     timeLate: timelateDatabaseFormat,
                     dayOfWeek: Number(day)
                 }
@@ -452,6 +457,7 @@ export const getTimeTableByRoom = async (req, res) => {
 
 export const deleteTimetable = async (req, res) => {
     const timetableId = req.params.timetableId;
+    // console.log(timetableId);
     if (timetableId) {
         try {
             const studyingTime = await db.studingTime.findMany({
@@ -459,29 +465,35 @@ export const deleteTimetable = async (req, res) => {
                     timetableId: timetableId
                 }
             });
-
-            const studyTimeId = studyingTime.map((item) => item.studyTimeId);
-
-            const attendance = await db.attendance.deleteMany({
-                where: {
-                    studingTimeId: {
-                        in: studyTimeId
+            if(studyingTime.length > 0) {
+                const studyTimeId = studyingTime.map((item) => item.studyTimeId);
+                
+                const leaveRequest = await db.leaveRequestStudingTime.deleteMany({
+                    where: {
+                        studyTimeId:{
+                            in:studyTimeId
+                        }
                     }
-                }
-            })
+                })
 
-            const studyingTimeDelete = await db.studingTime.deleteMany({
-                where: {
-                    timetableId: timetableId
-                }
-            });
-
+                const attendance = await db.attendance.deleteMany({
+                    where : {
+                        studingTimeId : {
+                            in:studyTimeId
+                        }
+                    }
+                })
+                const studyingTimeDelete = await db.studingTime.deleteMany({
+                    where: {
+                        timetableId: timetableId
+                    }
+                });
+            }
             const timetable = await db.timetable.delete({
                 where: {
                     timetableId: timetableId
                 }
             });
-
             res.json("delete successfully!");
         } catch (err) {
             console.error(err);

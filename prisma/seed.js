@@ -1,145 +1,146 @@
-import { hashPassword } from '../helper/bcrypt.js';
-import db from './client.js';
-import { DateTime } from 'luxon';
+import { hashPassword } from "../helper/bcrypt.js";
+import db from "./client.js";
+import { DateTime } from "luxon";
 // seed data Object
-import studentList from './jsonSeed/student.json' with { type: "json" };
-import leaderList from './jsonSeed/leader.json' with { type : "json"};
-import teacherList from './jsonSeed/teacher.json' with { type: "json"};
-import teacherNoClassList from './jsonSeed/teacherNoClass.json' with { type: "json"};
+import studentList from "./jsonSeed/student.json" with { type: "json" };
+import leaderList from "./jsonSeed/leader.json" with { type: "json" };
+import teacherList from "./jsonSeed/teacher.json" with { type: "json" };
+import teacherNoClassList from "./jsonSeed/teacherNoClass.json" with { type: "json" };
 
 // Academic-Term
-import termList from './jsonSeed/academicterm.json' with { type : "json"};
+import termList from "./jsonSeed/academicterm.json" with { type: "json" };
 // Classroom
-import classroomTypeList from './jsonSeed/classroomType.json' with { type: "json"};
-import classroomList from './jsonSeed/classroom.json' with { type: "json"};
-import classroomMemberList from './jsonSeed/classroomMemeber.json' with { type: "json"};
+import classroomTypeList from "./jsonSeed/classroomType.json" with { type: "json" };
+import classroomList from "./jsonSeed/classroom.json" with { type: "json" };
+import classroomMemberList from "./jsonSeed/classroomMemeber.json" with { type: "json" };
 // Department
-import departmentList from './jsonSeed/department.json' with { type: "json" };
+import departmentList from "./jsonSeed/department.json" with { type: "json" };
 // Suject
-import subjectTypeList from './jsonSeed/subjectType.json' with {type : "json"};
-import subjectList from './jsonSeed/subject.json' with { type: "json" };
+import subjectTypeList from "./jsonSeed/subjectType.json" with { type: "json" };
+import subjectList from "./jsonSeed/subject.json" with { type: "json" };
 // attendanceMethod
-import attendenceMethodList from './jsonSeed/attendanceMethods.json' with { type: "json"};
+import attendenceMethodList from "./jsonSeed/attendanceMethods.json" with { type: "json" };
 // activityType
-import activityTypeList from './jsonSeed/activityType.json' with { type: "json"};
+import activityTypeList from "./jsonSeed/activityType.json" with { type: "json" };
 // timetable
-import timetableList from './jsonSeed/timetable.json' with { type: "json"};
+import timetableList from "./jsonSeed/timetable.json" with { type: "json" };
 
-async function  main() {
-    try{
-        //Admin
-        const adminCreate = await db.admin.create({
-            data:{
-                name: 'NPS Admin',
-                password: await hashPassword("@npsadmin"),
-                username: 'nps',
-                email: 'admin@mail.com',
-                tel: '0651088956',
-            }
-        })
+async function main() {
+  try {
+    //Admin
+    const adminCreate = await db.admin.create({
+      data: {
+        name: "NPS Admin",
+        password: await hashPassword("@npsadmin"),
+        username: "nps",
+        email: "admin@mail.com",
+        tel: "0651088956",
+      },
+    });
 
-        //AcademicTerm
-        // const academicterm = await db.academicTerms.createMany({
-        //     data:termList.map((term) => {
-        //         return {
-        //             ...term,
-        //             termStart: DateTime.fromISO(term.termStart.toString(), {zone: 'UTC'}),
-        //             termEnd: DateTime.fromISO(term.termEnd.toString(), {zone: 'UTC'})
-        //         }
-        //     })
-        // });
+    //AcademicTerm
+    // const academicterm = await db.academicTerms.createMany({
+    //     data:termList.map((term) => {
+    //         return {
+    //             ...term,
+    //             termStart: DateTime.fromISO(term.termStart.toString(), {zone: 'UTC'}),
+    //             termEnd: DateTime.fromISO(term.termEnd.toString(), {zone: 'UTC'})
+    //         }
+    //     })
+    // });
 
-        //Create Department Base
-        // const departmentCreate = await db.department.createMany({
-        //     data:departmentList
-        // });
-        //Create ClassroomType Base
-        const classroomTypeCreate = await db.classroomType.createMany({
-            data:classroomTypeList
-        });
-        //Create Classroom Base
-        // const classroomCreate = await db.classrooms.createMany({
-        //     data:classroomList
-        // });
-        //Create Student Base
-        // const studentCreate = await db.student.createMany({
-        //     data:studentList
-        // });
-        //Crate ClassroomMember
-        // const classroomMemberCreate = await db.classroomMember.createMany({
-        //     data:classroomMemberList
-        // });
-        // Create Teacher Base
-        // const teacherData = await Promise.all(teacherList.map(async (teacher) => {
-        //         const teacherObject = teacher;
-        //         return {
-        //             ...teacherObject, "password" : await hashPassword(teacherObject.password)
-        //         }
-        //     })
-        // );
-        // const teacherCreate =  await db.teacher.createMany({
-        //     data: teacherData
-        // });
+    //Create Department Base
+    // const departmentCreate = await db.department.createMany({
+    //     data:departmentList
+    // });
+    //Create ClassroomType Base
+    const classroomTypeCreate = await db.classroomType.createMany({
+      data: classroomTypeList,
+    });
+    //Create Classroom Base
+    // const classroomCreate = await db.classrooms.createMany({
+    //     data:classroomList
+    // });
+    //Create Student Base
+    // const studentCreate = await db.student.createMany({
+    //     data:studentList
+    // });
+    //Crate ClassroomMember
+    // const classroomMemberCreate = await db.classroomMember.createMany({
+    //     data:classroomMemberList
+    // });
+    // Create Teacher Base
+    // const teacherData = await Promise.all(teacherList.map(async (teacher) => {
+    //         const teacherObject = teacher;
+    //         return {
+    //             ...teacherObject, "password" : await hashPassword(teacherObject.password)
+    //         }
+    //     })
+    // );
+    // const teacherCreate =  await db.teacher.createMany({
+    //     data: teacherData
+    // });
 
-        //Create TeacherNo class base for subject
-        // const teacherNoClassData = await Promise.all(teacherNoClassList.map(async (teacher) => {
-        //     const teacherObject = teacher;
-        //         return {
-        //             ...teacherObject, "password" : await hashPassword(teacherObject.password)
-        //         }
-        //     })
-        // );
-        // const teacherNoClassCreate =  await db.teacher.createMany({
-        //     data: teacherNoClassData
-        // });
-        //Crate subuject Type
-        // const subejctTypeCreate = await db.subjectType.createMany({
-        //     data:subjectTypeList
-        // });
-        //Crate subuject
-        // const subjectCreate = await db.subject.createMany({
-        //     data:subjectList
-        // });
+    //Create TeacherNo class base for subject
+    // const teacherNoClassData = await Promise.all(teacherNoClassList.map(async (teacher) => {
+    //     const teacherObject = teacher;
+    //         return {
+    //             ...teacherObject, "password" : await hashPassword(teacherObject.password)
+    //         }
+    //     })
+    // );
+    // const teacherNoClassCreate =  await db.teacher.createMany({
+    //     data: teacherNoClassData
+    // });
+    //Crate subuject Type
+    // const subejctTypeCreate = await db.subjectType.createMany({
+    //     data:subjectTypeList
+    // });
+    //Crate subuject
+    // const subjectCreate = await db.subject.createMany({
+    //     data:subjectList
+    // });
 
-        //Create timetable 
-        // const schedules = timetableList.schedules;
-        // for (let i = 0; i < schedules.length; i++) {
-        //     const { classId, schedule } = schedules[i];
-        //     for (let j = 0; j < schedule.length; j++) {
-        //     const { dayOfWeek, periods } = schedule[j];
-        //     for (let k = 0; k < periods.length; k++) {
-        //         const period = periods[k];
-        //         if (period.subId) {
-        //         await db.timetable.create({
-        //             data: {
-        //             subId: period.subId,
-        //             classId: classId,
-        //             timeStart: period.time.split('-')[0] + ':00',
-        //             timeEnd: period.time.split('-')[1] + ':00',
-        //             dayOfWeek: dayOfWeek,
-        //             timeLate: DateTime.fromISO(period.time.split('-')[0] + ':00').plus({ minutes: 15 }).toFormat('HH:mm:ss')
-        //             }
-        //         });
-        //         }
-        //     }
-        // }
-   
+    //Create timetable
+    // const schedules = timetableList.schedules;
+    // for (let i = 0; i < schedules.length; i++) {
+    //     const { classId, schedule } = schedules[i];
+    //     for (let j = 0; j < schedule.length; j++) {
+    //     const { dayOfWeek, periods } = schedule[j];
+    //     for (let k = 0; k < periods.length; k++) {
+    //         const period = periods[k];
+    //         if (period.subId) {
+    //         await db.timetable.create({
+    //             data: {
+    //             subId: period.subId,
+    //             classId: classId,
+    //             timeStart: period.time.split('-')[0] + ':00',
+    //             timeEnd: period.time.split('-')[1] + ':00',
+    //             dayOfWeek: dayOfWeek,
+    //             timeLate: DateTime.fromISO(period.time.split('-')[0] + ':00').plus({ minutes: 15 }).toFormat('HH:mm:ss')
+    //             }
+    //         });
+    //         }
+    //     }
+    // }
 
-        // Crate Attendence Method
-        const attendanceMethodCreate = await db.attendanceMethod.createMany({
-            data:attendenceMethodList
-        });
-        //Create ActivityType
-        const activityTypeCreate = await db.activityType.createMany({
-            data:activityTypeList
-        });
-    }catch(error){
-        throw error;
-    }
-    
+    // Crate Attendence Method
+    const attendanceMethodCreate = await db.attendanceMethod.createMany({
+      data: attendenceMethodList,
+    });
+    //Create ActivityType
+    const activityTypeCreate = await db.activityType.createMany({
+      data: activityTypeList,
+    });
+    // create leaverequesttype
+    const leaverequesttype = await db.leaveRequestType.createMany({
+      data: [{ leaveTypeName: "ลาป่วย" }, { leaveTypeName: "ลากิจ" }],
+    });
+  } catch (error) {
+    throw error;
+  }
 }
 
 main().catch((err) => {
-    console.error("Error on generation Seed: " +err);
+  console.error("Error on generation Seed: " + err);
 });
-

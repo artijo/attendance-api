@@ -1,55 +1,63 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import morgan from 'morgan';
-import cors from 'cors';
+import express from "express";
+import dotenv from "dotenv";
+import morgan from "morgan";
+import cors from "cors";
 import cookieParser from "cookie-parser";
 
 // import routes
-import parentRouter from './routers/parentRouter.js';
-import studentRouter from './routers/studentRoute.js';
-import teacherRouter from './routers/teacherRoute.js';
-import adminRouter from './routers/adminRoute.js';
-import authRouter from './routers/authRouter.js';
+import parentRouter from "./routers/parentRouter.js";
+import studentRouter from "./routers/studentRoute.js";
+import teacherRouter from "./routers/teacherRoute.js";
+import adminRouter from "./routers/adminRoute.js";
+import authRouter from "./routers/authRouter.js";
 
 // import middleware
-import { isAuth } from './middleware.js';
-
+import { isAuth } from "./middleware.js";
 
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
-const environment = process.env.ENVIRONTMENT || 'development';
+const environment = process.env.ENVIRONTMENT || "development";
 
 const app = express();
 
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 // cookie parser
-app.use(cookieParser(
-
-));
+app.use(cookieParser());
 
 // cors
-app.use(cors(
-    {
-        origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:4321' ,'https://manage.att.nps.ac.th', "https://teacher.att.nps.ac.th", "https://student.att.nps.ac.th", "https://nps-attendance-parent.netlify.app"],
-        credentials: true
-    }
-));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:5175",
+      "http://localhost:4321",
+      "https://manage.att.nps.ac.th",
+      "https://teacher.att.nps.ac.th",
+      "https://student.att.nps.ac.th",
+      "https://nps-attendance-parent.netlify.app",
+    ],
+    credentials: true,
+  }),
+);
 
 // middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // app.use(morgan('dev'));
-environment === 'development' ? app.use(morgan('dev')) : app.use(morgan('combined'));
+environment === "development"
+  ? app.use(morgan("dev"))
+  : app.use(morgan("combined"));
 
 // use routes
-app.use('/auth', authRouter);
-app.use('/s', isAuth,studentRouter); //studentRoute s= student
-app.use('/t', isAuth, teacherRouter); // teacherRoute t= teacher
-app.use('/a', isAuth, adminRouter);
-app.use('/p', parentRouter); // parentRoute p= parent
+app.use("/auth", authRouter);
+app.use("/s", isAuth, studentRouter); //studentRoute s= student
+app.use("/t", isAuth, teacherRouter); // teacherRoute t= teacher
+app.use("/a", isAuth, adminRouter);
+app.use("/p", parentRouter); // parentRoute p= parent
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
