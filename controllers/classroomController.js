@@ -128,7 +128,7 @@ export const updateClassroom = async (req, res) => {
                 },
               },
             });
-          })
+          }),
         );
       }
 
@@ -184,9 +184,12 @@ export const getAllClassroom = async (req, res) => {
         { classRoom: "asc" },
       ],
     });
-    console.log(classroom);
     return res.json(classroom);
   } catch (error) {
+    return res.status(500).json({
+      message: "Error fetching classrooms",
+      error: error.message,
+    });
     console.error(error);
   }
 };
@@ -234,6 +237,10 @@ export const getClassroom = async (req, res) => {
     return res.status(200).json(classroom);
   } catch (error) {
     console.error(error);
+    return res.status(500).json({
+      message: "Error fetching classroom",
+      error: error.message,
+    });
   }
 };
 
@@ -247,6 +254,10 @@ export const getAllClassroomType = async (req, res) => {
     res.json(classroomType);
   } catch (error) {
     console.error(error);
+    return res.status(500).json({
+      message: "Error fetching classroom types",
+      error: error.message,
+    });
   }
 };
 
@@ -263,6 +274,10 @@ export const createClassroomType = async (req, res) => {
       return res.json({ message: "Create Classroom Type Success" });
     } catch (err) {
       console.error(err);
+      return res.status(500).json({
+        message: "Create Classroom Type Failed",
+        error: err.message,
+      });
     }
   }
 };
@@ -284,6 +299,10 @@ export const updateClassroomType = async (req, res) => {
       return res.json({ message: "Update Classroom Type Success" });
     } catch (err) {
       console.error(err);
+      return res.status(500).json({
+        message: "Update Classroom Type Failed",
+        error: err.message,
+      });
     }
   }
 };
@@ -303,6 +322,10 @@ export const deleteClassroomType = async (req, res) => {
       return res.json({ message: "Delete Classroom Type Success" });
     } catch (err) {
       console.error(err);
+      return res.status(500).json({
+        message: "Delete Classroom Type Failed",
+        error: err.message,
+      });
     }
   }
 };
@@ -311,16 +334,76 @@ export const createClassroomMember = async (req, res) => {
   const body = req.body;
   if (body) {
     try {
-      const classroomMember = await db.classroomMember.create({
-        data: {
+      const studentinclass = await db.classroomMember.findMany({
+        where: {
           stdId: body.studentId,
-          classId: body.classId,
-          stdNo: body.stdNo,
         },
       });
-      return res.json({ message: "Create Classroom Member Success" });
+
+      if (studentinclass.length > 0) {
+        const getclassterm = await db.classrooms.findUnique({
+          where: {
+            classId: body.classId,
+          },
+          select: {
+            term: {
+              select: {
+                termId: true,
+              },
+            },
+          },
+        });
+        // check isexist term
+        studentinclass.forEach(async (student) => {
+          let term = await db.classrooms.findUnique({
+            where: {
+              classId: student.classId,
+            },
+            select: {
+              term: {
+                select: {
+                  termId: true,
+                },
+              },
+            },
+          });
+          if (term.term.termId === getclassterm.term.termId) {
+            return res
+              .status(400)
+              .json({ message: "นักเรียนนี้มีอยู่ในห้องเรียนแล้ว" });
+          } else {
+            await db.classroomMember.create({
+              data: {
+                stdId: body.studentId,
+                classId: body.classId,
+                stdNo: body.stdNo,
+              },
+            });
+            return res.json({
+              message: "Create Classroom Member Success",
+            });
+          }
+        });
+      } else {
+        const classroomMember = await db.classroomMember.create({
+          data: {
+            stdId: body.studentId,
+            classId: body.classId,
+            stdNo: body.stdNo,
+          },
+        });
+        return res.json({ message: "Create Classroom Member Success" });
+      }
     } catch (err) {
+      return res.status(500).json({
+        message: "Create Classroom Member Failed",
+        error: err.message,
+      });
       console.error(err);
+      return res.status(500).json({
+        message: "Create Classroom Member Failed",
+        error: err.message,
+      });
     }
   }
 };
@@ -342,6 +425,10 @@ export const updateClassroomMember = async (req, res) => {
       return res.json({ message: "Update Classroom Member Success" });
     } catch (err) {
       console.error(err);
+      return res.status(500).json({
+        message: "Update Classroom Member Failed",
+        error: err.message,
+      });
     }
   }
 };
@@ -362,6 +449,10 @@ export const deleteClassroomMember = async (req, res) => {
       res.json({ message: "Delete Classroom Member Success" });
     } catch (err) {
       console.error(err);
+      return res.status(500).json({
+        message: "Delete Classroom Member Failed",
+        error: err.message,
+      });
     }
   }
 };
@@ -411,6 +502,10 @@ export const getClassroomByAcademicYearTerm = async (req, res) => {
       res.json(classrooms);
     } catch (err) {
       console.error(err);
+      res.status(500).json({
+        message: "Error fetching classrooms by academic year term",
+        error: err.message,
+      });
     }
   }
 };
@@ -447,6 +542,10 @@ export const getAcademicYearClassroom = async (req, res) => {
     res.json(semesterSortUnqiueData(classrooms));
   } catch (err) {
     console.error(err);
+    res.status(500).json({
+      message: "Error fetching academic year classrooms",
+      error: err.message,
+    });
   }
 };
 
@@ -472,6 +571,10 @@ export const getClassroomFilterByAcademicYearAndLevel = async (req, res) => {
     res.json(classrooms);
   } catch (err) {
     console.error(err);
+    res.status(500).json({
+      message: "Error fetching classrooms by academic year and level",
+      error: err.message,
+    });
   }
 };
 
@@ -532,6 +635,10 @@ export const getTeacherAdvisorClassroom = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error });
     console.log(error);
+    return res.status(500).json({
+      message: "เกิดข้อผิดพลาดบางอย่างบน Server",
+      error: error.message,
+    });
   }
 };
 
