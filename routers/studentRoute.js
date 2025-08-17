@@ -59,12 +59,12 @@ router.post("/attendance/qr", saveAttendenceByStudentWithQR); // บันทึ
 //ประวัติการเข้าเรียน
 router.get(
   "/attendence/history/:termId/:date",
-  summarzieAttendenceByDateStudent
+  summarzieAttendenceByDateStudent,
 );
 router.get("/attendecne/subjectlist/:termId", getSubjectByStudent);
 router.get(
   "/attendence/history/subjectdetail/:termId/:subjectId",
-  summarzieAttendenceBySubject
+  summarzieAttendenceBySubject,
 );
 
 // ประวัติการทำคะแนนพฤติกรรม
@@ -92,11 +92,11 @@ router.delete("/leave/:id", cancelLeaveRequest); // ยกเลิกการ�
 router.get("/leader/classrooms", getClassroomBystdId); // ห้องเรียนของนักเรียน
 router.get(
   "/leader/classrooms/:classId/members",
-  getClassroomMembersByClassroomId
+  getClassroomMembersByClassroomId,
 ); // สมาชิกในห้องเรียน
 router.get(
   "/leader/classrooms/:classId/timetable",
-  getTimeTableandStudytimeByClassId
+  getTimeTableandStudytimeByClassId,
 ); // ตารางเรียนของห้องเรียน
 router.get("/leader/studytime/:studingTimeId", getStuydingTimeById); // ตารางเรียนของห้องเรียน
 router.post("/leader/attendance/bulk", saveAttendenceByLeader); // บันทึกการเข้าเรียนของหัวหน้าห้อง
