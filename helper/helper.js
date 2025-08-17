@@ -88,3 +88,19 @@ export function formateAttendanceStatus(status) {
       return status;
   }
 }
+
+export function getLastestTerm(term) {
+  const latestYear = Math.max(...term.map((t) => parseInt(t.academicYear)));
+  const latestTermsInYear = term.filter(
+    (termItem) => parseInt(termItem.academicYear) === latestYear,
+  );
+  if (latestTermsInYear.length > 1) {
+    const latestSemester = Math.max(
+      ...latestTermsInYear.map((termItem) => parseInt(termItem.semester)),
+    );
+    return latestTermsInYear.filter(
+      (termItem) => parseInt(termItem.semester) === latestSemester,
+    )[0];
+  }
+  return latestTermsInYear[0];
+}
