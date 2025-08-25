@@ -330,7 +330,7 @@ export const getActivityByTeacher = async (req, res) => {
 export const paticipatedActivityByteacher = async (req, res) => {
   const { actId } = req.params;
   const { stdId, status, note, date } = req.body;
-  console.log(req.body);
+  const dtNow = DateTime.now().setZone(zone);
   try {
     const activity = await db.activity.findFirst({
       where: {
@@ -444,7 +444,7 @@ export const paticipatedActivityByteacher = async (req, res) => {
       });
       if (parent.length > 0) {
         parent.map(async (p) => {
-          const message = `เรียนผู้ปกครอง ${p.parent.name} นักเรียน ${p.student.fName} ${p.student.lName} ได้เข้าร่วมกิจกรรม ${activity.actName} วันที่ ${DateTime.fromJSDate(activity.actDate).setZone(zone).toFormat("dd/LL/yyyy")}\n\n\nบันทึกการเข้าร่วมกิจกรรมโดยคุณครู ${teacher.fName} ${teacher.lName}`;
+          const message = `เรียนผู้ปกครอง ${p.parent.name} นักเรียน ${p.student.fName} ${p.student.lName} ได้เข้าร่วมกิจกรรม ${activity.actName} วันที่ ${dtNowtoFormat("dd/LL/yyyy")} เวลา ${dtNow.toFormat("HH:mm")} \n\n\nบันทึกการเข้าร่วมกิจกรรมโดยคุณครู ${teacher.fName} ${teacher.lName}`;
           await pushMessageToLine(p.parent.lineId, message);
         });
       } else {
@@ -486,7 +486,7 @@ export const abstactActivityClassroom = async (req, res) => {
   }).setZone(zone);
   const dayBetween = daybetween(
     actDateStart.toString().split("T")[0],
-    actDateEnd.toString().split("T")[0]
+    actDateEnd.toString().split("T")[0],
   );
   const abstact = await dayBetween.reduce(async (accPromise, curr) => {
     const acc = await accPromise;
@@ -496,7 +496,7 @@ export const abstactActivityClassroom = async (req, res) => {
           .setZone("UTC")
           .minus({ hour: 7 });
         const gteDate = DateTime.fromISO(
-          `${curr}T${activities.actStartTime}:00Z`
+          `${curr}T${activities.actStartTime}:00Z`,
         )
           .setZone("UTC")
           .minus({ hour: 7 });
@@ -528,10 +528,10 @@ export const abstactActivityClassroom = async (req, res) => {
           },
           isJoin: false,
         };
-      })
+      }),
     );
     acc[curr] = studentPaticipate.sort((a, b) =>
-      a.stdId.localeCompare(b.stdId)
+      a.stdId.localeCompare(b.stdId),
     );
     return acc;
   }, Promise.resolve({}));
@@ -550,7 +550,7 @@ export const abstactActivityFilterByRoom = async (req, res) => {
     // console.log(activitys);
     //หาว่ากิจกรรมที่ต้องการ insert นั้นอยู่ระหว่างช่วงเทอมไหน
     const dateTimeNow = DateTime.fromISO(
-      activitys.actDate.toISOString()
+      activitys.actDate.toISOString(),
     ).setZone(zone);
     const dateActivityStart = dateTimeNow.toString().split("T")[0];
     function isSchoolOpen(dateStr) {
@@ -583,7 +583,7 @@ export const abstactActivityFilterByRoom = async (req, res) => {
     }).setZone(zone);
     const paticipateCount = daybetween(
       actDateStart.toString().split("T")[0],
-      actDateEnd.toString().split("T")[0]
+      actDateEnd.toString().split("T")[0],
     ).length;
 
     const classroomsHasMembers = await db.classrooms.findMany({
@@ -639,10 +639,10 @@ export const abstactActivityFilterByRoom = async (req, res) => {
               participateCount: participate.length,
             };
             return objectDraft;
-          })
+          }),
         );
         const participateMemberSortByStdNo = (await participateMember).sort(
-          (a, b) => a.stdNo - b.stdNo
+          (a, b) => a.stdNo - b.stdNo,
         );
 
         acc[`${curr.classLevel}/${curr.classRoom}`] =
@@ -650,7 +650,7 @@ export const abstactActivityFilterByRoom = async (req, res) => {
 
         return acc;
       },
-      Promise.resolve({})
+      Promise.resolve({}),
     );
     return res.status(200).send(abstactFilterByClassroom);
   } catch (error) {
@@ -673,7 +673,7 @@ export const generateLinkActivityForQR = async (req, res) => {
       const now = DateTime.now().setZone(zone);
       const activityDateEnd = DateTime.fromISO(
         activity.actDateEnd.toISOString(),
-        { zone: "UTC" }
+        { zone: "UTC" },
       )
         .setZone(zone)
         .endOf("day");
@@ -692,14 +692,14 @@ export const generateLinkActivityForQR = async (req, res) => {
         diff.toObject().days * 24 * 60 * 60 +
           diff.toObject().hours * 60 * 60 +
           diff.toObject().minutes * 60 +
-          diff.toObject().seconds
+          diff.toObject().seconds,
       );
 
       const token = generateToken(
         {
           activityId: activity.actId,
         },
-        expirySeconds
+        expirySeconds,
       );
       const link = `${process.env.STUDENT_WEB_CLIENT}/activity/qr/${token}`;
       res.status(200).json({ link });
@@ -739,7 +739,7 @@ export const saveActivityByStudentWithQR = async (req, res) => {
         .startOf("day");
       const activityDateEnd = DateTime.fromISO(
         activity.actDateEnd.toISOString(),
-        { zone: "UTC" }
+        { zone: "UTC" },
       )
         .setZone(zone)
         .endOf("day");
@@ -829,6 +829,28 @@ export const saveActivityByStudentWithQR = async (req, res) => {
             operateBy: "student",
           },
         });
+
+        //pushMassa to Line
+        const parent = await db.studentParent.findMany({
+          where: {
+            student: {
+              stdId: req.user.id,
+            },
+          },
+          include: {
+            parent: true,
+            student: true,
+          },
+        });
+        if (parent.length > 0) {
+          parent.map(async (p) => {
+            const message = `เรียนผู้ปกครอง ${p.parent.name} นักเรียน ${p.student.fName} ${p.student.lName} ได้เข้าร่วมกิจกรรม ${activity.actName} วันที่ ${now.toFormat("dd/LL/yyyy")} เวลา ${now.toFormat("HH:mm")}\n\n\nบันทึกการเข้าร่วมกิจกรรมโดยนักเรียน`;
+            await pushMessageToLine(p.parent.lineId, message);
+          });
+        } else {
+          console.log("No parent found for this student.");
+        }
+
         return res.status(200).json({
           message: "join activity success",
           activity,
@@ -873,7 +895,7 @@ export const getActivityByLeader = async (req, res) => {
     const filteredActivities = activities.filter((activity) => {
       if (activity.classroom && activity.classroom.length > 0) {
         return activity.classroom.some(
-          (classroom) => classroom.classId === classId
+          (classroom) => classroom.classId === classId,
         );
       }
       return true; // Include activities without classroom restrictions
@@ -1043,7 +1065,7 @@ export const getActivityStudent = async (req, res) => {
       });
       // console.log(studentClassroomMember);
       const arrayOfClassID = studentClassroomMember.map(
-        (stdclassMemeber) => stdclassMemeber.classId
+        (stdclassMemeber) => stdclassMemeber.classId,
       );
       if (studentClassroomMember.length < 0) {
         console.error("นักเรียนคนนี้ไม่มีห้องที่อยู่");
@@ -1063,10 +1085,10 @@ export const getActivityStudent = async (req, res) => {
         return res.status(500).json({ message: "Internal server error" });
       }
       const firstTermStartDate = DateTime.fromJSDate(
-        terms[0].termStart
+        terms[0].termStart,
       ).setZone("UTC");
       const lastTermStartDate = DateTime.fromJSDate(
-        terms[terms.length - 1].termEnd
+        terms[terms.length - 1].termEnd,
       ).setZone("UTC");
       const activity = await db.activity.findMany({
         where: {
@@ -1127,6 +1149,27 @@ export const activityCheckIn = async (req, res) => {
           operateBy: "student",
         },
       });
+
+      const parent = await db.studentParent.findMany({
+        where: {
+          student: {
+            stdId: studentId,
+          },
+        },
+        include: {
+          parent: true,
+          student: true,
+        },
+      });
+      if (parent.length > 0) {
+        parent.map(async (p) => {
+          const message = `เรียsนผู้ปกครอง ${p.parent.name} นักเรียน ${p.student.fName} ${p.student.lName} ได้เข้าร่วมกิจกรรม ${activity.actName} วันที่ ${dtNow.toFormat("dd/LL/yyyy")} เวลา ${dtNow.toFormat("HH:mm")}\n\n\nบันทึกการเข้าร่วมกิจกรรมโดยนักเรียน`;
+          await pushMessageToLine(p.parent.lineId, message);
+        });
+      } else {
+        console.log("No parent found for this student.");
+      }
+
       return res.status(200).json({ status: 1 });
     } catch (error) {
       console.error(error);

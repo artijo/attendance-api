@@ -114,7 +114,7 @@ export const getAttendenceBySubject = async (req, res) => {
       });
       let months = [];
       const startDateTime = DateTime.fromJSDate(term.term.termStart).setZone(
-        zone
+        zone,
       );
       const endDateTime = DateTime.fromJSDate(term.term.termEnd).setZone(zone);
       for (let m = startDateTime.month; m <= endDateTime.month; m++) {
@@ -123,7 +123,7 @@ export const getAttendenceBySubject = async (req, res) => {
       const newData = () => {
         const newStudent = student.map((item) => {
           const attendence = item.student.attendance.map(
-            (item) => item.studingTimeId
+            (item) => item.studingTimeId,
           );
           const Attendence = stuidingTime.map((studTime) => {
             const month = DateTime.fromJSDate(studTime.studingTimeDate).month;
@@ -131,10 +131,10 @@ export const getAttendenceBySubject = async (req, res) => {
               return {
                 studyTimeId: studTime.studyTimeId,
                 attId: item.student.attendance.find(
-                  (att) => att.studingTimeId === studTime.studyTimeId
+                  (att) => att.studingTimeId === studTime.studyTimeId,
                 ).attId,
                 attStatus: item.student.attendance.find(
-                  (att) => att.studingTimeId === studTime.studyTimeId
+                  (att) => att.studingTimeId === studTime.studyTimeId,
                 ).attStatus,
                 studingTimeDate: studTime.studingTimeDate,
                 month: month,
@@ -191,7 +191,7 @@ export const getAttendenceByDateAndStudnet = async (req, res) => {
         },
       });
       const weekday = DateTime.fromISO(`${date}T00:00:00`).setZone(
-        zone
+        zone,
       ).weekday;
       const timetable = await db.timetable.findMany({
         where: {
@@ -201,10 +201,10 @@ export const getAttendenceByDateAndStudnet = async (req, res) => {
 
       // console.log(timetable);
       const listOfTimetableId = timetable.map(
-        (timetable) => timetable.timetableId
+        (timetable) => timetable.timetableId,
       );
       const listOfTimetableDate = timetable.map((timetable) =>
-        DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone(zone)
+        DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone(zone),
       );
       const studyTime = await db.studingTime.findMany({
         where: {
@@ -226,7 +226,7 @@ export const getAttendenceByDateAndStudnet = async (req, res) => {
       });
 
       const isAttendece = getStudent.attendance.map(
-        (item) => item.studingTimeId
+        (item) => item.studingTimeId,
       );
       const abstactAttendece = studyTime.map((studTime) => {
         if (isAttendece.includes(studTime.studyTimeId)) {
@@ -235,10 +235,10 @@ export const getAttendenceByDateAndStudnet = async (req, res) => {
             subjectName: studTime.timetable.subject.subNameThai,
             subjectCode: studTime.timetable.subject.subCode,
             attId: student.attendance.find(
-              (att) => att.studingTimeId === studTime.studyTimeId
+              (att) => att.studingTimeId === studTime.studyTimeId,
             ).attId,
             attStatus: student.attendance.find(
-              (att) => att.studingTimeId === studTime.studyTimeId
+              (att) => att.studingTimeId === studTime.studyTimeId,
             ).attStatus,
             studingTimeDate: studTime.studingTimeDate,
           };
@@ -278,7 +278,7 @@ export const getAttendenceByDate = async (req, res) => {
   if (date && classroomId) {
     try {
       const weekdayOnDateInput = DateTime.fromISO(`${date}T00:00:00`).setZone(
-        zone
+        zone,
       ).weekday;
       const timetables = await db.timetable.findMany({
         where: {
@@ -298,8 +298,8 @@ export const getAttendenceByDate = async (req, res) => {
               studingTimeDate: {
                 in: timetables.map((timetable) =>
                   DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone(
-                    zone
-                  )
+                    zone,
+                  ),
                 ),
               },
             },
@@ -341,7 +341,7 @@ export const getAttendenceByDate = async (req, res) => {
       const newData = () => {
         const newStudent = student.map((item) => {
           const attendence = item.student.attendance.map(
-            (item) => item.studingTimeId
+            (item) => item.studingTimeId,
           );
           const Attendence = stuidingTime.map((studTime) => {
             if (attendence.includes(studTime.studyTimeId)) {
@@ -350,10 +350,10 @@ export const getAttendenceByDate = async (req, res) => {
                 subjectName: studTime.timetable.subject.subNameThai,
                 subjectCode: studTime.timetable.subject.subCode,
                 attId: item.student.attendance.find(
-                  (att) => att.studingTimeId === studTime.studyTimeId
+                  (att) => att.studingTimeId === studTime.studyTimeId,
                 ).attId,
                 attStatus: item.student.attendance.find(
-                  (att) => att.studingTimeId === studTime.studyTimeId
+                  (att) => att.studingTimeId === studTime.studyTimeId,
                 ).attStatus,
                 studingTimeDate: studTime.studingTimeDate,
               };
@@ -410,7 +410,7 @@ export const getAttendenceSummaryByClassroom = async (req, res) => {
       }
       const studyTimeIdArray = timetables
         .map((timetable) =>
-          timetable.studyTime.map((studyTime) => studyTime.studyTimeId)
+          timetable.studyTime.map((studyTime) => studyTime.studyTimeId),
         )
         .flat();
       const student = await db.classroomMember.findMany({
@@ -445,16 +445,16 @@ export const getAttendenceSummaryByClassroom = async (req, res) => {
       });
       const summaryList = student.map((std) => {
         const attendenceCount = std.student.attendance.filter(
-          (att) => att.attStatus === "PRESENT"
+          (att) => att.attStatus === "PRESENT",
         ).length;
         const attendenceLateCount = std.student.attendance.filter(
-          (att) => att.attStatus === "LATE"
+          (att) => att.attStatus === "LATE",
         ).length;
         const attendenceLeaveCount = std.student.attendance.filter(
-          (att) => att.attStatus === "LEAVE"
+          (att) => att.attStatus === "LEAVE",
         ).length;
         const attendenceActivity = std.student.attendance.filter(
-          (att) => att.attStatus === "ACTIVITY"
+          (att) => att.attStatus === "ACTIVITY",
         ).length;
         const attendenceAbsentCount =
           studyCount -
@@ -518,7 +518,7 @@ export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
       }
       const studyTimeIdArray = timetables
         .map((timetable) =>
-          timetable.studyTime.map((studyTime) => studyTime.studyTimeId)
+          timetable.studyTime.map((studyTime) => studyTime.studyTimeId),
         )
         .flat();
       // console.log(studyTimeIdArray);
@@ -574,7 +574,7 @@ export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
       // console.log(oldStudent);
       const student = oldStudent.map((std, index) => {
         const attendance = std.student.attendance.filter((att) =>
-          studyTimeIdArray.includes(att.studingTimeId)
+          studyTimeIdArray.includes(att.studingTimeId),
         );
         return {
           stdNo: std.stdNo,
@@ -589,16 +589,16 @@ export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
       });
       const summaryList = student.map((std) => {
         const attendenceCount = std.student.attendance.filter(
-          (att) => att.attStatus === "PRESENT"
+          (att) => att.attStatus === "PRESENT",
         ).length;
         const attendenceLateCount = std.student.attendance.filter(
-          (att) => att.attStatus === "LATE"
+          (att) => att.attStatus === "LATE",
         ).length;
         const attendenceLeaveCount = std.student.attendance.filter(
-          (att) => att.attStatus === "LEAVE"
+          (att) => att.attStatus === "LEAVE",
         ).length;
         const attendenceActivity = std.student.attendance.filter(
-          (att) => att.attStatus === "ACTIVITY"
+          (att) => att.attStatus === "ACTIVITY",
         ).length;
         const attendenceAbsentCount =
           studyCount -
@@ -769,7 +769,7 @@ export const saveAttendenceByTeacher = async (req, res) => {
             const updatedBehaviourScore = incrementBehaviourScore(
               behaviourScore.behaviourScore,
               existingAttendance.attStatus,
-              item.attStatus
+              item.attStatus,
             );
             // console.log("updatedBehaviourScore", updatedBehaviourScore);
             // console.log("increment behaviour score");
@@ -800,7 +800,7 @@ export const saveAttendenceByTeacher = async (req, res) => {
 
           const updatedBehaviourScore = decoreteBehaviourScore(
             behaviourScore.behaviourScore,
-            item.attStatus
+            item.attStatus,
           );
           if (updatedBehaviourScore.decorreted) {
             await db.classroomMember.update({
@@ -863,7 +863,7 @@ export const saveAttendenceByTeacher = async (req, res) => {
           //   console.log(behaviourScore);
           const updatedBehaviourScore = decoreteBehaviourScore(
             behaviourScore.behaviourScore,
-            item.attStatus
+            item.attStatus,
           );
 
           if (updatedBehaviourScore.decorreted) {
@@ -1139,16 +1139,16 @@ export const abstactAttendenceBySubject = async (req, res) => {
           });
 
           const attendenceCount = attendance.filter(
-            (att) => att.attStatus === "PRESENT"
+            (att) => att.attStatus === "PRESENT",
           ).length;
           const attendenceLateCount = attendance.filter(
-            (att) => att.attStatus === "LATE"
+            (att) => att.attStatus === "LATE",
           ).length;
           const attendenceLeaveCount = attendance.filter(
-            (att) => att.attStatus === "LEAVE"
+            (att) => att.attStatus === "LEAVE",
           ).length;
           const attendenceActivity = attendance.filter(
-            (att) => att.attStatus === "ACTIVITY"
+            (att) => att.attStatus === "ACTIVITY",
           ).length;
           const attendenceAbsentCount =
             studyCount -
@@ -1231,7 +1231,7 @@ export const studentAttendenceEnrollment = async (req, res) => {
           attStatus: statusEnrollment(
             enrollmentInfo.timetable.timeStart,
             enrollmentInfo.timetable.timeLate,
-            dtNow
+            dtNow,
           ),
           latitute: location.latitude,
           longitute: location.longitude,
@@ -1241,6 +1241,27 @@ export const studentAttendenceEnrollment = async (req, res) => {
           leaderId: null,
         },
       });
+
+      const student = await db.studentParent.findMany({
+        where: {
+          stdId: req.user.id,
+        },
+        include: {
+          student: true,
+          parent: true,
+        },
+      });
+      //pushMassage
+      if (student.length > 0) {
+        student.map(async (std) => {
+          const lineId = std.parent.lineId;
+          if (lineId) {
+            const message = `เรียนผู้ปกครอง ${std.parent.name} \n${formatTitle(std.student.title)}${std.student.fName} ${std.student.lName} ได้ทำการเช็คชื่อเรียนวิชา ${enrollmentInfo.timetable.subject.subNameThai} (${enrollmentInfo.timetable.subject.subNameEng})\nสอนโดยคุณครู: ${enrollmentInfo.timetable.subject.teacher.fName} ${enrollmentInfo.timetable.subject.teacher.lName}\nสถานะการเข้าเรียน: ${formateAttendanceStatus(createAttendance.attStatus)} \nเวลา: ${dtNow.toFormat("yyyy-MM-dd HH:mm:ss")}\n\n\nการบันทึกนี้ถูกบันทึกโดยนักเรียนผ่านระบบยืนยันตำแหน่งที่ตั้งของโรงเรียนด้วย GPS`;
+            await pushMessageToLine(lineId, message);
+          }
+        });
+      }
+
       res.status(200).json({ message: "ลงชื่อเข้าเรียนสำเร็จ" });
     } catch (error) {
       console.error(error);
@@ -1417,13 +1438,13 @@ export const summarzieAttendenceByDateStudent = async (req, res) => {
   const termId = req.params.termId;
   const date = req.params.date;
   const dateStart = DateTime.fromISO(`${date}T00:00:00`).setZone(
-    "Asia/Bangkok"
+    "Asia/Bangkok",
   );
   const starttime = DateTime.fromISO(
-    `${dateStart.toString().split("T")[0]}T01:40:00Z`
+    `${dateStart.toString().split("T")[0]}T01:40:00Z`,
   ).setZone("UTC");
   const endtime = DateTime.fromISO(
-    `${dateStart.toString().split("T")[0]}T08:40:00Z`
+    `${dateStart.toString().split("T")[0]}T08:40:00Z`,
   ).setZone("UTC");
   // console.log(endtime);
   if (termId && studentId && date) {
@@ -1478,7 +1499,7 @@ export const summarzieAttendenceByDateStudent = async (req, res) => {
 
       const studytimeFilter = studytime.map((st) => {
         const filterAttendence = st.attendance.filter(
-          (att) => att.stdId === studentId
+          (att) => att.stdId === studentId,
         );
         const newObject = {
           ...st,
@@ -1534,7 +1555,7 @@ export const summarzieAttendenceBySubject = async (req, res) => {
 
       const studytimeFilter = stduytime.map((st) => {
         const filterAttendence = st.attendance.filter(
-          (att) => att.stdId === studentId
+          (att) => att.stdId === studentId,
         );
         const newObject = {
           ...st,
