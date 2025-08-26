@@ -436,7 +436,6 @@ export async function teacherUpdateStatusLeaveRequest(req, res) {
           studingTimeId: studingTime.studyTimeId,
         },
       });
-      console.log("attendence", attendence);
       // get attendence medhod
       const attendenceMethodId = await db.attendanceMethod.findFirst({
         where: {
@@ -458,6 +457,62 @@ export async function teacherUpdateStatusLeaveRequest(req, res) {
             operatedBy: "ระบบลา",
           },
         });
+
+        if (attendence.attStatus == "ABSENT") {
+          let term = await db.academicTerms.findMany();
+          term = getLastestTerm(term);
+          // update behavior point +1
+          await db.behaviourScoreTransaction.create({
+            data: {
+              student: {
+                connect: { stdId: leaveRequest.leaveRequest.stdId },
+              },
+              score: 1,
+              Status: "INCREMENT",
+            },
+          });
+          // update student behaviour point at ClassroomMember
+          await db.classroomMember.updateMany({
+            where: {
+              stdId: leaveRequest.leaveRequest.stdId,
+              classroom: {
+                termId: term.termId,
+              },
+            },
+            data: {
+              behaviourScore: {
+                increment: 1,
+              },
+            },
+          });
+        } else if (attendence.attStatus == "LATE") {
+          let term = await db.academicTerms.findMany();
+          term = getLastestTerm(term);
+          // update behavior point +0.5
+          await db.behaviourScoreTransaction.create({
+            data: {
+              student: {
+                connect: { stdId: leaveRequest.leaveRequest.stdId },
+              },
+              score: 0.5,
+              Status: "INCREMENT",
+            },
+          });
+          // update student behaviour point at ClassroomMember
+          await db.classroomMember.updateMany({
+            where: {
+              stdId: leaveRequest.leaveRequest.stdId,
+              classroom: {
+                termId: term.termId,
+              },
+            },
+            data: {
+              behaviourScore: {
+                increment: 0.5,
+              },
+            },
+          });
+        }
       } else {
         // create attendence
         await db.attendance.create({
