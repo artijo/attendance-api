@@ -45,10 +45,20 @@ export const getFullCalendarStudyTime = async (req, res) => {
       },
     });
     const fullCalendarEventFormat = studyTimes.map((studytime) => {
-      // ระบุ zone ให้ถูกต้องตั้งแต่ตอนสร้าง DateTime object เพื่อป้องกันการเพิ่มเวลาที่ไม่ต้องการ
-      const startDateTime = DateTime.fromJSDate(studytime.studingTimeDate, {
-        zone: zone,
-      });
+      // 1. แปลงอ็อบเจกต์ Date ให้เป็น String โดยไม่ให้เปลี่ยนโซนเวลา
+      //    หรือถ้าข้อมูลที่ส่งมาเป็น String อยู่แล้วก็ใช้ได้เลย
+      const dateString = studytime.studingTimeDate
+        .toISOString()
+        .slice(0, 19)
+        .replace("T", " ");
+
+      // 2. ใช้ .fromFormat() และระบุโซนเวลาท้องถิ่น (zone)
+      const startDateTime = DateTime.fromFormat(
+        dateString,
+        "yyyy-MM-dd HH:mm:ss",
+        { zone: zone },
+      );
+
       const endDateTime = startDateTime.plus({ minutes: 50 });
 
       return {
