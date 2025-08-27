@@ -25,7 +25,7 @@ export const getTermDateBetweenFilterHolidays = async (req, res) => {
           termId: termId,
         },
       });
-      // console.log(term);
+
       const holidays = await db.holiday.findMany({
         where: {
           termId: termId,
@@ -34,29 +34,32 @@ export const getTermDateBetweenFilterHolidays = async (req, res) => {
           startHolidayDate: "asc",
         },
       });
+
       const holidayListDate = holidays.map((holiday) => {
-        const timezoneformat = DateTime.fromJSDate(
-          holiday.startHolidayDate,
-        ).setZone(zone);
+        // สร้าง DateTime จากวันที่ในฐานข้อมูล และระบุ Timezone ทันที
+        const timezoneformat = DateTime.fromJSDate(holiday.startHolidayDate, {
+          zone: zone,
+        });
         const holidayDay = timezoneformat.toISODate();
-        // console.log(holidayDay);
         return holidayDay;
       });
-      const termStart = DateTime.fromJSDate(term.termStart)
-        .setZone(zone)
-        .toISO();
-      const termEnd = DateTime.fromJSDate(term.termEnd).setZone(zone).toISO();
+
+      // สร้าง DateTime โดยระบุ Timezone ให้ชัดเจน
+      const termStart = DateTime.fromJSDate(term.termStart, {
+        zone: zone,
+      }).toISODate();
+      const termEnd = DateTime.fromJSDate(term.termEnd, {
+        zone: zone,
+      }).toISODate();
+
+      // ฟังก์ชัน daybetween() ต้องส่งข้อมูลวันที่ที่อยู่ในรูปแบบ 'yyyy-MM-dd'
       const termDateBetween = daybetween(termStart, termEnd)
         .filter((date) => {
-          const checkSatAndSun = DateTime.fromISO(`${date}T17:00:00`).setZone(
-            zone,
-          ).weekday;
-          // console.log(checkSatAndSun);
-          return checkSatAndSun != 6 && checkSatAndSun != 7;
-          // console.log(checkSatAndSun);
+          // สร้าง DateTime object ด้วยวันที่และ Timezone ที่ถูกต้องทันที
+          const checkSatAndSun = DateTime.fromISO(date, { zone: zone }).weekday;
+          return checkSatAndSun !== 6 && checkSatAndSun !== 7;
         })
         .filter((date) => {
-          // const checkSatAndSun = DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone(zone).day;
           return !holidayListDate.includes(date);
         });
 
@@ -110,12 +113,10 @@ export const createTerm = async (req, res) => {
         },
       });
       if (isexistacademicterm) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "ไม่สามารถสร้างเทอมปีการศึกษาได้เนื่องจากมีปีการศึกษาและเทอมนี้อยู่แล้ว",
-          });
+        return res.status(400).json({
+          message:
+            "ไม่สามารถสร้างเทอมปีการศึกษาได้เนื่องจากมีปีการศึกษาและเทอมนี้อยู่แล้ว",
+        });
       }
       // เช็คว่ามีเทอมที่มีวันที่ทับซ้อนกันหรือไม่
       const minimunDate = await db.academicTerms.findFirst({
@@ -136,12 +137,10 @@ export const createTerm = async (req, res) => {
           termEnd,
         );
         if (isTermExist) {
-          return res
-            .status(400)
-            .json({
-              message:
-                "ไม่สามารถสร้างเทอมปีการศึกษาได้เนื่องจากมีระหว่างวันที่มีอยู่ในฐานข้อมูลแล้ว",
-            });
+          return res.status(400).json({
+            message:
+              "ไม่สามารถสร้างเทอมปีการศึกษาได้เนื่องจากมีระหว่างวันที่มีอยู่ในฐานข้อมูลแล้ว",
+          });
         }
       }
       // const isTermExist = CheckDateBetween(minimunDate.termStart, maxDate.termEnd, termStart, termEnd);
@@ -211,11 +210,9 @@ export const deleteTerm = async (req, res) => {
           termId: String(termId),
         },
       });
-      res
-        .status(200)
-        .json({
-          message: `ลบ ปีการศึกษา${academicTerm.academicYear} เทอม ${academicTerm.semester} สำเร็จ`,
-        });
+      res.status(200).json({
+        message: `ลบ ปีการศึกษา${academicTerm.academicYear} เทอม ${academicTerm.semester} สำเร็จ`,
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "ไม่สามารถลบปีการศึกษาเทอมได้" });
