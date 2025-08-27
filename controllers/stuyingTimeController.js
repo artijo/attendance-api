@@ -45,8 +45,8 @@ export const getFullCalendarStudyTime = async (req, res) => {
       },
     });
     const fullCalendarEventFormat = studyTimes.map((studytime) => {
-      const startDateTime = DateTime.fromISO(
-        studytime.studingTimeDate.toISOString(),
+      const startDateTime = DateTime.fromJSDate(
+        studytime.studingTimeDate,
       ).setZone(zone);
       const endDateTime = startDateTime.plus({ minutes: 50 });
       return {
