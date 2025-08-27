@@ -98,6 +98,14 @@ export const createTimetableByAddSubject = async (req, res) => {
                         });
                     }
                 };
+                const findStudingTime = await db.studingTime.findMany({
+                    where: {
+                        timetable : {
+                            classId : classroom.classId
+                        }
+                    }
+                });
+                // console.log(findStudingTime);
                 return res.status(200).json({ message: 'create successful' });
             }
         } catch (error) {
