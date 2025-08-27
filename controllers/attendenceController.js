@@ -275,35 +275,28 @@ export const getAttendenceByDateAndStudnet = async (req, res) => {
 export const getAttendenceByDate = async (req, res) => {
   const date = req.params.date;
   const classroomId = req.params.classroomId;
+  // console.log(date);
+  // console.log(classroomId);
   if (date && classroomId) {
     try {
       const weekdayOnDateInput = DateTime.fromISO(`${date}T00:00:00`).setZone(
         zone,
       ).weekday;
+      // console.log(weekdayOnDateInput);
       const timetables = await db.timetable.findMany({
         where: {
           AND: [{ classId: classroomId }, { dayOfWeek: weekdayOnDateInput }],
         },
       });
-
+      const sDate = DateTime.fromISO(date, { zone }).startOf('day');
+      const eDate = DateTime.fromISO(date, { zone }).endOf('day');
       const stuidingTime = await db.studingTime.findMany({
         where: {
-          AND: [
-            {
-              timetableId: {
-                in: timetables.map((timetable) => timetable.timetableId),
-              },
-            },
-            {
-              studingTimeDate: {
-                in: timetables.map((timetable) =>
-                  DateTime.fromISO(`${date}T${timetable.timeStart}`).setZone(
-                    zone,
-                  ),
-                ),
-              },
-            },
-          ],
+          timetableId: { in: timetables.map(t => t.timetableId) },
+          studingTimeDate: {
+            gte: sDate,
+            lte: eDate
+          },
         },
         include: {
           timetable: {
@@ -316,6 +309,7 @@ export const getAttendenceByDate = async (req, res) => {
           studingTimeDate: "asc",
         },
       });
+      // console.log(stuidingTime);
       if (stuidingTime.length == 0) return res.json([]);
       const student = await db.classroomMember.findMany({
         where: {

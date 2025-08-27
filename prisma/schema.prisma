@@ -3,20 +3,11 @@ generator client {
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
-// if the DATABASE_URL env var is set, we connect to the production database
-// otherwise, we connect to a local SQLite database
-
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// datasource db {
-//   provider = "sqlite"
-//   url      = "file:dev.db"
-// }
-
-// specify the schema of your database tables
 model Student {
   stdId                     String                      @id
   title                     EnumNameTitle
@@ -26,28 +17,28 @@ model Student {
   tel                       String?                     @unique
   googleId                  String?                     @unique
   lineId                    String?                     @unique
-  parent                    StudentParent[]
-  attendance                Attendance[]
-  leaveRequest              LeaveRequest[]
-  activity                  ActivityParticipate[]
-  classroomMembers          ClassroomMember[]
-  Leader                    Leader[]
-  behaviourScoreTransaction behaviourScoreTransaction[]
   createdAt                 DateTime                    @default(now())
   updatedAt                 DateTime                    @updatedAt
   deletedAt                 DateTime?
+  activity                  ActivityParticipate[]
+  attendance                Attendance[]
+  classroomMembers          ClassroomMember[]
+  Leader                    Leader[]
+  leaveRequest              LeaveRequest[]
+  parent                    StudentParent[]
+  behaviourScoreTransaction behaviourScoreTransaction[]
 }
 
 model Leader {
   ldrId      String                @id @default(uuid())
   stdId      String
-  student    Student               @relation(fields: [stdId], references: [stdId])
-  classroom  Classrooms[]
-  attendance Attendance[]
-  activity   ActivityParticipate[]
   createdAt  DateTime              @default(now())
   updatedAt  DateTime              @updatedAt
   deletedAt  DateTime?
+  activity   ActivityParticipate[]
+  attendance Attendance[]
+  classroom  Classrooms[]
+  student    Student               @relation(fields: [stdId], references: [stdId])
 }
 
 model Teacher {
@@ -60,26 +51,25 @@ model Teacher {
   googleId                String?                   @unique
   lineId                  String?                   @unique
   deptId                  String?
-  department              Department?               @relation(fields: [deptId], references: [deptId])
-  subject                 Subject[]
-  classTeacher            ClassroomTeacher[]
-  attendance              Attendance[]
-  leaveRequestStudingTime LeaveRequestStudingTime[]
-  activity                ActivityTeacher[]
-  actParticipate          ActivityParticipate[]
   createdAt               DateTime                  @default(now())
   updatedAt               DateTime                  @updatedAt
   deletedAt               DateTime?
+  actParticipate          ActivityParticipate[]
+  activity                ActivityTeacher[]
+  attendance              Attendance[]
+  classTeacher            ClassroomTeacher[]
+  leaveRequestStudingTime LeaveRequestStudingTime[]
+  subject                 Subject[]
+  department              Department?               @relation(fields: [deptId], references: [deptId])
 }
 
 model Department {
   deptId    String    @id @default(uuid())
-  // deptCode  String    @unique
   deptName  String
-  teacher   Teacher[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+  teacher   Teacher[]
 }
 
 model Parent {
@@ -88,21 +78,21 @@ model Parent {
   email     String?         @unique
   tel       String?         @unique
   lineId    String?         @unique
-  student   StudentParent[]
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
   deletedAt DateTime?
+  student   StudentParent[]
 }
 
 model StudentParent {
   id        String    @id @default(uuid())
   stdId     String
   prntId    String
-  student   Student   @relation(fields: [stdId], references: [stdId])
-  parent    Parent    @relation(fields: [prntId], references: [prntId])
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+  parent    Parent    @relation(fields: [prntId], references: [prntId])
+  student   Student   @relation(fields: [stdId], references: [stdId])
 }
 
 model Subject {
@@ -112,24 +102,23 @@ model Subject {
   subNameEng  String?
   subCredit   Float
   tchId       String
-  teacher     Teacher     @relation(fields: [tchId], references: [tchId])
   subTypeId   String
-  subjectType SubjectType @relation(fields: [subTypeId], references: [subTypeId])
-  timetable   Timetable[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   deletedAt   DateTime?
+  subjectType SubjectType @relation(fields: [subTypeId], references: [subTypeId])
+  teacher     Teacher     @relation(fields: [tchId], references: [tchId])
+  timetable   Timetable[]
 }
 
 model SubjectType {
   subTypeId       String    @id @default(uuid())
-  // subTypeCode     String    @unique
   subTypeNameThai String
   subTypeNameEng  String?
-  subject         Subject[]
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?
+  subject         Subject[]
 }
 
 model Classrooms {
@@ -137,72 +126,70 @@ model Classrooms {
   classLevel       Int
   classRoom        Int
   classTypeId      String
-  classroomType    ClassroomType              @relation(fields: [classTypeId], references: [classTypeId])
-  classroomMembers ClassroomMember[]
   termId           String
-  term             AcademicTerms              @relation(fields: [termId], references: [termId])
-  timetable        Timetable[]
-  classTeacher     ClassroomTeacher[]
-  activity         ClassroomCanjoinActivity[]
   ldrId            String?
-  leader           Leader?                    @relation(fields: [ldrId], references: [ldrId])
-  // behaviourScoreTransaction behaviourScoreTransaction[]
   createdAt        DateTime                   @default(now())
   updatedAt        DateTime                   @updatedAt
   deletedAt        DateTime?
+  activity         ClassroomCanjoinActivity[]
+  classroomMembers ClassroomMember[]
+  classTeacher     ClassroomTeacher[]
+  classroomType    ClassroomType              @relation(fields: [classTypeId], references: [classTypeId])
+  leader           Leader?                    @relation(fields: [ldrId], references: [ldrId])
+  term             AcademicTerms              @relation(fields: [termId], references: [termId])
+  timetable        Timetable[]
 }
 
 model ClassroomMember {
   classRoomMemeberId String     @id @default(uuid())
   classId            String
   stdId              String
-  classroom          Classrooms @relation(fields: [classId], references: [classId])
-  student            Student    @relation(fields: [stdId], references: [stdId])
   stdNo              String
   behaviourScore     Float      @default(100)
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   deletedAt          DateTime?
+  classroom          Classrooms @relation(fields: [classId], references: [classId])
+  student            Student    @relation(fields: [stdId], references: [stdId])
 }
 
 model ClassroomType {
   classTypeId       String       @id @default(uuid())
   classTypeNameThai String
   classTypeNameEng  String?
-  classroom         Classrooms[]
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
   deletedAt         DateTime?
+  classroom         Classrooms[]
 }
 
 model Timetable {
   timetableId String        @id @default(uuid())
   subId       String
   classId     String
-  // tchId       String
   timeStart   String
   timeEnd     String
   timeLate    String
-  dayOfWeek   Int // 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday, 7 = Sunday
-  subject     Subject       @relation(fields: [subId], references: [subId])
-  classroom   Classrooms    @relation(fields: [classId], references: [classId])
-  studyTime   StudingTime[]
+  dayOfWeek   Int
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   deletedAt   DateTime?
+  studyTime   StudingTime[]
+  classroom   Classrooms    @relation(fields: [classId], references: [classId])
+  subject     Subject       @relation(fields: [subId], references: [subId])
 }
 
 model StudingTime {
   studyTimeId               String                      @id @default(uuid())
   timetableId               String
-  timetable                 Timetable                   @relation(fields: [timetableId], references: [timetableId])
-  attendance                Attendance[]
-  leaveRequest              LeaveRequestStudingTime[]
-  behaviourScoreTransaction behaviourScoreTransaction[]
   studingTimeDate           DateTime
   createdAt                 DateTime                    @default(now())
   updatedAt                 DateTime                    @updatedAt
   deletedAt                 DateTime?
+  attendance                Attendance[]
+  leaveRequest              LeaveRequestStudingTime[]
+  timetable                 Timetable                   @relation(fields: [timetableId], references: [timetableId])
+  behaviourScoreTransaction behaviourScoreTransaction[]
 }
 
 model Attendance {
@@ -211,31 +198,30 @@ model Attendance {
   studingTimeId String
   attTimestamp  DateTime
   attStatus     EnumAttendanceStatus
-  // attStatus     String
-  student       Student              @relation(fields: [stdId], references: [stdId])
-  studingTime   StudingTime          @relation(fields: [studingTimeId], references: [studyTimeId])
   attMethodId   String
-  attMethod     AttendanceMethod     @relation(fields: [attMethodId], references: [attMethodId])
   latitute      Float?
   longitute     Float?
   note          String?
   operatedBy    String
   tchId         String?
-  teacher       Teacher?             @relation(fields: [tchId], references: [tchId])
   leaderId      String?
-  leader        Leader?              @relation(fields: [leaderId], references: [ldrId])
   createdAt     DateTime             @default(now())
   updatedAt     DateTime             @updatedAt
   deletedAt     DateTime?
+  attMethod     AttendanceMethod     @relation(fields: [attMethodId], references: [attMethodId])
+  leader        Leader?              @relation(fields: [leaderId], references: [ldrId])
+  student       Student              @relation(fields: [stdId], references: [stdId])
+  studingTime   StudingTime          @relation(fields: [studingTimeId], references: [studyTimeId])
+  teacher       Teacher?             @relation(fields: [tchId], references: [tchId])
 }
 
 model AttendanceMethod {
   attMethodId   String       @id @default(uuid())
   attMethodName String
-  attendance    Attendance[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   deletedAt     DateTime?
+  attendance    Attendance[]
 }
 
 model LeaveRequest {
@@ -245,21 +231,21 @@ model LeaveRequest {
   leaveTypeId      String
   leaveReason      String
   LeaveFile        String?
-  student          Student                   @relation(fields: [stdId], references: [stdId])
-  leaveRequestType LeaveRequestType          @relation(fields: [leaveTypeId], references: [leaveTypeId])
-  studingTime      LeaveRequestStudingTime[]
   createdAt        DateTime                  @default(now())
   updatedAt        DateTime                  @updatedAt
   deletedAt        DateTime?
+  leaveRequestType LeaveRequestType          @relation(fields: [leaveTypeId], references: [leaveTypeId])
+  student          Student                   @relation(fields: [stdId], references: [stdId])
+  studingTime      LeaveRequestStudingTime[]
 }
 
 model LeaveRequestType {
   leaveTypeId   String         @id @default(uuid())
   leaveTypeName String
-  leaveRequest  LeaveRequest[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   deletedAt     DateTime?
+  leaveRequest  LeaveRequest[]
 }
 
 model LeaveRequestStudingTime {
@@ -267,15 +253,15 @@ model LeaveRequestStudingTime {
   leaveId                   String
   studyTimeId               String
   leaveStatus               EnumLeaveStatus @default(WAITING)
-  leaveRequest              LeaveRequest    @relation(fields: [leaveId], references: [leaveId])
-  studingTime               StudingTime     @relation(fields: [studyTimeId], references: [studyTimeId])
   tacherApproveId           String?
-  teacherApprove            Teacher?        @relation(fields: [tacherApproveId], references: [tchId])
   approverTimestamp         DateTime?
   rejectedNote              String?
   createdAt                 DateTime        @default(now())
   updatedAt                 DateTime        @updatedAt
   deletedAt                 DateTime?
+  leaveRequest              LeaveRequest    @relation(fields: [leaveId], references: [leaveId])
+  studingTime               StudingTime     @relation(fields: [studyTimeId], references: [studyTimeId])
+  teacherApprove            Teacher?        @relation(fields: [tacherApproveId], references: [tchId])
 }
 
 model Activity {
@@ -284,7 +270,6 @@ model Activity {
   actDate         DateTime
   actDateEnd      DateTime
   actTypeId       String
-  activityType    ActivityType               @relation(fields: [actTypeId], references: [actTypeId])
   actStatus       EnumActivityStatus
   actDesc         String?
   actLocation     String?
@@ -292,61 +277,62 @@ model Activity {
   actEndTime      String?
   joinLimit       Boolean
   joinLimitNumber Int?
-  teacher         ActivityTeacher[]
-  classroom       ClassroomCanjoinActivity[]
-  actParticipate  ActivityParticipate[]
   createdAt       DateTime                   @default(now())
   updatedAt       DateTime                   @updatedAt
   deletedAt       DateTime?
+  activityType    ActivityType               @relation(fields: [actTypeId], references: [actTypeId])
+  actParticipate  ActivityParticipate[]
+  teacher         ActivityTeacher[]
+  classroom       ClassroomCanjoinActivity[]
 }
 
 model ActivityType {
   actTypeId   String     @id @default(uuid())
   actTypeName String
-  activity    Activity[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   deletedAt   DateTime?
+  activity    Activity[]
 }
 
 model ActivityTeacher {
   actTeacherId String    @id @default(uuid())
   actId        String
   tchId        String
-  teacher      Teacher   @relation(fields: [tchId], references: [tchId])
-  activity     Activity  @relation(fields: [actId], references: [actId])
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
+  activity     Activity  @relation(fields: [actId], references: [actId])
+  teacher      Teacher   @relation(fields: [tchId], references: [tchId])
 }
 
 model ClassroomCanjoinActivity {
   classCanjoinId String     @id @default(uuid())
   classId        String
   actId          String
-  classroom      Classrooms @relation(fields: [classId], references: [classId])
-  activity       Activity   @relation(fields: [actId], references: [actId])
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   deletedAt      DateTime?
+  activity       Activity   @relation(fields: [actId], references: [actId])
+  classroom      Classrooms @relation(fields: [classId], references: [classId])
 }
 
 model ActivityParticipate {
   actParticipateId String    @id @default(uuid())
   actId            String
   stdId            String
-  student          Student   @relation(fields: [stdId], references: [stdId])
-  activity         Activity  @relation(fields: [actId], references: [actId])
   note             String?
   joinTimestamp    DateTime
   operateBy        String
   teacherId        String?
-  teacher          Teacher?  @relation(fields: [teacherId], references: [tchId])
   leaderId         String?
-  leader           Leader?   @relation(fields: [leaderId], references: [ldrId])
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   deletedAt        DateTime?
+  activity         Activity  @relation(fields: [actId], references: [actId])
+  leader           Leader?   @relation(fields: [leaderId], references: [ldrId])
+  student          Student   @relation(fields: [stdId], references: [stdId])
+  teacher          Teacher?  @relation(fields: [teacherId], references: [tchId])
 }
 
 model Holiday {
@@ -356,10 +342,10 @@ model Holiday {
   holidayName      String
   type             holidayType
   termId           String
-  term             AcademicTerms @relation(fields: [termId], references: [termId])
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
   deletedAt        DateTime?
+  term             AcademicTerms @relation(fields: [termId], references: [termId])
 }
 
 model AcademicTerms {
@@ -368,29 +354,22 @@ model AcademicTerms {
   semester     Int
   termStart    DateTime
   termEnd      DateTime
-  classroom    Classrooms[]
-  holiday      Holiday[]
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   deletedAt    DateTime?
+  classroom    Classrooms[]
+  holiday      Holiday[]
 }
 
 model ClassroomTeacher {
   classTeacherId String     @id @default(uuid())
   classId        String
   tchId          String
-  classroom      Classrooms @relation(fields: [classId], references: [classId])
-  teacher        Teacher    @relation(fields: [tchId], references: [tchId])
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   deletedAt      DateTime?
-
-  // @@unique([classId, tchId])
-}
-
-enum holidayType {
-  RATCHAKHAN // ราชกาล
-  SCHOOL // วันหยุดของโรงเรียนเอง
+  classroom      Classrooms @relation(fields: [classId], references: [classId])
+  teacher        Teacher    @relation(fields: [tchId], references: [tchId])
 }
 
 model Admin {
@@ -408,25 +387,27 @@ model Admin {
 model behaviourScoreTransaction {
   id           String             @id @default(uuid())
   stdId        String
-  // classId      String
   stuingTimeId String
-  student      Student            @relation(fields: [stdId], references: [stdId])
-  // classroom    Classrooms  @relation(fields: [classId], references: [classId])
-  studingTime  StudingTime        @relation(fields: [stuingTimeId], references: [studyTimeId])
   score        Float
-  // reason       String?
   Status       EnumBehaviourScore @default(DECREMENT)
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
   deletedAt    DateTime?
+  student      Student            @relation(fields: [stdId], references: [stdId])
+  studingTime  StudingTime        @relation(fields: [stuingTimeId], references: [studyTimeId])
+}
+
+enum holidayType {
+  RATCHAKHAN
+  SCHOOL
 }
 
 enum EnumAttendanceStatus {
-  PRESENT // มาเรียน
-  ABSENT // ขาดเรียน
-  LATE // มาสาย
-  ACTIVITY // กิจกรรม
-  LEAVE // ลา
+  PRESENT
+  ABSENT
+  LATE
+  ACTIVITY
+  LEAVE
 }
 
 enum EnumLeaveStatus {
@@ -436,10 +417,10 @@ enum EnumLeaveStatus {
 }
 
 enum EnumNameTitle {
-  BOY // เด็กชาย
-  GIRL // เด็กหญิง
-  MR // นาย
-  MS // นางสาว
+  BOY
+  GIRL
+  MR
+  MS
 }
 
 enum EnumActivityStatus {
@@ -448,6 +429,6 @@ enum EnumActivityStatus {
 }
 
 enum EnumBehaviourScore {
-  INCREMENT // เพิ่มคะแนน
-  DECREMENT // ลดคะแนน
+  INCREMENT
+  DECREMENT
 }
