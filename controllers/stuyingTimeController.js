@@ -45,11 +45,12 @@ export const getFullCalendarStudyTime = async (req, res) => {
       },
     });
     const fullCalendarEventFormat = studyTimes.map((studytime) => {
-      const startDateTime = DateTime.fromFormat(
-        studytime.studingTimeDate,
-        "yyyy-MM-dd HH:mm:ss.SSS",
-      ).setZone(zone);
+      // ระบุ zone ให้ถูกต้องตั้งแต่ตอนสร้าง DateTime object เพื่อป้องกันการเพิ่มเวลาที่ไม่ต้องการ
+      const startDateTime = DateTime.fromJSDate(studytime.studingTimeDate, {
+        zone: zone,
+      });
       const endDateTime = startDateTime.plus({ minutes: 50 });
+
       return {
         title: `${studytime.timetable.subject.subCode}-${studytime.timetable.subject.subNameThai}`,
         start: startDateTime,
