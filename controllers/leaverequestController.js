@@ -444,9 +444,14 @@ export async function teacherUpdateStatusLeaveRequest(req, res) {
           attMethodName: "ระบบลา",
         },
       });
+
+      if (!attendenceMethodId) {
+        return res.status(404).json({ message: "Attendance method not found" });
+      }
+
       if (attendence) {
         // update attendence
-        await db.attendence.update({
+        await db.attendance.update({
           where: {
             attId: attendence.attId,
           },
