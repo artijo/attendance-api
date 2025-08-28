@@ -8,6 +8,8 @@ import {
 import { formatTitle, getLastestTerm } from "../helper/helper.js";
 formatTitle;
 
+const zone = process.env.TIME_ZONE || "Asia/Bangkok";
+
 export async function getAllLeaveRequestsByStudentId(req, res) {
   try {
     const leaveRequests = await db.leaveRequest.findMany({
@@ -330,7 +332,7 @@ export async function getLeaveRequestForTeacher(req, res) {
 
 export async function getLeaveRequestForTeacherByleaveRequestStudingTimeId(
   req,
-  res,
+  res
 ) {
   try {
     const leaveId = req.params.id; // Assuming you have the teacher ID in the request
@@ -370,7 +372,7 @@ export async function getLeaveRequestForTeacherByleaveRequestStudingTimeId(
     if (leaveRequests[0].LeaveFile) {
       const signedUrl = await generateSignedUrl(
         "nps",
-        leaveRequests[0].LeaveFile,
+        leaveRequests[0].LeaveFile
       );
       // console.log('signedUrl', signedUrl);
       leaveRequests[0].LeaveFile = signedUrl;
@@ -413,7 +415,7 @@ export async function teacherUpdateStatusLeaveRequest(req, res) {
         teacherApprove: {
           connect: { tchId: teacherId },
         },
-        approverTimestamp: DateTime.now().toJSDate(),
+        approverTimestamp: DateTime.now().setZone(zone).toJSDate(),
         leaveStatus: status.toUpperCase(), // Convert status to uppercase
         rejectedNote: rejectReason || null,
       },
@@ -450,7 +452,7 @@ export async function teacherUpdateStatusLeaveRequest(req, res) {
           },
           data: {
             attStatus: "LEAVE",
-            attTimestamp: DateTime.now().toJSDate(),
+            attTimestamp: DateTime.now().setZone(zone).toJSDate(),
             attMethod: {
               connect: { attMethodId: attendenceMethodId.attMethodId },
             },
@@ -523,7 +525,7 @@ export async function teacherUpdateStatusLeaveRequest(req, res) {
             studingTime: {
               connect: { studyTimeId: studingTime.studyTimeId },
             },
-            attTimestamp: DateTime.now().toJSDate(),
+            attTimestamp: DateTime.now().setZone(zone).toJSDate(),
             attMethod: {
               connect: { attMethodId: attendenceMethodId.attMethodId },
             },
@@ -625,7 +627,7 @@ export async function getLeaveRequestForAdminByLeaveId(req, res) {
     if (leaveRequests[0].LeaveFile) {
       const signedUrl = await generateSignedUrl(
         "nps",
-        leaveRequests[0].LeaveFile,
+        leaveRequests[0].LeaveFile
       );
       // console.log('signedUrl', signedUrl);
       leaveRequests[0].LeaveFile = signedUrl;
