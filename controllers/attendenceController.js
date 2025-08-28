@@ -645,7 +645,7 @@ export const getAttendenceSummaryByPerson = async (req, res) => {
 export const saveAttendenceByTeacher = async (req, res) => {
   const body = req.body;
   // console.log(body);
-  const dtNow = DateTime.now();
+  const dtNow = DateTime.now().setZone(zone);
   if (body) {
     try {
       const AttMethodId = await db.attendanceMethod.findFirst({
@@ -907,7 +907,7 @@ export const saveAttendenceByTeacher = async (req, res) => {
 export const saveAttendenceByLeader = async (req, res) => {
   const body = req.body;
   // console.log(body);
-  const dtNow = DateTime.now();
+  const dtNow = DateTime.now().setZone(zone);
   if (body) {
     try {
       const AttMethodId = await db.attendanceMethod.findFirst({
