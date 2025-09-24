@@ -444,7 +444,7 @@ export const paticipatedActivityByteacher = async (req, res) => {
       });
       if (parent.length > 0) {
         parent.map(async (p) => {
-          const message = `เรียนผู้ปกครอง ${p.parent.name} นักเรียน ${p.student.fName} ${p.student.lName} ได้เข้าร่วมกิจกรรม ${activity.actName} วันที่ ${dtNowtoFormat("dd/LL/yyyy")} เวลา ${dtNow.toFormat("HH:mm")} \n\n\nบันทึกการเข้าร่วมกิจกรรมโดยคุณครู ${teacher.fName} ${teacher.lName}`;
+          const message = `เรียนผู้ปกครอง ${p.parent.name} นักเรียน ${p.student.fName} ${p.student.lName} ได้เข้าร่วมกิจกรรม ${activity.actName} วันที่ ${dtNow.toFormat("dd/LL/yyyy")} เวลา ${dtNow.toFormat("HH:mm")} \n\n\nบันทึกการเข้าร่วมกิจกรรมโดยคุณครู ${teacher.fName} ${teacher.lName}`;
           await pushMessageToLine(p.parent.lineId, message);
         });
       } else {
