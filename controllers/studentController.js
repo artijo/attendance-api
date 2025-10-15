@@ -49,7 +49,7 @@ export const createStudentWithFile = async (req, res) => {
         !item.no ||
         !item.title ||
         !item.firstName ||
-        !item.lastName,
+        !item.lastName
     );
 
   try {
@@ -63,7 +63,7 @@ export const createStudentWithFile = async (req, res) => {
     const student = await db.student.createMany({
       data: allStudents
         .filter(
-          (item) => item.studentId && item.studentId.toString().trim() !== "",
+          (item) => item.studentId && item.studentId.toString().trim() !== ""
         )
         .map((item) => ({
           stdId: item.studentId.toString(),
@@ -144,7 +144,7 @@ export const createStudentWithFile = async (req, res) => {
 
     const classroomMembers = allStudents
       .filter(
-        (item) => item.studentId && item.studentId.toString().trim() !== "",
+        (item) => item.studentId && item.studentId.toString().trim() !== ""
       )
       .map((item) => {
         const key = `${parseInt(item.class)}-${parseInt(item.room)}`;
@@ -232,7 +232,11 @@ export const getStudent = async (req, res) => {
               classroom: true,
             },
           },
-          parent: true,
+          parent: {
+            include: {
+              parent: true,
+            },
+          },
         },
       });
       // console.log(student);
