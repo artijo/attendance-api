@@ -696,10 +696,10 @@ export const getTimetableRoleStudent = async (req, res) => {
   const dtNowString = dtNow.toString();
   const studyTimeStart = DateTime.fromISO(
     `${dtNowString.split("T")[0]}T08:40:00`
-  ).setZone("UTC");
+  ).setZone("Asia/Bangkok");
   const studyTimeEnd = DateTime.fromISO(
     `${dtNowString.split("T")[0]}T15:30:00`
-  ).setZone("UTC");
+  ).setZone("Asia/Bangkok");
   if (studentId != undefined) {
     try {
       const dtSearchStart = dtNow.startOf("year").minus({ year: 2 });
@@ -748,6 +748,8 @@ export const getTimetableRoleStudent = async (req, res) => {
         },
       });
 
+      console.log(classroom.classId);
+
       if (!classroom) {
         return res.status(404).json({ message: "ไม่พบข้อมูลห้องเรียน" });
       }
@@ -760,6 +762,8 @@ export const getTimetableRoleStudent = async (req, res) => {
           dayOfWeek: dtNow.weekday,
         },
       });
+
+      // console.log(timetable);
 
       const studingTime = await db.studingTime.findMany({
         where: {

@@ -95,15 +95,11 @@ export const getOneAcademicTerm = async (req, res) => {
 };
 
 export const createTerm = async (req, res) => {
-  const body = req.body;
+  const body = req.body; 
   const acadamicyear = parseInt(body.academicYear) - 543;
   const semester = parseInt(body.semester);
-  const termStart = DateTime.fromISO(`${body.termStart}T00:00:00`).setZone(
-    zone,
-  );
+  const termStart = DateTime.fromISO(`${body.termStart}T00:00:00`).setZone(zone);
   const termEnd = DateTime.fromISO(`${body.termEnd}T00:00:00`).setZone(zone);
-  // console.log(termStart);
-  // console.log(termEnd);
   if (acadamicyear && semester && termStart && termEnd) {
     try {
       const isexistacademicterm = await db.academicTerms.findFirst({
@@ -112,6 +108,7 @@ export const createTerm = async (req, res) => {
           semester: semester,
         },
       });
+
       if (isexistacademicterm) {
         return res.status(400).json({
           message:
@@ -129,6 +126,7 @@ export const createTerm = async (req, res) => {
           termEnd: "desc",
         },
       });
+
       if (minimunDate && maxDate) {
         const isTermExist = CheckDateBetween(
           minimunDate.termStart,
@@ -170,34 +168,60 @@ export const createTerm = async (req, res) => {
 export const updateTerm = async (req, res) => {
   const body = req.body;
   const termId = body.termId;
-  const acadamicyear = parseInt(body.academicYear);
+  const acadamicyear = parseInt(body.academicYear) - 543;
   const semester = parseInt(body.semester);
-  const termStart = DateTime.fromISO(`${body.termStart}T00:00:00`).setZone(
-    zone,
-  );
+  const termStart = DateTime.fromISO(`${body.termStart}T00:00:00`).setZone(zone);
   const termEnd = DateTime.fromISO(`${body.termEnd}T00:00:00`).setZone(zone);
   if (body) {
     try {
-      await db.academicTerms.update({
+      /*
+        findTerm_inRange ใช้สำหรับการค้นหาข้อมูลที่อยู่ในระหว่าง termEnd และ termStart  หากเจอมากกว่า 1 ตัวแปลว่ามีวันที่ซ่ำกันอย่างแน่นอน
+        และหากมี 1 ตัวแต่เป็น Id เดียวกันให้สามารถแก้ไขได้ หากมี 1 ตัวแต่ Id ไม่เหมือนกันให้ไม่ผ่าน หากไม่มี Array.lenght = 0 แปลว่าไม่มีตัวซ่ำ
+      */
+      const findTerm_inRange = await db.academicTerms.findMany({
         where: {
-          termId: termId,
-        },
-        data: {
-          academicYear: acadamicyear,
-          semester: semester,
-          termStart: termStart,
-          termEnd: termEnd,
-        },
+          termStart: { lte: termEnd },
+          termEnd: { gte: termStart }  
+        }
       });
-      res.status(200).json({ message: "แก้ไขปีการศึกษาสำเร็จ" });
+
+      if (findTerm_inRange.length > 1) return res.status(400).json({ message: "ไม่สามารถแก้ไขเทอมได้เนื่องจากมีวันของวันที่เลือกทับซ้อนกับเทอมอื่น" }); // กรณีที่ array มีความยาวมากกว่า 1 แปลว่าวันที่ทับกันอย่างแน่นอน
+      if (findTerm_inRange.length === 1) {
+        if (findTerm_inRange[0].termId === termId) { // หาก termID เท่ากันให้สามารถแก้ไขข้อมูลได้
+          await db.academicTerms.update({
+            where: {
+              termId: termId,
+            },
+            data: {
+              academicYear: acadamicyear,
+              semester: semester,
+              termStart: termStart,
+              termEnd: termEnd,
+            },
+          });
+          return res.status(200).json({ message: "แก้ไขปีการศึกษาสำเร็จ" })
+        } else { // หาก termId ไม่ใช่ตัวเดียวกันใหแก้ไขไม่ได้
+          return res.status(400).json({ message: "ไม่สามารถแก้ไขเทอมได้เนื่องจากมีวันของวันที่เลือกทับซ้อนกับเทอมอื่น" })
+        }
+      } else { // หากความยาว array = 0 แปลว่าไม่มีวันไหนซ่ำให้สามารถแก้ไขได้
+        await db.academicTerms.update({
+          where: {
+            termId: termId,
+          },
+          data: {
+            academicYear: acadamicyear,
+            semester: semester,
+            termStart: termStart,
+            termEnd: termEnd,
+          },
+        });
+        return res.status(200).json({ message: "แก้ไขปีการศึกษาสำเร็จ" })
+      }
     } catch (error) {
-      console.error(error);
-      res
-        .status(500)
-        .json({ message: "Error: เกิดข้อผิดพลาดในการแก้ไขเทอมปีการศึกษา" });
+      return res.status(500).json({ message: "Error: เกิดข้อผิดพลาดในการแก้ไขเทอมปีการศึกษา" });
     }
   } else {
-    res.status(400).json({ message: "กรุณากรอกข้อมูลให้ถูกต้องหรือครบถ้วน" });
+    return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ถูกต้องหรือครบถ้วน" });
   }
 };
 
