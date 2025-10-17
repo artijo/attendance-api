@@ -428,6 +428,7 @@ export const editTimelateTimetable = async (req, res) => {
         timeLate: String(lateTime),
       },
     });
+    
     return res.status(200).json({ message: "สร้างสำเร็จ" });
   } else {
     return res.status(400).json({ message: "ข้อมูลไม่ถูกต้อง" });
@@ -435,12 +436,12 @@ export const editTimelateTimetable = async (req, res) => {
 };
 
 export const getTimeTableByRoom = async (req, res) => {
-  const classid = req.query.classroomid;
-  if (classid) {
+  const classId = req.query.classroomid;
+  if (classId) {
     try {
       const timetable = await db.timetable.findMany({
         where: {
-          classId: classid,
+          classId: classId,
         },
         orderBy: [{ dayOfWeek: "asc" }, { timeStart: "asc" }],
         select: {
@@ -462,8 +463,6 @@ export const getTimeTableByRoom = async (req, res) => {
                   academicYear: true,
                 },
               },
-              // academicYear:true,
-              // semester:true,
               leader: {
                 select: {
                   ldrId: true,
@@ -510,9 +509,7 @@ export const getTimeTableByRoom = async (req, res) => {
         4: [],
         5: [],
       };
-
       const arrayOfDayOfWeek = Object.keys(dayOfWeek);
-
       arrayOfDayOfWeek.forEach((objectKey) => {
         timetable.forEach((subjecttimetable) => {
           if (Number(objectKey) === Number(subjecttimetable.dayOfWeek)) {
@@ -520,8 +517,6 @@ export const getTimeTableByRoom = async (req, res) => {
           }
         });
       });
-
-      // console.log(timetable);
       res.json(dayOfWeek);
     } catch (error) {
       console.log(error);

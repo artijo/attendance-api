@@ -35,7 +35,8 @@ export const fullCalendarHoliday = async (req, res) => {
                 start: startHolidayDateFormat,
                 end: endHolidayDateFormat,
                 allDay: true,
-                color: holiday.type === 'RATCHAKHAN' ? 'red' : 'blue'
+                holidayType: holiday.type
+                // color: holiday.type === 'RATCHAKHAN' ? 'red' : 'blue'
             }
             return object;
         });

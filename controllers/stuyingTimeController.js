@@ -53,7 +53,7 @@ export const getFullCalendarStudyTime = async (req, res) => {
         title: `${studytime.timetable.subject.subCode}-${studytime.timetable.subject.subNameThai}`,
         start: startDateTime,
         end: endDateTime,
-        color: "#FFD700",
+        // color: "#FFD700",
       };
     });
     // console.log(fullCalendarEventFormat);
