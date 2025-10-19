@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import db from "../prisma/client.js";
 
 export const createClassroom = async (req, res) => {
@@ -9,6 +10,7 @@ export const createClassroom = async (req, res) => {
         var leader = await db.leader.findFirst({
           where: {
             stdId: body.leaderId,
+            deletedAt: null,
           },
         });
         if (leader) {
@@ -31,7 +33,6 @@ export const createClassroom = async (req, res) => {
           term: {
             connect: { termId: body.termId },
           },
-          // classTypeId:body.classTypeId,
           leader: leaderId
             ? {
                 connect: {
@@ -70,6 +71,7 @@ export const updateClassroom = async (req, res) => {
         var leader = await db.leader.findFirst({
           where: {
             stdId: body.leaderId,
+            deletedAt: null,
           },
         });
         if (leader) {
@@ -107,7 +109,7 @@ export const updateClassroom = async (req, res) => {
         },
       });
 
-      // Delete existing classroom-teacher relationships
+      // Delete existing classroom-teacher relationships (soft delete if needed)
       await db.classroomTeacher.deleteMany({
         where: {
           classId: body.classId,
@@ -128,7 +130,7 @@ export const updateClassroom = async (req, res) => {
                 },
               },
             });
-          }),
+          })
         );
       }
 
@@ -162,6 +164,9 @@ export const getAllClassroom = async (req, res) => {
         classroomType: true,
         term: true,
         classroomMembers: {
+          where: {
+            deletedAt: null,
+          },
           include: {
             student: true,
           },
@@ -172,6 +177,9 @@ export const getAllClassroom = async (req, res) => {
           },
         },
         classTeacher: {
+          where: {
+            deletedAt: null,
+          },
           include: {
             teacher: true,
           },
@@ -190,7 +198,6 @@ export const getAllClassroom = async (req, res) => {
       message: "Error fetching classrooms",
       error: error.message,
     });
-    console.error(error);
   }
 };
 
@@ -200,7 +207,6 @@ export const getClassroom = async (req, res) => {
     const classroom = await db.classrooms.findUnique({
       where: {
         classId: uuid,
-        deletedAt: null,
       },
       include: {
         classroomType: true,
@@ -214,6 +220,9 @@ export const getClassroom = async (req, res) => {
           },
         },
         classTeacher: {
+          where: {
+            deletedAt: null,
+          },
           include: {
             teacher: true,
           },
@@ -233,7 +242,12 @@ export const getClassroom = async (req, res) => {
         },
       },
     });
-    // console.log(classroom);
+
+    // Check if classroom is soft deleted
+    if (classroom && classroom.deletedAt) {
+      return res.status(404).json({ error: "Classroom not found" });
+    }
+
     return res.status(200).json(classroom);
   } catch (error) {
     console.error(error);
@@ -337,6 +351,7 @@ export const createClassroomMember = async (req, res) => {
       const studentinclass = await db.classroomMember.findMany({
         where: {
           stdId: body.studentId,
+          deletedAt: null,
         },
       });
 
@@ -354,7 +369,7 @@ export const createClassroomMember = async (req, res) => {
           },
         });
         // check isexist term
-        studentinclass.forEach(async (student) => {
+        for (const student of studentinclass) {
           let term = await db.classrooms.findUnique({
             where: {
               classId: student.classId,
@@ -371,18 +386,18 @@ export const createClassroomMember = async (req, res) => {
             return res
               .status(400)
               .json({ message: "นักเรียนนี้มีอยู่ในห้องเรียนแล้ว" });
-          } else {
-            await db.classroomMember.create({
-              data: {
-                stdId: body.studentId,
-                classId: body.classId,
-                stdNo: body.stdNo,
-              },
-            });
-            return res.json({
-              message: "Create Classroom Member Success",
-            });
           }
+        }
+        // If no duplicate found, create new member
+        await db.classroomMember.create({
+          data: {
+            stdId: body.studentId,
+            classId: body.classId,
+            stdNo: body.stdNo,
+          },
+        });
+        return res.json({
+          message: "Create Classroom Member Success",
         });
       } else {
         const classroomMember = await db.classroomMember.create({
@@ -395,10 +410,6 @@ export const createClassroomMember = async (req, res) => {
         return res.json({ message: "Create Classroom Member Success" });
       }
     } catch (err) {
-      return res.status(500).json({
-        message: "Create Classroom Member Failed",
-        error: err.message,
-      });
       console.error(err);
       return res.status(500).json({
         message: "Create Classroom Member Failed",
@@ -478,11 +489,18 @@ export const getClassroomByAcademicYearTerm = async (req, res) => {
             },
           },
           classTeacher: {
+            where: {
+              deletedAt: null,
+            },
             include: {
               teacher: true,
             },
           },
-          leader: true,
+          leader: {
+            include: {
+              student: true,
+            },
+          },
           timetable: {
             where: {
               deletedAt: null,
@@ -580,14 +598,18 @@ export const getClassroomFilterByAcademicYearAndLevel = async (req, res) => {
 
 export const getTeacherAdvisorClassroom = async (req, res) => {
   const user = req.user;
-  // if(!user) res.status(500).json({message: "มีข้อผิดพลาดบางอย่างภายใน server โดยไม่ทราบสาเหตุ"});
   try {
     const advisorList = await db.teacher.findMany({
       where: {
         tchId: user.id,
+        deletedAt: null,
       },
       include: {
-        classTeacher: true,
+        classTeacher: {
+          where: {
+            deletedAt: null,
+          },
+        },
       },
     });
     console.log(advisorList[0].classTeacher);
@@ -607,9 +629,13 @@ export const getTeacherAdvisorClassroom = async (req, res) => {
         classId: {
           in: classroomsIds,
         },
+        deletedAt: null,
       },
       include: {
         classroomMembers: {
+          where: {
+            deletedAt: null,
+          },
           include: {
             student: true,
           },
@@ -630,10 +656,8 @@ export const getTeacherAdvisorClassroom = async (req, res) => {
         },
       ],
     });
-    // console.log(orderByClassrooms);
     res.status(200).json(orderByClassrooms);
   } catch (error) {
-    res.status(500).json({ message: error });
     console.log(error);
     return res.status(500).json({
       message: "เกิดข้อผิดพลาดบางอย่างบน Server",
@@ -645,23 +669,25 @@ export const getTeacherAdvisorClassroom = async (req, res) => {
 export const getClassroomByClassAndSubject = async (req, res) => {
   const subjectId = req.params.subjectId;
   const termId = req.params.termId;
-  // console.log(subjectId);
-  // console.log(termId);
   try {
     const classrooms = await db.classrooms.findMany({
       where: {
         timetable: {
           some: {
             subId: subjectId,
+            deletedAt: null,
           },
         },
         termId: termId,
+        deletedAt: null,
       },
       include: {
         classroomType: true,
-        // teacher:true,
         term: true,
         classTeacher: {
+          where: {
+            deletedAt: null,
+          },
           include: {
             teacher: true,
           },
@@ -673,5 +699,69 @@ export const getClassroomByClassAndSubject = async (req, res) => {
   } catch (error) {
     res.status(501).json("เกิดข้อผิดพลาดบางอย่างบน Server");
     console.error(error);
+  }
+};
+
+export const softDeleteClassroom = async (req, res) => {
+  const uuid = req.params.uuid;
+  if (uuid) {
+    try {
+      await db.classrooms.update({
+        where: {
+          classId: uuid,
+        },
+        data: {
+          deletedAt: DateTime.now().toJSDate(),
+        },
+      });
+      return res.json({ message: "Soft Delete Classroom Success" });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({
+        message: "Error soft deleting classroom",
+        error: err.message,
+      });
+    }
+  }
+};
+
+export const restoreClassroom = async (req, res) => {
+  const uuid = req.params.uuid;
+  if (uuid) {
+    try {
+      await db.classrooms.update({
+        where: {
+          classId: uuid,
+        },
+        data: {
+          deletedAt: null,
+        },
+      });
+      return res.json({ message: "Restore Classroom Success" });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({
+        message: "Error restoring classroom",
+        error: err.message,
+      });
+    }
+  }
+};
+export const getDeletedClassrooms = async (req, res) => {
+  try {
+    const deletedClassrooms = await db.classrooms.findMany({
+      where: {
+        deletedAt: {
+          not: null,
+        },
+      },
+    });
+    return res.json(deletedClassrooms);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Error fetching deleted classrooms",
+      error: err.message,
+    });
   }
 };
