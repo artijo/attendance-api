@@ -2,7 +2,7 @@ import { daybetween } from "../helper/helper.js";
 import db from "../prisma/client.js";
 import { DateTime } from "luxon";
 import { pushMessageToLine } from "../helper/line.js";
-import { generateToken, decodeToken, verifyToken } from "../helper/jwt.js";
+import { generateToken, verifyToken } from "../helper/jwt.js";
 
 const zone = process.env.TIME_ZONE || "Asia/Bangkok";
 
@@ -518,12 +518,8 @@ export const abstactActivityClassroom = async (req, res) => {
       student: true,
     },
   });
-  const actDateStart = DateTime.fromISO(activities.actDate.toISOString(), {
-    zone: "UTC",
-  }).setZone(zone);
-  const actDateEnd = DateTime.fromISO(activities.actDateEnd.toISOString(), {
-    zone: "UTC",
-  }).setZone(zone);
+  const actDateStart = DateTime.fromJSDate(activities.actDate).setZone(zone);
+  const actDateEnd = DateTime.fromJSDate(activities.actDateEnd).setZone(zone);
   const dayBetween = daybetween(
     actDateStart.toString().split("T")[0],
     actDateEnd.toString().split("T")[0],
@@ -532,14 +528,8 @@ export const abstactActivityClassroom = async (req, res) => {
     const acc = await accPromise;
     const studentPaticipate = await Promise.all(
       classroomMember.map(async (member) => {
-        const lteDate = DateTime.fromISO(`${curr}T${activities.actEndTime}:00Z`)
-          .setZone("UTC")
-          .minus({ hour: 7 });
-        const gteDate = DateTime.fromISO(
-          `${curr}T${activities.actStartTime}:00Z`,
-        )
-          .setZone("UTC")
-          .minus({ hour: 7 });
+        const lteDate = DateTime.fromISO(`${curr}`).endOf('day');
+        const gteDate = DateTime.fromISO(`${curr}`).startOf('day');
         const paticipate = await db.activityParticipate.findFirst({
           where: {
             AND: {
@@ -555,6 +545,7 @@ export const abstactActivityClassroom = async (req, res) => {
             student: true,
           },
         });
+
         if (paticipate) {
           return { ...paticipate, isJoin: true };
         } else {
@@ -570,11 +561,15 @@ export const abstactActivityClassroom = async (req, res) => {
         };
       }),
     );
+    
     acc[curr] = studentPaticipate.sort((a, b) =>
       a.stdId.localeCompare(b.stdId),
     );
     return acc;
   }, Promise.resolve({}));
+  
+
+
   return res.status(200).json(abstact);
 };
 
