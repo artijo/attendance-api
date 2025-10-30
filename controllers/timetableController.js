@@ -690,50 +690,35 @@ export const getTimetableRoleStudent = async (req, res) => {
 
       const term = await db.academicTerms.findFirst({
         where: {
-          termStart: { lte: dtNow },
-          termEnd: { gte: dtNow },
+          termStart: { lte: dtNow.startOf('day') },
+          termEnd: { gte: dtNow.startOf('day') },
         },
       });
-
-      console.log(term);
 
       if (!term) {
         return res.status(500).json("Internal server-side error");
       }
 
-      const classroom = await db.classroomMember.findFirst({
-        where: {
-          AND: [
-            { stdId: studentId },
-            {
-              classroom: {
-                termId: term.termId,
-              },
-            },
-          ],
-        },
-        include: {
-          classroom: true,
-          student: true,
-        },
+      const classroomMember = await db.classroomMember.findFirst({
+        where : {
+          stdId: studentId,
+          classroom: {
+            termId: term.termId
+          },
+          deletedAt : null
+        }
       });
 
-      console.log(classroom.classId);
-
-      if (!classroom) {
+      if (!classroomMember.classId) {
         return res.status(404).json({ message: "ไม่พบข้อมูลห้องเรียน" });
       }
 
-      // console.log(dtStart);
-
       const timetable = await db.timetable.findMany({
         where: {
-          classId: classroom.classId,
+          classId: classroomMember.classId,
           dayOfWeek: dtNow.weekday,
         },
       });
-
-      // console.log(timetable);
 
       const studingTime = await db.studingTime.findMany({
         where: {
