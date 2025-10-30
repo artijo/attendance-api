@@ -334,12 +334,12 @@ export const getActivityByTeacher = async (req, res) => {
       where: {
         tchId: req.user.id,
         deletedAt: null,
+        activity: {
+          deletedAt: null,
+        },
       },
       include: {
         activity: {
-          where: {
-            deletedAt: null,
-          },
           include: {
             activityType: true,
             teacher: {
@@ -526,7 +526,7 @@ export const abstactActivityClassroom = async (req, res) => {
   }).setZone(zone);
   const dayBetween = daybetween(
     actDateStart.toString().split("T")[0],
-    actDateEnd.toString().split("T")[0]
+    actDateEnd.toString().split("T")[0],
   );
   const abstact = await dayBetween.reduce(async (accPromise, curr) => {
     const acc = await accPromise;
@@ -536,7 +536,7 @@ export const abstactActivityClassroom = async (req, res) => {
           .setZone("UTC")
           .minus({ hour: 7 });
         const gteDate = DateTime.fromISO(
-          `${curr}T${activities.actStartTime}:00Z`
+          `${curr}T${activities.actStartTime}:00Z`,
         )
           .setZone("UTC")
           .minus({ hour: 7 });
@@ -568,10 +568,10 @@ export const abstactActivityClassroom = async (req, res) => {
           },
           isJoin: false,
         };
-      })
+      }),
     );
     acc[curr] = studentPaticipate.sort((a, b) =>
-      a.stdId.localeCompare(b.stdId)
+      a.stdId.localeCompare(b.stdId),
     );
     return acc;
   }, Promise.resolve({}));
@@ -590,7 +590,7 @@ export const abstactActivityFilterByRoom = async (req, res) => {
     // console.log(activitys);
     //หาว่ากิจกรรมที่ต้องการ insert นั้นอยู่ระหว่างช่วงเทอมไหน
     const dateTimeNow = DateTime.fromISO(
-      activitys.actDate.toISOString()
+      activitys.actDate.toISOString(),
     ).setZone(zone);
     const dateActivityStart = dateTimeNow.toString().split("T")[0];
     function isSchoolOpen(dateStr) {
@@ -623,7 +623,7 @@ export const abstactActivityFilterByRoom = async (req, res) => {
     }).setZone(zone);
     const paticipateCount = daybetween(
       actDateStart.toString().split("T")[0],
-      actDateEnd.toString().split("T")[0]
+      actDateEnd.toString().split("T")[0],
     ).length;
 
     const classroomsHasMembers = await db.classrooms.findMany({
@@ -679,10 +679,10 @@ export const abstactActivityFilterByRoom = async (req, res) => {
               participateCount: participate.length,
             };
             return objectDraft;
-          })
+          }),
         );
         const participateMemberSortByStdNo = (await participateMember).sort(
-          (a, b) => a.stdNo - b.stdNo
+          (a, b) => a.stdNo - b.stdNo,
         );
 
         acc[`${curr.classLevel}/${curr.classRoom}`] =
@@ -690,7 +690,7 @@ export const abstactActivityFilterByRoom = async (req, res) => {
 
         return acc;
       },
-      Promise.resolve({})
+      Promise.resolve({}),
     );
     return res.status(200).send(abstactFilterByClassroom);
   } catch (error) {
@@ -714,7 +714,7 @@ export const generateLinkActivityForQR = async (req, res) => {
       const now = DateTime.now().setZone(zone);
       const activityDateEnd = DateTime.fromISO(
         activity.actDateEnd.toISOString(),
-        { zone: "UTC" }
+        { zone: "UTC" },
       )
         .setZone(zone)
         .endOf("day");
@@ -733,14 +733,14 @@ export const generateLinkActivityForQR = async (req, res) => {
         diff.toObject().days * 24 * 60 * 60 +
           diff.toObject().hours * 60 * 60 +
           diff.toObject().minutes * 60 +
-          diff.toObject().seconds
+          diff.toObject().seconds,
       );
 
       const token = generateToken(
         {
           activityId: activity.actId,
         },
-        expirySeconds
+        expirySeconds,
       );
       const link = `${process.env.STUDENT_WEB_CLIENT}/activity/qr/${token}`;
       res.status(200).json({ link });
@@ -783,7 +783,7 @@ export const saveActivityByStudentWithQR = async (req, res) => {
         .startOf("day");
       const activityDateEnd = DateTime.fromISO(
         activity.actDateEnd.toISOString(),
-        { zone: "UTC" }
+        { zone: "UTC" },
       )
         .setZone(zone)
         .endOf("day");
@@ -954,7 +954,7 @@ export const getActivityByLeader = async (req, res) => {
     const filteredActivities = activities.filter((activity) => {
       if (activity.classroom && activity.classroom.length > 0) {
         return activity.classroom.some(
-          (classroom) => classroom.classId === classId
+          (classroom) => classroom.classId === classId,
         );
       }
       return true; // Include activities without classroom restrictions
@@ -1129,7 +1129,7 @@ export const getActivityStudent = async (req, res) => {
       });
       // console.log(studentClassroomMember);
       const arrayOfClassID = studentClassroomMember.map(
-        (stdclassMemeber) => stdclassMemeber.classId
+        (stdclassMemeber) => stdclassMemeber.classId,
       );
       if (studentClassroomMember.length < 0) {
         console.error("นักเรียนคนนี้ไม่มีห้องที่อยู่");
@@ -1149,10 +1149,10 @@ export const getActivityStudent = async (req, res) => {
         return res.status(500).json({ message: "Internal server error" });
       }
       const firstTermStartDate = DateTime.fromJSDate(
-        terms[0].termStart
+        terms[0].termStart,
       ).setZone("UTC");
       const lastTermStartDate = DateTime.fromJSDate(
-        terms[terms.length - 1].termEnd
+        terms[terms.length - 1].termEnd,
       ).setZone("UTC");
       const activity = await db.activity.findMany({
         where: {
