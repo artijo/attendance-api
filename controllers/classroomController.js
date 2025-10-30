@@ -612,7 +612,7 @@ export const getTeacherAdvisorClassroom = async (req, res) => {
         },
       },
     });
-    console.log(advisorList[0].classTeacher);
+    // console.log(advisorList[0].classTeacher);
     if (advisorList.length === 0)
       return res.json({ not_found: "ไม่มีห้องที่เป็นที่ปรึกษา" });
     const classroomsIds = advisorList
@@ -640,7 +640,11 @@ export const getTeacherAdvisorClassroom = async (req, res) => {
             student: true,
           },
         },
-        term: true,
+        term: {
+          include :{
+            holiday:true
+          }
+        },
         classroomType: true,
         leader: {
           include: {

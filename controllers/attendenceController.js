@@ -373,7 +373,7 @@ export const getAttendenceByDate = async (req, res) => {
         });
         return newStudent;
       };
-      const data = newData();
+      const data = newData().sort((a, b) => a.stdNo - b.stdNo);
       // console.log(data[0].attendance);
       res.json(data);
     } catch (err) {
