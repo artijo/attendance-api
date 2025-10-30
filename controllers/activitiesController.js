@@ -467,7 +467,7 @@ export const paticipatedActivityByteacher = async (req, res) => {
               tchId: req.user.id,
             },
           },
-          joinTimestamp: targetDate.toUTC().toJSDate(),
+          joinTimestamp: dtNow,
         },
       });
       // Send LINE notification
