@@ -687,36 +687,17 @@ export const getTimetableRoleStudent = async (req, res) => {
   ).setZone("Asia/Bangkok");
   if (studentId != undefined) {
     try {
-      // const dtSearchStart = dtNow.startOf("year").minus({ year: 2 });
-      // const dtSearchEnd = dtNow.endOf("year").plus({ year: 2 });
-      // console.log(dtSearchStart.toISO());
-      // console.log(dtSearchEnd.toISO());
-      const maxValue = await db.academicTerms.aggregate({
-        _max: {
-          academicYear: true,
-          semester: true,
-        },
-      });
+
       const term = await db.academicTerms.findFirst({
         where: {
-          academicYear: maxValue._max.academicYear,
-          semester: maxValue._max.semester,
+          termStart: { lte: dtNow },
+          termEnd: { gte: dtNow },
         },
       });
 
-      // const term = termList.find((term) => {
-      //   const termStart = DateTime.fromJSDate(term.termStart).setZone(
-      //     "Asia/Bangkok",
-      //   );
-      //   const termEnd = DateTime.fromJSDate(term.termEnd).setZone(
-      //     "Asia/Bangkok",
-      //   );
-      //   return dtNow >= termStart && dtNow <= termEnd;
-      // });
+      console.log(term);
 
-      // console.log(term);
-
-      if (term == undefined) {
+      if (!term) {
         return res.status(500).json("Internal server-side error");
       }
 
