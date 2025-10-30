@@ -677,23 +677,24 @@ export const getTimeTable = async (req, res) => {
 
 export const getTimetableRoleStudent = async (req, res) => {
   const studentId = req.user.id;
-  const dtNow = DateTime.now().setZone(zone);
+  const dtNow = DateTime.now().setZone(zone).startOf('day');
   const dtNowString = dtNow.toString();
   const studyTimeStart = DateTime.fromISO(
     `${dtNowString.split("T")[0]}T08:40:00`,
   ).setZone("Asia/Bangkok");
   const studyTimeEnd = DateTime.fromISO(
-    `${dtNowString.split("T")[0]}T15:30:00`,
+    `${dtNowString.split("T")[0]}T15:30:00Z`,
   ).setZone("Asia/Bangkok");
   if (studentId != undefined) {
     try {
 
       const term = await db.academicTerms.findFirst({
         where: {
-          termStart: { lte: dtNow.startOf('day') },
-          termEnd: { gte: dtNow.startOf('day') },
+          termStart: { lte: dtNow },
+          termEnd: { gte: dtNow },
         },
       });
+
 
       if (!term) {
         return res.status(500).json("Internal server-side error");
@@ -706,8 +707,12 @@ export const getTimetableRoleStudent = async (req, res) => {
             termId: term.termId
           },
           deletedAt : null
+        },
+        include: {
+          classroom:true
         }
       });
+
 
       if (!classroomMember.classId) {
         return res.status(404).json({ message: "ไม่พบข้อมูลห้องเรียน" });
@@ -720,10 +725,11 @@ export const getTimetableRoleStudent = async (req, res) => {
         },
       });
 
+
       const studingTime = await db.studingTime.findMany({
         where: {
           timetableId: {
-            in: timetable.map((item) => item.timetableId),
+            in: [...timetable.map((item) => item.timetableId)],
           },
           studingTimeDate: {
             gte: studyTimeStart,
@@ -746,6 +752,7 @@ export const getTimetableRoleStudent = async (req, res) => {
           },
         },
       });
+
       return res.status(200).json(studingTime);
     } catch (error) {
       console.error(error);
