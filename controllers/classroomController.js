@@ -210,7 +210,11 @@ export const getClassroom = async (req, res) => {
       },
       include: {
         classroomType: true,
-        term: true,
+        term: {
+          include : {
+            holiday:true
+          }
+        },
         classroomMembers: {
           where: {
             deletedAt: null,
