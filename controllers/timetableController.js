@@ -137,6 +137,7 @@ export const createTimetableByAddSubject = async (req, res) => {
 
 export const createTimetableBySwitchPeriod = async (req, res) => {
   const { classroom, timetable, schedule, weekday } = req.body;
+  console.log('kuy')
   if (timetable) {
     try {
       const subjectOnTimetable = await db.timetable.findMany({
@@ -180,17 +181,26 @@ export const createTimetableBySwitchPeriod = async (req, res) => {
         where: {
           timetableId: timetable.timetableId,
         },
+        orderBy: {
+          studingTimeDate: 'asc'
+        }
       });
 
       if (studingTimeOnPeriod.length > 0) {
-        studingTimeOnPeriod.forEach(async (studyTime) => {
-          // .setZone(process.env.TIME_ZONE)
-          const newTimeformat = DateTime.fromISO(
-            `${studyTime.studingTimeDate.toISOString().split("T")[0]}T${timetable.timeStart}`,
-          )
-            .set({ weekday: weekday })
-            .setZone(process.env.TIME_ZONE);
-          // console.log(newTimeformat);
+        studingTimeOnPeriod.forEach(async (studyTime, index) => {
+          let newTimeformat;
+          const oldStudyTime = DateTime.fromJSDate(studyTime.studingTimeDate).setZone('Asia/Bangkok');
+          const oldWeekDay = oldStudyTime.weekday;
+          // console.log(oldStudyTime)
+          if(weekday > oldWeekDay) {
+            const lengthWeekday = weekday - oldWeekDay;
+            newTimeformat = DateTime.fromISO(`${oldStudyTime.toString().split("T")[0]}T${timetable.timeStart}`).plus({day : lengthWeekday}).setZone('Asia/Bangkok');
+          }else if(weekday < oldWeekDay) {
+            const lengthWeekday = oldWeekDay - weekday;
+            newTimeformat = DateTime.fromISO(`${oldStudyTime.toString().split("T")[0]}T${timetable.timeStart}`).minus({day : lengthWeekday}).setZone('Asia/Bangkok');
+          }else {
+            newTimeformat = DateTime.fromISO(`${oldStudyTime.toString().split("T")[0]}T${timetable.timeStart}`).setZone('Asia/Bangkok');
+          }
           const updateStdyingTime = await db.studingTime.update({
             where: {
               studyTimeId: studyTime.studyTimeId,
@@ -199,7 +209,6 @@ export const createTimetableBySwitchPeriod = async (req, res) => {
               studingTimeDate: newTimeformat,
             },
           });
-          // console.log(updateStdyingTime);
         });
       }
       return res.status(200).json({ message: "create successful" });
@@ -701,15 +710,15 @@ export const getTimetableRoleStudent = async (req, res) => {
       }
 
       const classroomMember = await db.classroomMember.findFirst({
-        where : {
+        where: {
           stdId: studentId,
           classroom: {
             termId: term.termId
           },
-          deletedAt : null
+          deletedAt: null
         },
         include: {
-          classroom:true
+          classroom: true
         }
       });
 
