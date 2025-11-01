@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import morgan from "morgan";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
 // import routes
 import parentRouter from "./routers/parentRouter.js";
@@ -26,6 +28,19 @@ app.use(express.static("public"));
 // cookie parser
 app.use(cookieParser());
 
+// helmet
+app.use(helmet());
+
+// rate limiter
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 100, // limit each IP to 50 requests per windowMs
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  message: "Too many requests from this IP, please try again after a minute",
+});
+app.use(limiter);
+
 // cors
 
 const allowOrigin =
@@ -47,7 +62,7 @@ app.use(
   cors({
     origin: allowOrigin,
     credentials: true,
-  }),
+  })
 );
 
 // middleware

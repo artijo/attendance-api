@@ -2,7 +2,7 @@ import { daybetween } from "../helper/helper.js";
 import db from "../prisma/client.js";
 import { DateTime } from "luxon";
 import { pushMessageToLine } from "../helper/line.js";
-import { generateToken, decodeToken, verifyToken } from "../helper/jwt.js";
+import { generateToken, verifyToken } from "../helper/jwt.js";
 
 const zone = process.env.TIME_ZONE || "Asia/Bangkok";
 
@@ -18,11 +18,19 @@ export const getAllActivitiesByType = async (req, res) => {
     const activities = await db.activityType.findMany({
       where: {
         actTypeName: acttype,
+        deletedAt: null,
       },
       include: {
         activity: {
+          where: {
+            deletedAt: null,
+          },
           include: {
-            teacher: true,
+            teacher: {
+              where: {
+                deletedAt: null,
+              },
+            },
           },
         },
       },
@@ -41,13 +49,18 @@ export const getActivity = async (req, res) => {
   const { date, classId } = req.query;
 
   try {
-    let actParticipateFilter = {};
+    let actParticipateFilter = {
+      where: {
+        deletedAt: null,
+      },
+    };
 
     // If date is provided in query, filter actParticipate by date
     if (date) {
       const filterDate = DateTime.fromISO(date);
       actParticipateFilter = {
         where: {
+          deletedAt: null,
           joinTimestamp: {
             gte: filterDate.startOf("day").toUTC().toJSDate(),
             lte: filterDate.endOf("day").toUTC().toJSDate(),
@@ -73,6 +86,9 @@ export const getActivity = async (req, res) => {
       include: {
         activityType: true,
         teacher: {
+          where: {
+            deletedAt: null,
+          },
           include: {
             teacher: true,
           },
@@ -83,6 +99,9 @@ export const getActivity = async (req, res) => {
             student: {
               include: {
                 classroomMembers: {
+                  where: {
+                    deletedAt: null,
+                  },
                   include: {
                     classroom: true,
                   },
@@ -93,10 +112,16 @@ export const getActivity = async (req, res) => {
           },
         },
         classroom: {
+          where: {
+            deletedAt: null,
+          },
           include: {
             classroom: {
               include: {
                 classroomMembers: {
+                  where: {
+                    deletedAt: null,
+                  },
                   include: {
                     student: true,
                   },
@@ -108,6 +133,12 @@ export const getActivity = async (req, res) => {
         },
       },
     });
+
+    // Filter out soft deleted records manually
+    if (activity && activity.deletedAt) {
+      return res.status(404).json({ error: "Activity not found" });
+    }
+
     return res.json(activity);
   } catch (error) {
     console.error(error);
@@ -117,7 +148,11 @@ export const getActivity = async (req, res) => {
 
 export const getActivityType = async (req, res) => {
   try {
-    const activityType = await db.activityType.findMany();
+    const activityType = await db.activityType.findMany({
+      where: {
+        deletedAt: null,
+      },
+    });
     return res.json(activityType);
   } catch (error) {
     console.error(error);
@@ -298,14 +333,29 @@ export const getActivityByTeacher = async (req, res) => {
     const activity = await db.activityTeacher.findMany({
       where: {
         tchId: req.user.id,
+        deletedAt: null,
+        activity: {
+          deletedAt: null,
+        },
       },
       include: {
         activity: {
           include: {
             activityType: true,
-            teacher: true,
-            actParticipate: true,
+            teacher: {
+              where: {
+                deletedAt: null,
+              },
+            },
+            actParticipate: {
+              where: {
+                deletedAt: null,
+              },
+            },
             classroom: {
+              where: {
+                deletedAt: null,
+              },
               include: {
                 classroom: {
                   include: {
@@ -359,16 +409,6 @@ export const paticipatedActivityByteacher = async (req, res) => {
         },
       },
     });
-
-    // const activityParticipateCount = await db.activityParticipate.count({
-    //     where: {
-    //         actId: actId,
-    //         joinTimestamp: {
-    //             gte: targetDate.startOf('day').toUTC().toJSDate(),
-    //             lte: targetDate.endOf('day').toUTC().toJSDate()
-    //         }
-    //     }
-    // });
 
     if (activityPaticipate) {
       if (status == "ABSENT") {
@@ -427,7 +467,7 @@ export const paticipatedActivityByteacher = async (req, res) => {
               tchId: req.user.id,
             },
           },
-          joinTimestamp: targetDate.toUTC().toJSDate(),
+          joinTimestamp: dtNow,
         },
       });
       // Send LINE notification
@@ -478,28 +518,18 @@ export const abstactActivityClassroom = async (req, res) => {
       student: true,
     },
   });
-  const actDateStart = DateTime.fromISO(activities.actDate.toISOString(), {
-    zone: "UTC",
-  }).setZone(zone);
-  const actDateEnd = DateTime.fromISO(activities.actDateEnd.toISOString(), {
-    zone: "UTC",
-  }).setZone(zone);
+  const actDateStart = DateTime.fromJSDate(activities.actDate).setZone(zone);
+  const actDateEnd = DateTime.fromJSDate(activities.actDateEnd).setZone(zone);
   const dayBetween = daybetween(
     actDateStart.toString().split("T")[0],
-    actDateEnd.toString().split("T")[0]
+    actDateEnd.toString().split("T")[0],
   );
   const abstact = await dayBetween.reduce(async (accPromise, curr) => {
     const acc = await accPromise;
     const studentPaticipate = await Promise.all(
       classroomMember.map(async (member) => {
-        const lteDate = DateTime.fromISO(`${curr}T${activities.actEndTime}:00Z`)
-          .setZone("UTC")
-          .minus({ hour: 7 });
-        const gteDate = DateTime.fromISO(
-          `${curr}T${activities.actStartTime}:00Z`
-        )
-          .setZone("UTC")
-          .minus({ hour: 7 });
+        const lteDate = DateTime.fromISO(`${curr}`).endOf('day');
+        const gteDate = DateTime.fromISO(`${curr}`).startOf('day');
         const paticipate = await db.activityParticipate.findFirst({
           where: {
             AND: {
@@ -515,6 +545,7 @@ export const abstactActivityClassroom = async (req, res) => {
             student: true,
           },
         });
+
         if (paticipate) {
           return { ...paticipate, isJoin: true };
         } else {
@@ -528,13 +559,17 @@ export const abstactActivityClassroom = async (req, res) => {
           },
           isJoin: false,
         };
-      })
+      }),
     );
+    
     acc[curr] = studentPaticipate.sort((a, b) =>
-      a.stdId.localeCompare(b.stdId)
+      a.stdId.localeCompare(b.stdId),
     );
     return acc;
   }, Promise.resolve({}));
+  
+
+
   return res.status(200).json(abstact);
 };
 
@@ -550,7 +585,7 @@ export const abstactActivityFilterByRoom = async (req, res) => {
     // console.log(activitys);
     //หาว่ากิจกรรมที่ต้องการ insert นั้นอยู่ระหว่างช่วงเทอมไหน
     const dateTimeNow = DateTime.fromISO(
-      activitys.actDate.toISOString()
+      activitys.actDate.toISOString(),
     ).setZone(zone);
     const dateActivityStart = dateTimeNow.toString().split("T")[0];
     function isSchoolOpen(dateStr) {
@@ -583,7 +618,7 @@ export const abstactActivityFilterByRoom = async (req, res) => {
     }).setZone(zone);
     const paticipateCount = daybetween(
       actDateStart.toString().split("T")[0],
-      actDateEnd.toString().split("T")[0]
+      actDateEnd.toString().split("T")[0],
     ).length;
 
     const classroomsHasMembers = await db.classrooms.findMany({
@@ -639,10 +674,10 @@ export const abstactActivityFilterByRoom = async (req, res) => {
               participateCount: participate.length,
             };
             return objectDraft;
-          })
+          }),
         );
         const participateMemberSortByStdNo = (await participateMember).sort(
-          (a, b) => a.stdNo - b.stdNo
+          (a, b) => a.stdNo - b.stdNo,
         );
 
         acc[`${curr.classLevel}/${curr.classRoom}`] =
@@ -650,7 +685,7 @@ export const abstactActivityFilterByRoom = async (req, res) => {
 
         return acc;
       },
-      Promise.resolve({})
+      Promise.resolve({}),
     );
     return res.status(200).send(abstactFilterByClassroom);
   } catch (error) {
@@ -666,6 +701,7 @@ export const generateLinkActivityForQR = async (req, res) => {
       const activity = await db.activity.findFirst({
         where: {
           actId: activityId,
+          deletedAt: null,
         },
       });
       if (!activity)
@@ -673,7 +709,7 @@ export const generateLinkActivityForQR = async (req, res) => {
       const now = DateTime.now().setZone(zone);
       const activityDateEnd = DateTime.fromISO(
         activity.actDateEnd.toISOString(),
-        { zone: "UTC" }
+        { zone: "UTC" },
       )
         .setZone(zone)
         .endOf("day");
@@ -685,21 +721,21 @@ export const generateLinkActivityForQR = async (req, res) => {
         "minutes",
         "seconds",
       ]);
-      console.log(diff.toObject());
+      // console.log(diff.toObject());
 
       // Calculate expiry time in seconds
       const expirySeconds = Math.floor(
         diff.toObject().days * 24 * 60 * 60 +
           diff.toObject().hours * 60 * 60 +
           diff.toObject().minutes * 60 +
-          diff.toObject().seconds
+          diff.toObject().seconds,
       );
 
       const token = generateToken(
         {
           activityId: activity.actId,
         },
-        expirySeconds
+        expirySeconds,
       );
       const link = `${process.env.STUDENT_WEB_CLIENT}/activity/qr/${token}`;
       res.status(200).json({ link });
@@ -718,13 +754,16 @@ export const saveActivityByStudentWithQR = async (req, res) => {
   if (token) {
     try {
       const verify = verifyToken(token);
-      // console.log(verify);
       const activity = await db.activity.findFirst({
         where: {
           actId: verify.activityId,
+          deletedAt: null,
         },
         include: {
           classroom: {
+            where: {
+              deletedAt: null,
+            },
             include: {
               classroom: true,
             },
@@ -739,7 +778,7 @@ export const saveActivityByStudentWithQR = async (req, res) => {
         .startOf("day");
       const activityDateEnd = DateTime.fromISO(
         activity.actDateEnd.toISOString(),
-        { zone: "UTC" }
+        { zone: "UTC" },
       )
         .setZone(zone)
         .endOf("day");
@@ -764,6 +803,7 @@ export const saveActivityByStudentWithQR = async (req, res) => {
         const count = await db.activityParticipate.count({
           where: {
             actId: activity.actId,
+            deletedAt: null,
           },
         });
         if (count >= activity.joinLimitNumber) {
@@ -790,6 +830,7 @@ export const saveActivityByStudentWithQR = async (req, res) => {
           const student = await db.classroomMember.findFirst({
             where: {
               stdId: req.user.id,
+              deletedAt: null,
               classId: {
                 in: classroom.map((classroom) => classroom.classId),
               },
@@ -872,15 +913,28 @@ export const getActivityByLeader = async (req, res) => {
   // ดึง activity ทั้งหมด ถ้ากิจกรรมไหนมีการจำกัดตามห้องเรียนให้ filter ตามห้องเรียนที่ไม่เกี่ยวข้องออกไป
   try {
     const activities = await db.activity.findMany({
+      where: {
+        deletedAt: null,
+      },
       include: {
         activityType: true,
         teacher: {
+          where: {
+            deletedAt: null,
+          },
           include: {
             teacher: true,
           },
         },
-        actParticipate: true,
+        actParticipate: {
+          where: {
+            deletedAt: null,
+          },
+        },
         classroom: {
+          where: {
+            deletedAt: null,
+          },
           include: {
             classroom: {
               include: {
@@ -895,7 +949,7 @@ export const getActivityByLeader = async (req, res) => {
     const filteredActivities = activities.filter((activity) => {
       if (activity.classroom && activity.classroom.length > 0) {
         return activity.classroom.some(
-          (classroom) => classroom.classId === classId
+          (classroom) => classroom.classId === classId,
         );
       }
       return true; // Include activities without classroom restrictions
@@ -916,11 +970,13 @@ export const paticipatedActivityByLeader = async (req, res) => {
     const activity = await db.activity.findFirst({
       where: {
         actId: actId,
+        deletedAt: null,
       },
     });
     const teacher = await db.teacher.findFirst({
       where: {
         tchId: req.user.id,
+        deletedAt: null,
       },
     });
 
@@ -934,6 +990,7 @@ export const paticipatedActivityByLeader = async (req, res) => {
     const leader = await db.leader.findFirst({
       where: {
         stdId: req.user.id,
+        deletedAt: null,
       },
     });
 
@@ -941,6 +998,7 @@ export const paticipatedActivityByLeader = async (req, res) => {
       where: {
         actId: actId,
         stdId: stdId,
+        deletedAt: null,
         joinTimestamp: {
           gte: targetDate.startOf("day").toUTC().toJSDate(),
           lte: targetDate.endOf("day").toUTC().toJSDate(),
@@ -1054,6 +1112,7 @@ export const getActivityStudent = async (req, res) => {
       const studentClassroomMember = await db.classroomMember.findMany({
         where: {
           stdId: studnetId,
+          deletedAt: null,
         },
         include: {
           classroom: {
@@ -1065,7 +1124,7 @@ export const getActivityStudent = async (req, res) => {
       });
       // console.log(studentClassroomMember);
       const arrayOfClassID = studentClassroomMember.map(
-        (stdclassMemeber) => stdclassMemeber.classId
+        (stdclassMemeber) => stdclassMemeber.classId,
       );
       if (studentClassroomMember.length < 0) {
         console.error("นักเรียนคนนี้ไม่มีห้องที่อยู่");
@@ -1085,20 +1144,25 @@ export const getActivityStudent = async (req, res) => {
         return res.status(500).json({ message: "Internal server error" });
       }
       const firstTermStartDate = DateTime.fromJSDate(
-        terms[0].termStart
+        terms[0].termStart,
       ).setZone("UTC");
       const lastTermStartDate = DateTime.fromJSDate(
-        terms[terms.length - 1].termEnd
+        terms[terms.length - 1].termEnd,
       ).setZone("UTC");
       const activity = await db.activity.findMany({
         where: {
           AND: [
             { actDate: { gte: firstTermStartDate } },
             { actDateEnd: { lte: lastTermStartDate } },
+            { deletedAt: null },
           ],
         },
         include: {
-          classroom: true,
+          classroom: {
+            where: {
+              deletedAt: null,
+            },
+          },
           activityType: true,
         },
       });
@@ -1127,7 +1191,6 @@ export const getActivityStudent = async (req, res) => {
 
 export const activityCheckIn = async (req, res) => {
   const { activity } = req.body;
-  // console.log(activity.actId);
   const studentId = req.user.id;
   const dtNow = DateTime.now().setZone("Asia/Bangkok");
   if (activity && studentId) {
@@ -1194,6 +1257,7 @@ export const isActivityThisTimeCheckIn = async (req, res) => {
           AND: [
             { actId: activityId },
             { stdId: studentId },
+            { deletedAt: null },
             {
               joinTimestamp: {
                 gte: dtNowStartDay,
@@ -1227,6 +1291,7 @@ export const activityHistoryStudent = async (req, res) => {
         where: {
           stdId: studnetId,
           actId: activityId,
+          deletedAt: null,
         },
         include: {
           teacher: true,
@@ -1245,5 +1310,58 @@ export const activityHistoryStudent = async (req, res) => {
   } else {
     console.error("Bad requset");
     return res.status(400).json({ message: "Bad requset" });
+  }
+};
+
+export const softDeleteActivity = async (req, res) => {
+  const { uuid } = req.params;
+  try {
+    await db.activity.update({
+      where: {
+        actId: uuid,
+      },
+      data: {
+        deletedAt: DateTime.now().setZone(zone).toJSDate(),
+      },
+    });
+    return res.status(200).json({ message: "success" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getsoftDeletedActivity = async (req, res) => {
+  try {
+    const activities = await db.activity.findMany({
+      where: {
+        deletedAt: {
+          not: null,
+        },
+      },
+    });
+    console.log(activities);
+    return res.status(200).json(activities);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const restoreSoftDeletedActivity = async (req, res) => {
+  const { uuid } = req.params;
+  try {
+    await db.activity.update({
+      where: {
+        actId: uuid,
+      },
+      data: {
+        deletedAt: null,
+      },
+    });
+    return res.status(200).json({ message: "success" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };

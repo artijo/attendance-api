@@ -373,7 +373,7 @@ export const getAttendenceByDate = async (req, res) => {
         });
         return newStudent;
       };
-      const data = newData();
+      const data = newData().sort((a, b) => a.stdNo - b.stdNo);
       // console.log(data[0].attendance);
       res.json(data);
     } catch (err) {
@@ -477,7 +477,7 @@ export const getAttendenceSummaryByClassroom = async (req, res) => {
           behaviourScore: std.behaviourScore,
           canExam: attendencePercent >= 80 ? "-" : "มส.",
         };
-      });
+      }).sort((a,b) => a.stdNo - b.stdNo);;
       res.json(summaryList);
     } catch (err) {
       console.error(err);
@@ -490,7 +490,7 @@ export const getAttendenceSummaryByClassroom = async (req, res) => {
 export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
   const classroomId = req.params.classroomId;
   const subjectId = req.params.subjectId;
-  console.log(classroomId);
+  // console.log(classroomId);
   if (classroomId) {
     try {
       const timetables = await db.timetable.findMany({
@@ -620,9 +620,8 @@ export const getAttendenceSummaryBySubjectIsExam = async (req, res) => {
           attendencePercent: attendencePercent,
           canExam: attendencePercent >= 80 ? "-" : "มส.",
         };
-      });
-      // console.log(summaryList);
-      // console.log(summaryList);
+      }).sort((a,b) => a.stdNo - b.stdNo);
+    
       res.json(summaryList);
     } catch (err) {
       console.error(err);

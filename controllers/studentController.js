@@ -4,6 +4,7 @@ import {
   handdleErrorDuplicateKeyStudent,
 } from "../validator.js";
 import { getLastestTerm } from "../helper/helper.js";
+import { DateTime } from "luxon";
 
 export const createStudent = async (req, res) => {
   // สร้างรายชื่อนักเรียนรายบุคคล
@@ -49,7 +50,7 @@ export const createStudentWithFile = async (req, res) => {
         !item.no ||
         !item.title ||
         !item.firstName ||
-        !item.lastName,
+        !item.lastName
     );
 
   try {
@@ -63,7 +64,7 @@ export const createStudentWithFile = async (req, res) => {
     const student = await db.student.createMany({
       data: allStudents
         .filter(
-          (item) => item.studentId && item.studentId.toString().trim() !== "",
+          (item) => item.studentId && item.studentId.toString().trim() !== ""
         )
         .map((item) => ({
           stdId: item.studentId.toString(),
@@ -87,7 +88,11 @@ export const createStudentWithFile = async (req, res) => {
     // Get current academic year
     const currentYear = new Date().getFullYear(); // Convert to Buddhist Era
 
-    const classrooms = await db.classrooms.findMany();
+    const classrooms = await db.classrooms.findMany({
+      where: {
+        deletedAt: null,
+      },
+    });
     const classroomMap = new Map();
     classrooms.forEach((classroom) => {
       const key = `${classroom.classLevel}-${classroom.classRoom}`;
@@ -107,6 +112,7 @@ export const createStudentWithFile = async (req, res) => {
               { classTypeNameEng: "Unspecified" },
               { classTypeNameThai: "ไม่ระบุ" },
             ],
+            deletedAt: null,
           },
         });
 
@@ -114,6 +120,7 @@ export const createStudentWithFile = async (req, res) => {
           where: {
             academicYear: currentYear,
             semester: 1,
+            deletedAt: null,
           },
         });
 
@@ -144,7 +151,7 @@ export const createStudentWithFile = async (req, res) => {
 
     const classroomMembers = allStudents
       .filter(
-        (item) => item.studentId && item.studentId.toString().trim() !== "",
+        (item) => item.studentId && item.studentId.toString().trim() !== ""
       )
       .map((item) => {
         const key = `${parseInt(item.class)}-${parseInt(item.room)}`;
@@ -185,11 +192,13 @@ export const getAllStudent = async (req, res) => {
         where: {
           classLevel: parseInt(classr[0]),
           classRoom: parseInt(classr[1]),
+          deletedAt: null,
         },
       });
       const student = await db.classroomMember.findMany({
         where: {
           classId: classroom.classId,
+          deletedAt: null,
         },
         select: {
           student: true,
@@ -203,15 +212,20 @@ export const getAllStudent = async (req, res) => {
   }
   try {
     const student = await db.student.findMany({
+      where: {
+        deletedAt: null,
+      },
       include: {
         classroomMembers: {
+          where: {
+            deletedAt: null,
+          },
           include: {
             classroom: true,
           },
         },
       },
     });
-    // console.log(student);
     return res.json(student);
   } catch (error) {
     console.error(error);
@@ -225,20 +239,31 @@ export const getStudent = async (req, res) => {
       const student = await db.student.findFirstOrThrow({
         where: {
           stdId: uuid,
+          deletedAt: null,
         },
         include: {
           classroomMembers: {
+            where: {
+              deletedAt: null,
+            },
             include: {
               classroom: true,
             },
           },
-          parent: true,
+          parent: {
+            where: {
+              deletedAt: null,
+            },
+            include: {
+              parent: true,
+            },
+          },
         },
       });
-      // console.log(student);
       res.json(student);
     } catch (err) {
       console.error(err);
+      res.status(404).json({ message: "ไม่พบข้อมูลนักเรียน" });
     }
   }
 };
@@ -292,6 +317,7 @@ export const getStudentwithoutClassroom = async (req, res) => {
   try {
     const students = await db.student.findMany({
       where: {
+        deletedAt: null,
         classroomMembers: {
           none: {},
         },
@@ -303,7 +329,6 @@ export const getStudentwithoutClassroom = async (req, res) => {
         lName: true,
         email: true,
         tel: true,
-        // cityzenId: true
       },
       orderBy: {
         stdId: "asc",
@@ -323,6 +348,9 @@ export const getStudentwithoutClassroom = async (req, res) => {
 export const getStudentforaddmemberinclassroom = async (req, res) => {
   try {
     const students = await db.student.findMany({
+      where: {
+        deletedAt: null,
+      },
       select: {
         stdId: true,
         title: true,
@@ -330,7 +358,6 @@ export const getStudentforaddmemberinclassroom = async (req, res) => {
         lName: true,
         email: true,
         tel: true,
-        // cityzenId: true
       },
       orderBy: {
         stdId: "asc",
@@ -353,9 +380,8 @@ export const getBehaviorScoreTransaction = async (req, res) => {
     try {
       const transactions = await db.behaviourScoreTransaction.findMany({
         where: {
-          student: {
-            stdId: stdId,
-          },
+          stdId: stdId,
+          deletedAt: null,
         },
         include: {
           studingTime: {
@@ -394,18 +420,25 @@ export const getDashboardData = async (req, res) => {
   const stdId = req.user?.id;
   if (stdId) {
     try {
-      let term = await db.academicTerms.findMany();
+      let term = await db.academicTerms.findMany({
+        where: {
+          deletedAt: null,
+        },
+      });
       term = getLastestTerm(term);
 
       const student = await db.student.findFirst({
         where: {
           stdId: stdId,
+          deletedAt: null,
         },
         include: {
           classroomMembers: {
             where: {
+              deletedAt: null,
               classroom: {
                 termId: term.termId,
+                deletedAt: null,
               },
             },
             include: {
@@ -414,6 +447,9 @@ export const getDashboardData = async (req, res) => {
                   term: true,
                   classroomType: true,
                   classTeacher: {
+                    where: {
+                      deletedAt: null,
+                    },
                     include: {
                       teacher: true,
                     },
@@ -432,12 +468,12 @@ export const getDashboardData = async (req, res) => {
       // ใบลาค้าง
       const pendingLeaves = await db.leaveRequest.count({
         where: {
-          student: {
-            stdId: stdId,
-          },
+          stdId: stdId,
+          deletedAt: null,
           studingTime: {
-            every: {
+            some: {
               leaveStatus: "WAITING",
+              deletedAt: null,
             },
           },
         },
@@ -478,5 +514,75 @@ export const getDashboardData = async (req, res) => {
     }
   } else {
     res.status(400).json({ message: "ไม่พบรหัสนักเรียน" });
+  }
+};
+
+export const softDeleteStudent = async (req, res) => {
+  const uuid = req.params.stdId;
+  if (uuid) {
+    try {
+      //soft delete
+      const student = await db.student.update({
+        where: {
+          stdId: uuid,
+        },
+        data: {
+          deletedAt: DateTime.now().toJSDate(),
+        },
+      });
+      res.json({
+        message: `ลบนักเรียน ${student.fName} ${student.lName} แล้ว`,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "เกิดข้อผิดพลาดในการลบนักเรียน",
+        error: err.message,
+      });
+    }
+  }
+};
+
+export const restoreSoftDeletedStudent = async (req, res) => {
+  const uuid = req.params.stdId;
+  if (uuid) {
+    try {
+      const student = await db.student.update({
+        where: {
+          stdId: uuid,
+        },
+        data: {
+          deletedAt: null,
+        },
+      });
+      res.json({
+        message: `กู้คืนข้อมูลนักเรียน ${student.fName} ${student.lName} แล้ว`,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "เกิดข้อผิดพลาดในการกู้คืนข้อมูลนักเรียน",
+        error: err.message,
+      });
+    }
+  }
+};
+
+export const getSoftDeletedStudents = async (req, res) => {
+  try {
+    const students = await db.student.findMany({
+      where: {
+        deletedAt: {
+          not: null,
+        },
+      },
+    });
+    res.json(students);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "เกิดข้อผิดพลาดในการดึงข้อมูลนักเรียนที่ถูกลบ",
+      error: err.message,
+    });
   }
 };

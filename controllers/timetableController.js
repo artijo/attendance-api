@@ -47,15 +47,13 @@ export const createTimetableByAddSubject = async (req, res) => {
           ({ timeStart, timeEnd, dayOfWeek, subId }) =>
             String(timeStart) === schedule.startDatabaseFormat &&
             String(timeEnd) === schedule.endDatabaseFormat &&
-            dayOfWeek === Number(weekday)
+            dayOfWeek === Number(weekday),
         );
         if (subjectExistsInPeriod != undefined) {
           // console.log('400 kub');
-          return res
-            .status(400)
-            .json({
-              message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${schedule.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}`,
-            });
+          return res.status(400).json({
+            message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${schedule.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}`,
+          });
         }
         // console.log(subjectExistsInPeriod);
         const createTimetable = await db.timetable.create({
@@ -77,7 +75,7 @@ export const createTimetableByAddSubject = async (req, res) => {
 
         const holidayListDate = holiday.map((holiday) => {
           const timezoneformat = DateTime.fromJSDate(
-            holiday.startHolidayDate
+            holiday.startHolidayDate,
           ).setZone(zone);
           const holidayDay = timezoneformat.toISODate();
           return holidayDay;
@@ -85,11 +83,11 @@ export const createTimetableByAddSubject = async (req, res) => {
 
         const termDateBetween = daybetween(
           classroom.term.termStart,
-          classroom.term.termEnd
+          classroom.term.termEnd,
         )
           .filter((date) => {
             const checkSatAndSun = DateTime.fromISO(
-              `${date}T${createTimetable.timeStart}`
+              `${date}T${createTimetable.timeStart}`,
             ).setZone(zone).weekday;
             // console.log(checkSatAndSun);
             return checkSatAndSun != 6 && checkSatAndSun != 7;
@@ -103,7 +101,7 @@ export const createTimetableByAddSubject = async (req, res) => {
         //  // เรียก daybetween เพื่อดูระหว่างวันไหนของเทอม และ filter วันเสาร์อาทิตย์ออกหลังจากนั้น filter วันหยุดต่อ
         for (const date of termDateBetween) {
           const dateformat = DateTime.fromISO(
-            `${date}T${createTimetable.timeStart}`
+            `${date}T${createTimetable.timeStart}`,
           ).setZone(zone);
           if (Number(dateformat.weekday) === Number(timetable.dayOfWeek)) {
             await db.studingTime.create({
@@ -139,6 +137,7 @@ export const createTimetableByAddSubject = async (req, res) => {
 
 export const createTimetableBySwitchPeriod = async (req, res) => {
   const { classroom, timetable, schedule, weekday } = req.body;
+  console.log('kuy')
   if (timetable) {
     try {
       const subjectOnTimetable = await db.timetable.findMany({
@@ -157,14 +156,12 @@ export const createTimetableBySwitchPeriod = async (req, res) => {
         ({ timeStart, timeEnd, dayOfWeek, subId }) =>
           String(timeStart) === schedule.startDatabaseFormat &&
           String(timeEnd) === schedule.endDatabaseFormat &&
-          dayOfWeek === Number(timetable.dayOfWeek)
+          dayOfWeek === Number(timetable.dayOfWeek),
       );
       if (subjectExistsInPeriod != undefined)
-        return res
-          .status(400)
-          .json({
-            message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${schedule.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}`,
-          });
+        return res.status(400).json({
+          message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${schedule.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}`,
+        });
 
       const swtichPeriod = await db.timetable.update({
         where: {
@@ -184,17 +181,26 @@ export const createTimetableBySwitchPeriod = async (req, res) => {
         where: {
           timetableId: timetable.timetableId,
         },
+        orderBy: {
+          studingTimeDate: 'asc'
+        }
       });
 
       if (studingTimeOnPeriod.length > 0) {
-        studingTimeOnPeriod.forEach(async (studyTime) => {
-          // .setZone(process.env.TIME_ZONE)
-          const newTimeformat = DateTime.fromISO(
-            `${studyTime.studingTimeDate.toISOString().split("T")[0]}T${timetable.timeStart}`
-          )
-            .set({ weekday: weekday })
-            .setZone(process.env.TIME_ZONE);
-          // console.log(newTimeformat);
+        studingTimeOnPeriod.forEach(async (studyTime, index) => {
+          let newTimeformat;
+          const oldStudyTime = DateTime.fromJSDate(studyTime.studingTimeDate).setZone('Asia/Bangkok');
+          const oldWeekDay = oldStudyTime.weekday;
+          // console.log(oldStudyTime)
+          if(weekday > oldWeekDay) {
+            const lengthWeekday = weekday - oldWeekDay;
+            newTimeformat = DateTime.fromISO(`${oldStudyTime.toString().split("T")[0]}T${timetable.timeStart}`).plus({day : lengthWeekday}).setZone('Asia/Bangkok');
+          }else if(weekday < oldWeekDay) {
+            const lengthWeekday = oldWeekDay - weekday;
+            newTimeformat = DateTime.fromISO(`${oldStudyTime.toString().split("T")[0]}T${timetable.timeStart}`).minus({day : lengthWeekday}).setZone('Asia/Bangkok');
+          }else {
+            newTimeformat = DateTime.fromISO(`${oldStudyTime.toString().split("T")[0]}T${timetable.timeStart}`).setZone('Asia/Bangkok');
+          }
           const updateStdyingTime = await db.studingTime.update({
             where: {
               studyTimeId: studyTime.studyTimeId,
@@ -203,7 +209,6 @@ export const createTimetableBySwitchPeriod = async (req, res) => {
               studingTimeDate: newTimeformat,
             },
           });
-          // console.log(updateStdyingTime);
         });
       }
       return res.status(200).json({ message: "create successful" });
@@ -240,7 +245,7 @@ export const createTimetableBySwitchSubjectAndSubject = async (req, res) => {
           ({ timeStart, timeEnd, dayOfWeek }) =>
             String(timeStart) === secondTimetable.timeStart &&
             String(timeEnd) === secondTimetable.timeEnd &&
-            dayOfWeek === Number(secondTimetable.dayOfWeek)
+            dayOfWeek === Number(secondTimetable.dayOfWeek),
         );
         // console.log(subjectExistsInPeriod);
         if (subjectExistsInPeriod != undefined) {
@@ -257,11 +262,9 @@ export const createTimetableBySwitchSubjectAndSubject = async (req, res) => {
         true
       ) {
         // console.log('if 1')
-        return res
-          .status(400)
-          .json({
-            message: `ไม่สามารถสลับวิชานี้ได้เนื่องจากมีวิชาที่คาบซ่ำกันอยู่`,
-          });
+        return res.status(400).json({
+          message: `ไม่สามารถสลับวิชานี้ได้เนื่องจากมีวิชาที่คาบซ่ำกันอยู่`,
+        });
       }
 
       if (
@@ -269,11 +272,9 @@ export const createTimetableBySwitchSubjectAndSubject = async (req, res) => {
         true
       ) {
         // console.log('if 2')
-        return res
-          .status(400)
-          .json({
-            message: `ไม่สามารถสลับวิชานี้ได้เนื่องจากมีวิชาที่คาบซ่ำกันอยู่`,
-          });
+        return res.status(400).json({
+          message: `ไม่สามารถสลับวิชานี้ได้เนื่องจากมีวิชาที่คาบซ่ำกันอยู่`,
+        });
       }
 
       const swtichSubjectFirstTimetable = await db.timetable.update({
@@ -331,14 +332,12 @@ export const createTimetable = async (req, res) => {
         ({ timeStart, timeEnd, dayOfWeek, subId }) =>
           String(timeStart) === schedule.startDatabaseFormat &&
           String(timeEnd) === schedule.endDatabaseFormat &&
-          dayOfWeek === Number(day)
+          dayOfWeek === Number(day),
       );
       if (subjectExistsInPeriod != undefined)
-        return res
-          .status(400)
-          .json({
-            message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${periodtime.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}`,
-          });
+        return res.status(400).json({
+          message: `ไม่สามารถสร้างวิชานี้ได้เนื่องจาก ${subjectExistsInPeriod.subject.subNameThai} อยู่ในคาบวัน ${formatDayOfWeeks(subjectExistsInPeriod.dayOfWeek)} คาบเวลา ${periodtime.timetableformate} ห้องม.${subjectExistsInPeriod.classroom.classLevel}/${subjectExistsInPeriod.classroom.classRoom}`,
+        });
       const timelateDatetime = DateTime.fromISO(schedule.startDatabaseFormat)
         .setZone(zone)
         .plus({ minutes: timelate });
@@ -362,7 +361,7 @@ export const createTimetable = async (req, res) => {
 
       const holidayListDate = holiday.map((holiday) => {
         const timezoneformat = DateTime.fromJSDate(
-          holiday.startHolidayDate
+          holiday.startHolidayDate,
         ).setZone(zone);
         const holidayDay = timezoneformat.toISODate();
         // console.log(holidayDay);
@@ -371,11 +370,11 @@ export const createTimetable = async (req, res) => {
 
       const termDateBetween = daybetween(
         classroom.term.termStart,
-        classroom.term.termEnd
+        classroom.term.termEnd,
       )
         .filter((date) => {
           const checkSatAndSun = DateTime.fromISO(
-            `${date}T${timetable.timeStart}`
+            `${date}T${timetable.timeStart}`,
           ).setZone(zone).weekday;
           // console.log(checkSatAndSun);
           return checkSatAndSun != 6 && checkSatAndSun != 7;
@@ -388,7 +387,7 @@ export const createTimetable = async (req, res) => {
       //  // เรียก daybetween เพื่อดูระหว่างวันไหนของเทอม และ filter วันเสาร์อาทิตย์ออกหลังจากนั้น filter วันหยุดต่อ
       for (const date of termDateBetween) {
         const dateformat = DateTime.fromISO(
-          `${date}T${timetable.timeStart}`
+          `${date}T${timetable.timeStart}`,
         ).setZone(zone);
         if (Number(dateformat.weekday) === Number(day)) {
           await db.studingTime.create({
@@ -428,6 +427,7 @@ export const editTimelateTimetable = async (req, res) => {
         timeLate: String(lateTime),
       },
     });
+
     return res.status(200).json({ message: "สร้างสำเร็จ" });
   } else {
     return res.status(400).json({ message: "ข้อมูลไม่ถูกต้อง" });
@@ -435,12 +435,12 @@ export const editTimelateTimetable = async (req, res) => {
 };
 
 export const getTimeTableByRoom = async (req, res) => {
-  const classid = req.query.classroomid;
-  if (classid) {
+  const classId = req.query.classroomid;
+  if (classId) {
     try {
       const timetable = await db.timetable.findMany({
         where: {
-          classId: classid,
+          classId: classId,
         },
         orderBy: [{ dayOfWeek: "asc" }, { timeStart: "asc" }],
         select: {
@@ -462,8 +462,6 @@ export const getTimeTableByRoom = async (req, res) => {
                   academicYear: true,
                 },
               },
-              // academicYear:true,
-              // semester:true,
               leader: {
                 select: {
                   ldrId: true,
@@ -510,9 +508,7 @@ export const getTimeTableByRoom = async (req, res) => {
         4: [],
         5: [],
       };
-
       const arrayOfDayOfWeek = Object.keys(dayOfWeek);
-
       arrayOfDayOfWeek.forEach((objectKey) => {
         timetable.forEach((subjecttimetable) => {
           if (Number(objectKey) === Number(subjecttimetable.dayOfWeek)) {
@@ -520,8 +516,6 @@ export const getTimeTableByRoom = async (req, res) => {
           }
         });
       });
-
-      // console.log(timetable);
       res.json(dayOfWeek);
     } catch (error) {
       console.log(error);
@@ -614,7 +608,7 @@ export const getSubjectTimetable = async (req, res) => {
       const listSubject = timetables.map((item) => item.subject);
       const uniqueSubject = listSubject.filter(
         (value, index, self) =>
-          self.findIndex((item) => item.subId === value.subId) === index
+          self.findIndex((item) => item.subId === value.subId) === index,
       );
       // console.log([...uniqueSubject]);
       res.json(uniqueSubject);
@@ -692,83 +686,59 @@ export const getTimeTable = async (req, res) => {
 
 export const getTimetableRoleStudent = async (req, res) => {
   const studentId = req.user.id;
-  const dtNow = DateTime.now().setZone(zone);
+  const dtNow = DateTime.now().setZone(zone).startOf('day');
   const dtNowString = dtNow.toString();
   const studyTimeStart = DateTime.fromISO(
-    `${dtNowString.split("T")[0]}T08:40:00`
+    `${dtNowString.split("T")[0]}T08:40:00`,
   ).setZone("Asia/Bangkok");
   const studyTimeEnd = DateTime.fromISO(
-    `${dtNowString.split("T")[0]}T15:30:00`
+    `${dtNowString.split("T")[0]}T15:30:00Z`,
   ).setZone("Asia/Bangkok");
   if (studentId != undefined) {
     try {
-      const dtSearchStart = dtNow.startOf("year").minus({ year: 2 });
-      const dtSearchEnd = dtNow.endOf("year");
-      const termList = await db.academicTerms.findMany({
+
+      const term = await db.academicTerms.findFirst({
         where: {
-          termStart: {
-            gte: dtSearchStart,
-          },
-          termEnd: {
-            lte: dtSearchEnd,
-          },
+          termStart: { lte: dtNow },
+          termEnd: { gte: dtNow },
         },
       });
 
-      const term = termList.find((term) => {
-        const termStart = DateTime.fromJSDate(term.termStart).setZone(
-          "Asia/Bangkok"
-        );
-        const termEnd = DateTime.fromJSDate(term.termEnd).setZone(
-          "Asia/Bangkok"
-        );
-        return dtNow >= termStart && dtNow <= termEnd;
-      });
 
-      // console.log(term);
-
-      if (term == undefined) {
+      if (!term) {
         return res.status(500).json("Internal server-side error");
       }
 
-      const classroom = await db.classroomMember.findFirst({
+      const classroomMember = await db.classroomMember.findFirst({
         where: {
-          AND: [
-            { stdId: studentId },
-            {
-              classroom: {
-                termId: term.termId,
-              },
-            },
-          ],
+          stdId: studentId,
+          classroom: {
+            termId: term.termId
+          },
+          deletedAt: null
         },
         include: {
-          classroom: true,
-          student: true,
-        },
+          classroom: true
+        }
       });
 
-      console.log(classroom.classId);
 
-      if (!classroom) {
+      if (!classroomMember.classId) {
         return res.status(404).json({ message: "ไม่พบข้อมูลห้องเรียน" });
       }
 
-      // console.log(dtStart);
-
       const timetable = await db.timetable.findMany({
         where: {
-          classId: classroom.classId,
+          classId: classroomMember.classId,
           dayOfWeek: dtNow.weekday,
         },
       });
 
-      // console.log(timetable);
 
       const studingTime = await db.studingTime.findMany({
         where: {
           timetableId: {
-            in: timetable.map((item) => item.timetableId),
+            in: [...timetable.map((item) => item.timetableId)],
           },
           studingTimeDate: {
             gte: studyTimeStart,
@@ -791,6 +761,7 @@ export const getTimetableRoleStudent = async (req, res) => {
           },
         },
       });
+
       return res.status(200).json(studingTime);
     } catch (error) {
       console.error(error);
