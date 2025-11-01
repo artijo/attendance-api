@@ -443,62 +443,19 @@ export const getTimeTableByRoom = async (req, res) => {
           classId: classId,
         },
         orderBy: [{ dayOfWeek: "asc" }, { timeStart: "asc" }],
-        select: {
-          timetableId: true,
-          dayOfWeek: true,
-          timeStart: true,
-          timeEnd: true,
-          timeLate: true,
-          subId: true,
-          classId: true,
+        include: {
           classroom: {
-            select: {
-              classId: true,
-              classLevel: true,
-              classRoom: true,
-              term: {
-                select: {
-                  semester: true,
-                  academicYear: true,
-                },
-              },
-              leader: {
-                select: {
-                  ldrId: true,
-                  student: {
-                    select: {
-                      fName: true,
-                      lName: true,
-                    },
-                  },
-                },
-              },
-              classroomType: {
-                select: {
-                  classTypeId: true,
-                  classTypeNameEng: true,
-                  classTypeNameThai: true,
-                },
-              },
-            },
+            include: {
+              term: true
+            }
           },
-          subject: {
-            select: {
-              subId: true,
-              subNameEng: true,
-              subNameThai: true,
-              subCode: true,
-              subCredit: true,
-              teacher: {
-                select: {
-                  tchId: true,
-                  fName: true,
-                  lName: true,
-                },
-              },
-            },
+          subject :{ 
+            include: {
+              teacher: true,
+              subjectType:true
+            }
           },
-        },
+        }
       });
 
       const dayOfWeek = {
