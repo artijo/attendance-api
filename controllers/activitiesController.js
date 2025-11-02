@@ -1106,78 +1106,62 @@ export const paticipatedActivityByLeader = async (req, res) => {
 };
 
 export const getActivityStudent = async (req, res) => {
-  const studnetId = req.user.id;
-  if (studnetId) {
+  const studentId = req.user.id;
+  if (studentId) {
     try {
-      const studentClassroomMember = await db.classroomMember.findMany({
+      const dtNow = DateTime.now().setZone("Asia/Bangkok");
+      if(dtNow.day === 6 || dtNow.day ===7) {
+        return res.status(200).json([]);
+      };
+      const term = await db.academicTerms.findFirst({ // หาเทอมปัจจุบัน
         where: {
-          stdId: studnetId,
+          termStart: { lte: dtNow },
+          termEnd: { gte: dtNow },
+        },
+      });
+      
+      const studentClassroomMember = await db.classroomMember.findFirst({ // หาว่านักเรียนอยู่ห้องไหน
+        where: {
+          stdId: studentId,
+          classroom : {
+            termId: term.termId,
+          },
           deletedAt: null,
         },
         include: {
           classroom: {
             include: {
-              term: true,
-            },
-          },
-        },
-      });
-      // console.log(studentClassroomMember);
-      const arrayOfClassID = studentClassroomMember.map(
-        (stdclassMemeber) => stdclassMemeber.classId,
-      );
-      if (studentClassroomMember.length < 0) {
-        console.error("นักเรียนคนนี้ไม่มีห้องที่อยู่");
-        return res.status(500).json({ message: "Internal server error" });
-      }
-      const terms = studentClassroomMember
-        .reduce((accumulator, currentValue) => {
-          const term = currentValue.classroom.term;
-          if (!accumulator.includes(term)) {
-            accumulator.push(term);
-          }
-          return accumulator;
-        }, [])
-        .sort((a, b) => a.termStart - b.termStart);
-      if (terms.length < 0) {
-        console.error("ไม่มีเทอม");
-        return res.status(500).json({ message: "Internal server error" });
-      }
-      const firstTermStartDate = DateTime.fromJSDate(
-        terms[0].termStart,
-      ).setZone("UTC");
-      const lastTermStartDate = DateTime.fromJSDate(
-        terms[terms.length - 1].termEnd,
-      ).setZone("UTC");
-      const activity = await db.activity.findMany({
-        where: {
-          AND: [
-            { actDate: { gte: firstTermStartDate } },
-            { actDateEnd: { lte: lastTermStartDate } },
-            { deletedAt: null },
-          ],
-        },
-        include: {
-          classroom: {
-            where: {
-              deletedAt: null,
-            },
-          },
-          activityType: true,
-        },
-      });
-      const filterActivity = activity.reduce((accumulator, item) => {
-        if (item.classroom.length > 0) {
-          item.classroom.map((classCanJoin) => {
-            if (arrayOfClassID.includes(classCanJoin.classId)) {
-              accumulator.push(item);
+              activity: true
             }
-          });
-        } else {
-          accumulator.push(item);
+          }
         }
-        return accumulator;
-      }, []);
+      });
+
+      const activities = await db.activity.findMany({
+        where : {
+          actDate : { lte :  dtNow},
+          actDateEnd: { gte : dtNow }
+        },
+        include : {
+          classroom : true
+        },
+        orderBy : {
+          actName : 'asc'
+        }
+      });
+
+      const filterActivity = activities.filter((activity) => {
+        if(activity.classroom.length > 0) {
+          const isThisClassroomCanJoin = activity.classroom.findIndex((classroom) => {
+            return classroom.classId === studentClassroomMember.classId;
+          })
+          if(isThisClassroomCanJoin !== -1) {
+            return true;
+          }
+          return false;
+        }
+        return true; 
+      });
       return res.status(200).json(filterActivity);
     } catch (error) {
       console.error(error);
@@ -1249,7 +1233,7 @@ export const isActivityThisTimeCheckIn = async (req, res) => {
   const studentId = req.user.id;
   const dtNowStartDay = DateTime.now().setZone("Asia/Bangkok").startOf("day");
   const dtNowEndDay = DateTime.now().setZone("Asia/Bangkok").endOf("day");
-  console.log(dtNowEndDay.toUTC().toString());
+  // console.log(dtNowEndDay.toUTC().toString());
   if (activityId && studentId) {
     try {
       const isActivityPaticipate = await db.activityParticipate.findFirst({
