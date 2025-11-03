@@ -627,7 +627,7 @@ export const getTeacherAdvisorClassroom = async (req, res) => {
       })
       .flat(1);
     if (classroomsIds.some((arrVal) => arrVal === null))
-      return res.json({ not_found: "ไม่มีห้องที่เป็นที่ปรึกษา" });
+    return res.json({ not_found: "ไม่มีห้องที่เป็นที่ปรึกษา" });
     const orderByClassrooms = await db.classrooms.findMany({
       where: {
         classId: {
@@ -636,12 +636,29 @@ export const getTeacherAdvisorClassroom = async (req, res) => {
         deletedAt: null,
       },
       include: {
+        timetable: {
+          include: {
+            studyTime: {
+              include: {
+                attendance:true
+              }
+            }
+          }
+        },
         classroomMembers: {
           where: {
             deletedAt: null,
           },
           include: {
-            student: true,
+            student: {
+              include :{
+                attendance : {
+                  include: {
+                    studingTime: true
+                  }
+                }
+              }
+            },
           },
         },
         term: {
