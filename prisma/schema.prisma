@@ -408,6 +408,7 @@ enum EnumAttendanceStatus {
   LATE
   ACTIVITY
   LEAVE
+  TEACHERLEAVE
 }
 
 enum EnumLeaveStatus {
