@@ -1,0 +1,11 @@
+import db from "../prisma/client.js";
+export const findByLineId = (lineId) => db.parent.findUnique({ where: { lineId } });
+export const findById = (prntId, include = {}) => db.parent.findUnique({ where: { prntId }, include });
+export const create = (data) => db.parent.create({ data });
+export const update = (lineId, data) => db.parent.update({ where: { lineId }, data });
+export const findAll = (include = {}) => db.parent.findMany({ include });
+export const findStudentParents = (where, include = {}) => db.studentParent.findMany({ where, include });
+export const findStudentParentFirst = (where) => db.studentParent.findFirst({ where });
+export const createStudentParent = (data) => db.studentParent.create({ data });
+export const deleteStudentParents = (where) => db.studentParent.deleteMany({ where });
+export const findStudent = (stdId, include = {}) => db.student.findUnique({ where: { stdId }, include });

@@ -1,0 +1,15 @@
+import db from "../prisma/client.js";
+export const findTimetable = (where) => db.timetable.findFirst({ where });
+export const findTimetables = (where = {}, include = {}, orderBy = []) => db.timetable.findMany({ where, include, orderBy });
+export const createTimetable = (data) => db.timetable.create({ data });
+export const updateTimetable = (timetableId, data) => db.timetable.update({ where: { timetableId }, data });
+export const deleteTimetable = (timetableId) => db.timetable.delete({ where: { timetableId } });
+export const findStudingTime = (where = {}, include = {}, orderBy = {}) => db.studingTime.findMany({ where, include, orderBy });
+export const createStudingTime = (data) => db.studingTime.create({ data });
+export const deleteStudingTime = (where) => db.studingTime.deleteMany({ where });
+export const deleteAttendance = (where) => db.attendance.deleteMany({ where });
+export const deleteLeaveRequestStudingTime = (where) => db.leaveRequestStudingTime.deleteMany({ where });
+export const findHolidays = (termId) => db.holiday.findMany({ where: { termId } });
+export const findAcademicTerm = (where) => db.academicTerms.findFirst({ where });
+export const findClassroomMember = (where, include = {}) => db.classroomMember.findFirst({ where, include });
+export const updateStudingTime = (studyTimeId, data) => db.studingTime.update({ where: { studyTimeId }, data });

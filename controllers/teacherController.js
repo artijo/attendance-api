@@ -1,73 +1,18 @@
-import db from "../prisma/client.js";
-import path from "path";
-import { fileURLToPath } from "url";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-import { hashPassword, comparePassword } from "../helper/bcrypt.js";
-import {
-  inputTeacherForm,
-  inputUpdateTeacherForm,
-  handdleErrorDuplicateKeyTeacher,
-} from "../validator.js";
-
-import { createExcelSubjectAttendence } from "../helper/excel.js";
+import * as teacherService from "../services/teacherService.js";
 
 export const createTeacher = async (req, res) => {
-  let body = req.body;
   try {
-    if (body.password) {
-      var password = await hashPassword(body.password); // รหัสผ่่านที่ผ่านการเข้ารหัสแล้วเรียบร้อยแล้ว
-    }
-    const teacher = await db.teacher.create({
-      data: {
-        fName: body.fName,
-        lName: body.lName,
-        password: body.password ? password : null,
-        email: body.email == "" ? null : body.email,
-        tel: body.tel == "" ? null : body.tel,
-        department: {
-          connect: {
-            deptId: body.deptId,
-          },
-        },
-      },
-    });
+    const teacher = await teacherService.createTeacher(req.body);
     res.json(teacher);
   } catch (err) {
     console.error(err);
-    return res
-      .status(500)
-      .json({ message: "เกิดข้อผิดพลาดในการสร้างรายชื่อครู" });
+    return res.status(500).json({ message: "เกิดข้อผิดพลาดในการสร้างรายชื่อครู" });
   }
 };
 
 export const getAllTeacher = async (req, res) => {
   try {
-    const teacherLists = await db.teacher.findMany({
-      where: {
-        deletedAt: null,
-      },
-      orderBy: [
-        {
-          fName: "asc",
-        },
-      ],
-      include: {
-        department: true,
-        classTeacher: {
-          where: {
-            deletedAt: null,
-          },
-          include: {
-            classroom: {
-              include: {
-                term: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    const teacherLists = await teacherService.getAllTeacher();
     res.json(teacherLists);
   } catch (err) {
     console.error(err);
@@ -76,38 +21,13 @@ export const getAllTeacher = async (req, res) => {
 };
 
 export const updateTeacher = async (req, res) => {
-  let body = req.body;
   const { uuid } = req.params;
-  if (body) {
+  if (req.body) {
     try {
-      let updateData = {
-        fName: body.fName,
-        lName: body.lName,
-        email: body.email == "" ? null : body.email,
-        tel: body.tel == "" ? null : body.tel,
-        department: {
-          connect: {
-            deptId: body.deptId,
-          },
-        },
-      };
-
-      if (body.password || body.password === "") {
-        const hashedPassword = await hashPassword(body.password);
-        updateData.password = hashedPassword;
-      }
-
-      const teacher = await db.teacher.update({
-        where: {
-          tchId: uuid,
-        },
-        data: updateData,
-      });
+      const teacher = await teacherService.updateTeacher(uuid, req.body);
       res.json(teacher);
     } catch (err) {
-      return res
-        .status(500)
-        .json({ message: "เกิดข้อผิดพลาดในการแก้ไขข้อมูลครู" });
+      return res.status(500).json({ message: "เกิดข้อผิดพลาดในการแก้ไขข้อมูลครู" });
     }
   }
 };
@@ -116,27 +36,7 @@ export const getTeacher = async (req, res) => {
   const uuid = req.params.uuid;
   if (uuid) {
     try {
-      const teacher = await db.teacher.findFirstOrThrow({
-        where: {
-          tchId: uuid,
-          deletedAt: null,
-        },
-        include: {
-          department: true,
-          classTeacher: {
-            where: {
-              deletedAt: null,
-            },
-            include: {
-              classroom: {
-                include: {
-                  term: true,
-                },
-              },
-            },
-          },
-        },
-      });
+      const teacher = await teacherService.getTeacher(uuid);
       res.json(teacher);
     } catch (err) {
       console.error(err);
@@ -149,105 +49,22 @@ export const deleteTeacher = async (req, res) => {
   const uuid = req.params.uuid;
   if (uuid) {
     try {
-      await db.teacher.update({
-        where: {
-          tchId: uuid,
-        },
-        data: {
-          deletedAt: new Date(),
-        },
-      });
-      return res.json({ message: "ลบข้อมูลครูสำเร็จ" });
+      const result = await teacherService.deleteTeacher(uuid);
+      return res.json(result);
     } catch (err) {
       console.error(err);
-      return res
-        .status(500)
-        .json({ message: "เกิดข้อผิดพลาดในการลบข้อมูลครู" });
+      return res.status(500).json({ message: "เกิดข้อผิดพลาดในการลบข้อมูลครู" });
     }
   }
 };
 
 export const getStudentAllAttendenceExcelOneSubject = async (req, res) => {
-  // export สรุปการเข้าเรียนของนักเรียนทุกคนแต่วิชาเดียว
-  const subjectId = req.body.subjectId; // uuid วิชา
-  const classroomId = req.body.classId; // uuid ห้องเรียน
-
   try {
-    const timetable = await db.timetable.findMany({
-      where: {
-        AND: {
-          subId: subjectId,
-          classId: classroomId,
-          deletedAt: null,
-        },
-      },
-      select: {
-        timetableId: true,
-      },
-    });
-
-    const timetableIds = timetable.map((item) => item.timetableId);
-
-    const objectTimetableForSearch = {
-      timetableId: {
-        in: timetableIds,
-      },
-    };
-
-    const studingTime = await db.studingTime.findMany({
-      where: objectTimetableForSearch,
-      select: {
-        studyTimeId: true,
-      },
-      orderBy: {
-        studingTimeDate: "asc",
-      },
-    });
-
-    const studentInThisClassRoom = await db.classroomMember.findMany({
-      where: {
-        classId: classroomId,
-      },
-      select: {
-        stdId: true,
-      },
-    });
-
-    const stutingTimes = studingTime.map((item) => item.studyTimeId);
-
-    const studentInClassroom = studentInThisClassRoom.map((item) => item.stdId);
-
-    const student = await db.student.findMany({
-      select: {
-        fName: true,
-        lName: true,
-        attendance: {
-          where: {
-            AND: {
-              stdId: {
-                in: studentInClassroom,
-              },
-              studingTimeId: {
-                in: stutingTimes,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    const subjectName = await db.subject.findFirst({
-      select: {
-        subNameEng: true,
-      },
-    });
-
-    const fileName = await createExcelSubjectAttendence(
-      student,
-      subjectName.subNameEng
+    const filePath = await teacherService.getStudentAllAttendenceExcelOneSubject(
+      req.body.subjectId,
+      req.body.classId
     );
-    const file = path.join(__dirname, `../public/${fileName}`);
-    res.sendFile(file);
+    res.sendFile(filePath);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "เกิดข้อผิดพลาดในการสร้างไฟล์" });
@@ -256,17 +73,11 @@ export const getStudentAllAttendenceExcelOneSubject = async (req, res) => {
 
 export const getAllDepartment = async (req, res) => {
   try {
-    const department = await db.department.findMany({
-      where: {
-        deletedAt: null,
-      },
-    });
+    const department = await teacherService.getAllDepartment();
     res.json(department);
   } catch (err) {
     console.error(err);
-    return res
-      .status(500)
-      .json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูลแผนก" });
+    return res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูลแผนก" });
   }
 };
 
@@ -274,12 +85,7 @@ export const getDepartment = async (req, res) => {
   const uuid = req.params.uuid;
   if (uuid) {
     try {
-      const department = await db.department.findFirstOrThrow({
-        where: {
-          deptId: uuid,
-          deletedAt: null,
-        },
-      });
+      const department = await teacherService.getDepartment(uuid);
       res.json(department);
     } catch (err) {
       console.error(err);
@@ -289,14 +95,9 @@ export const getDepartment = async (req, res) => {
 };
 
 export const createDepartment = async (req, res) => {
-  const body = req.body;
-  if (body) {
+  if (req.body) {
     try {
-      const department = await db.department.create({
-        data: {
-          deptName: body.deptName,
-        },
-      });
+      const department = await teacherService.createDepartment(req.body);
       res.json(department);
     } catch (err) {
       console.error(err);
@@ -305,18 +106,10 @@ export const createDepartment = async (req, res) => {
 };
 
 export const updateDepartment = async (req, res) => {
-  const body = req.body;
   const { uuid } = req.params;
-  if (body) {
+  if (req.body) {
     try {
-      const department = await db.department.update({
-        where: {
-          deptId: uuid,
-        },
-        data: {
-          deptName: body.deptName,
-        },
-      });
+      const department = await teacherService.updateDepartment(uuid, req.body);
       res.json(department);
     } catch (err) {
       console.error(err);
@@ -328,17 +121,8 @@ export const deleteDepartment = async (req, res) => {
   const uuid = req.params.uuid;
   if (uuid) {
     try {
-      await db.department.update({
-        where: {
-          deptId: uuid,
-        },
-        data: {
-          deletedAt: new Date(),
-        },
-      });
-      return res.json({
-        message: "delete success",
-      });
+      const result = await teacherService.deleteDepartment(uuid);
+      return res.json(result);
     } catch (err) {
       console.error(err);
       return res.status(500).json({ message: "เกิดข้อผิดพลาดในการลบแผนก" });
@@ -347,52 +131,12 @@ export const deleteDepartment = async (req, res) => {
 };
 
 export async function getTeacherInfo(req, res) {
-  const teacherId = req.user.id;
   try {
-    const teacher = await db.teacher.findUnique({
-      where: {
-        tchId: teacherId,
-      },
-      include: {
-        department: true,
-        classTeacher: {
-          where: {
-            deletedAt: null,
-          },
-          include: {
-            classroom: {
-              include: {
-                term: true,
-              },
-            },
-          },
-        },
-        subject: {
-          where: {
-            deletedAt: null,
-          },
-        },
-        activity: {
-          where: {
-            deletedAt: null,
-          },
-        },
-      },
-    });
-
-    if (!teacher) {
-      return res.status(404).json({ message: "Teacher not found" });
-    }
-
-    // Check if teacher is soft deleted
-    if (teacher.deletedAt) {
-      return res.status(404).json({ message: "Teacher not found" });
-    }
-
+    const teacher = await teacherService.getTeacherInfo(req.user.id);
     return res.json(teacher);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(err.statusCode || 500).json({ message: err.message || "Internal server error" });
   }
 }
 
@@ -400,38 +144,21 @@ export const restoreTeacher = async (req, res) => {
   const uuid = req.params.uuid;
   if (uuid) {
     try {
-      await db.teacher.update({
-        where: {
-          tchId: uuid,
-        },
-        data: {
-          deletedAt: null,
-        },
-      });
-      return res.json({ message: "คืนค่าข้อมูลครูสำเร็จ" });
+      const result = await teacherService.restoreTeacher(uuid);
+      return res.json(result);
     } catch (err) {
       console.error(err);
-      return res
-        .status(500)
-        .json({ message: "เกิดข้อผิดพลาดในการคืนค่าข้อมูลครู" });
+      return res.status(500).json({ message: "เกิดข้อผิดพลาดในการคืนค่าข้อมูลครู" });
     }
   }
 };
 
 export const getSoftDeletedTeachers = async (req, res) => {
   try {
-    const deletedTeachers = await db.teacher.findMany({
-      where: {
-        deletedAt: {
-          not: null,
-        },
-      },
-    });
+    const deletedTeachers = await teacherService.getSoftDeletedTeachers();
     res.json(deletedTeachers);
   } catch (err) {
     console.error(err);
-    return res
-      .status(500)
-      .json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูลครูที่ถูกลบ" });
+    return res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูลครูที่ถูกลบ" });
   }
 };

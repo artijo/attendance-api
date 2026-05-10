@@ -1,0 +1,10 @@
+import db from "../prisma/client.js";
+export const findMany = (where = {}, orderBy = []) => db.holiday.findMany({ where, orderBy });
+export const findUnique = (holidayId) => db.holiday.findUnique({ where: { holidayId } });
+export const create = (data) => db.holiday.create({ data });
+export const update = (holidayId, data) => db.holiday.update({ where: { holidayId }, data });
+export const remove = (holidayId) => db.holiday.delete({ where: { holidayId } });
+export const findClassroom = (classId) => db.classrooms.findUnique({ where: { classId }, select: { termId: true } });
+export const findStudingTimeByTerm = (termId) => db.studingTime.findMany({ where: { timetable: { classroom: { termId } } }, include: { attendance: true } });
+export const findStudingTimeByDateRange = (gte, lte) => db.studingTime.findMany({ where: { studingTimeDate: { gte, lte } } });
+export const deleteStudingTime = (studyTimeId) => db.studingTime.delete({ where: { studyTimeId } });
