@@ -1,8 +1,10 @@
 [
     {
+        "actTypeId": "1",
         "actTypeName": "กิจกรรมต่อเนื่อง"
     },
     {
+        "actTypeId": "2",
         "actTypeName": "กิจกรรมไม่ต่อเนื่อง"
     }
 ]

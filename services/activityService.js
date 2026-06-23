@@ -6,7 +6,7 @@ import * as repo from "../repositories/activityRepository.js";
 const zone = process.env.TIME_ZONE || "Asia/Bangkok";
 
 export const getAllActivitiesByType = async (actTypeId) => {
-  return repo.findActivities({ actTypeId, deletedAt: null }, { activityType: true, teacher: true, participations: true }, { actDate: "desc" });
+  return await repo.findActivities({ actTypeId, deletedAt: null }, { activityType: true, teacher: true, actParticipate: true }, { actDate: "desc" });
 };
 
 export const getActivity = async (actId) => {
@@ -19,11 +19,17 @@ export const getActivityType = async () => repo.findActivityTypes();
 
 export const createActivity = async (body) => {
   const actDate = DateTime.fromISO(body.actDate).setZone(zone).toJSDate();
+  const actDateEnd = DateTime.fromISO(body.actDateEnd).setZone(zone).toJSDate();
   const act = await repo.createActivity({
-    actName: body.actName, actDate, actDetail: body.actDetail || null,
+    actName: body.actName, actDate, actDateEnd , joinLimit: body.joinLimit, actDesc: body.actDesc || null,
     activityType: { connect: { actTypeId: body.actTypeId } },
-    teacher: { connect: { tchId: body.tchId } },
-    location: body.location || null, actStartTime: body.actStartTime || null, actEndTime: body.actEndTime || null,
+    teacher: {
+      create: body.teacher.map(t => ({
+        tchId: t.tchId  // ใส่ตรงๆ ได้เลย ไม่ต้อง nested connect
+      }))
+    },
+    actLocation: body.actLocation || null, actStartTime: body.actStartTime || null, actEndTime: body.actEndTime || null,
+    actStatus: "PROCESSING"
   });
   if (body.classroomIds && body.classroomIds.length > 0) {
     for (const classId of body.classroomIds) {
