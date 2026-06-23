@@ -10,7 +10,30 @@ export const getAllActivitiesByType = async (actTypeId) => {
 };
 
 export const getActivity = async (actId) => {
-  const act = await repo.findActivityById(actId, { activityType: true, teacher: true, participations: { include: { classroomMember: { include: { student: true, classroom: true } } } } });
+  const act = await repo.findActivityById(actId,
+    {
+      activityType: true,
+      teacher: {
+        include: {
+          teacher: true
+        }
+      },
+      actParticipate: {
+        include: {
+          student: {
+            include: {
+              classroomMembers: {
+                include: {
+                  classroom: true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  );
+
   if (!act) throw new AppError(404, "Activity not found");
   return act;
 };

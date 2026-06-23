@@ -1,7 +1,7 @@
 import db from "../prisma/client.js";
 
 export const findActivities = async (where = {}, include = {}, orderBy = {}) => await db.activity.findMany({ where, include, orderBy });
-export const findActivityById = (actId, include = {}) => db.activity.findUnique({ where: { actId }, include });
+export const findActivityById = async (actId, include = {}) => await db.activity.findUnique({ where: { actId }, include });
 export const createActivity = (data) => db.activity.create({ data });
 export const updateActivity = (actId, data) => db.activity.update({ where: { actId }, data });
 export const findActivityTypes = () => db.activityType.findMany();
